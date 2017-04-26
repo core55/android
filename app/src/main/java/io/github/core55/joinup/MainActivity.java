@@ -17,10 +17,15 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
+    String meetupHash;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
 
         // Handle app links
         Intent appLinkIntent = getIntent();
@@ -34,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
             Pattern pattern = Pattern.compile("/meetups/(.*?)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
+                meetupHash = matcher.group(1);
                 Log.i("JoinUp", "Meetup hash " + matcher.group(1));
             }
 
@@ -42,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToMap(View v){
         Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+        intent.putExtra("meetupHash",meetupHash);
         startActivity(intent);
     }
 }
