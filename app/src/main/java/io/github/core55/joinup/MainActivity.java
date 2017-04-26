@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 
+import android.util.Log;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void goToMap(View v){
+    public void goToMap(View v) {
         Intent intent = new Intent(MainActivity.this, MapsActivity.class);
         startActivity(intent);
     }
