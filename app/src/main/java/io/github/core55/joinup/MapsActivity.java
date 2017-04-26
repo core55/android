@@ -50,6 +50,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final TextView mTextView = (TextView) findViewById(R.id.text);
     String meetupHash;
 
+    final TextView mTextView = (TextView) findViewById(R.id.text);
+    String meetupHash;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,9 +65,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
         meetupHash = this.getIntent().getStringExtra("name");
     }
+
+
 
     /**
      * Manipulates the map once available.
