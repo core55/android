@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
                 meetupHash = matcher.group(1);
-                Log.i("JoinUp", "Meetup hash " + matcher.group(1));
+                Log.i("JoinUp", "Meetup hash " + meetupHash);
             }
 
         }
