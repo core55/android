@@ -50,9 +50,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final TextView mTextView = (TextView) findViewById(R.id.text);
     String meetupHash;
 
-    final TextView mTextView = (TextView) findViewById(R.id.text);
-    String meetupHash;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
