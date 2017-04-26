@@ -26,7 +26,8 @@
 
                 <data
                     android:scheme="https"
-                    android:host="patrick-rst.github.io" />
+                    android:host="patrick-rst.github.io"
+                    android:pathPrefix="/meetups" />
             </intent-filter>
         </activity>
     </application>

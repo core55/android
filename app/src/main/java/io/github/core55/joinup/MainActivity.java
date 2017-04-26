@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,5 +20,17 @@ public class MainActivity extends AppCompatActivity {
         Intent appLinkIntent = getIntent();
         String appLinkAction = appLinkIntent.getAction();
         Uri appLinkData = appLinkIntent.getData();
+
+        if (appLinkData != null && appLinkData.isHierarchical()) {
+            String uri = appLinkIntent.getDataString();
+            Log.i("JoinUp", "Deep link clicked " + uri);
+
+            Pattern pattern = Pattern.compile("/meetups/(.*?)");
+            Matcher matcher = pattern.matcher(uri);
+            if (matcher.find()) {
+                Log.i("JoinUp", "Meetup hash " + matcher.group(1));
+            }
+
+        }
     }
 }
