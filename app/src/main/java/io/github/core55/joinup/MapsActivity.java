@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +48,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker mCurrLocationMarker;
     private LocationRequest mLocationRequest;
 
-    final TextView mTextView = (TextView) findViewById(R.id.text);
+    //final TextView mTextView = (TextView) findViewById(R.id.text);
     String meetupHash;
 
     @Override
@@ -63,7 +64,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        meetupHash = this.getIntent().getStringExtra("name");
+      /*  String hash = this.getIntent().getStringExtra("name");
+        Toast.makeText(this, hash, Toast.LENGTH_LONG).show();
+        Log.d("hash",hash);*/
+        meetupHash = "472ae1023128483e989c1b0481659d00";//this.getIntent().getStringExtra("name");
     }
 
 
@@ -96,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users";
+        String url ="https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users"; //TODO make a string in strings.xml
 
         // Request a string response from the provided URL.
 
@@ -110,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        mTextView.setText("Response: " + response.toString());
+                       // mTextView.setText("Response: " + response.toString());
                     }
                 }, new Response.ErrorListener() {
 
@@ -129,15 +133,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     void displayUsersOnMap(JSONObject j) throws JSONException {
         JSONArray users = j.getJSONObject("_embedded").getJSONArray("users");
-        for( int i =0; i< users.length();i++){// JSONObject user : users){
+        for (int i = 0; i < users.length(); i++) {// JSONObject user : users){
             JSONObject user = users.getJSONObject(i);
+            Log.d("user", user.toString());
+            LatLng latLng = new LatLng(user.getDouble("lastLatitude"), user.getDouble("lastLongitude"));
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title(user.getString("nickname"));
+            //Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
+            mMap.addMarker(markerOptions);
+
 
         }
-
-
     }
 
-    // connects googleAPIclient to google services
+        // connects googleAPIclient to google services
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -193,7 +203,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
         //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
     }
 
