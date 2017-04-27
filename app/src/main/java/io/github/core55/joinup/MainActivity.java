@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
             String uri = appLinkIntent.getDataString();
             Log.i("JoinUp", "Deep link clicked " + uri);
 
-            Pattern pattern = Pattern.compile("/meetups/(.*?)");
+            Pattern pattern = Pattern.compile("/meetups/(.*)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
                 meetupHash = matcher.group(1);
