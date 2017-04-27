@@ -36,10 +36,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-    }
 
-    public void goToMap(View v) {
+        // start maps activity
         Intent intent = new Intent(MainActivity.this, MapsActivity.class);
         startActivity(intent);
     }
+
 }
