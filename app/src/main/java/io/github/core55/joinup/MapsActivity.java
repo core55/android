@@ -1,14 +1,24 @@
 package io.github.core55.joinup;
 
 import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +45,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -47,7 +60,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private Marker mCurrLocationMarker;
     private LocationRequest mLocationRequest;
-
     //final TextView mTextView = (TextView) findViewById(R.id.text);
     String meetupHash;
 
@@ -55,6 +67,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // Handle app links
+        Intent appLinkIntent = getIntent();
+        String appLinkAction = appLinkIntent.getAction();
+        Uri appLinkData = appLinkIntent.getData();
+
+        if (appLinkData != null && appLinkData.isHierarchical()) {
+            String uri = appLinkIntent.getDataString();
+            Log.i("JoinUp", "Deep link clicked " + uri);
+
+            Pattern pattern = Pattern.compile("/meetups/(.*)");
+            Matcher matcher = pattern.matcher(uri);
+            if (matcher.find()) {
+                meetupHash = matcher.group(1);
+                Log.i("JoinUp", "Meetup hash " + meetupHash);
+            }
+
+        }
+
+
+        ImageButton mShowDialog = (ImageButton) findViewById(R.id.imageButton);
+
+
+        mShowDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapsActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.dialog_share, null);
+                mBuilder.setView(mView);
+
+                EditText url = (EditText) mView.findViewById(R.id.editText);
+                url.setText(meetupHash);
+
+                final AlertDialog dialog = mBuilder.create();
+                dialog.show();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+
+            }
+
+
+        });
+
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -69,7 +126,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("hash",hash);*/
         meetupHash = "472ae1023128483e989c1b0481659d00";//this.getIntent().getStringExtra("name");
     }
-
 
 
     /**
@@ -97,10 +153,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
-
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users"; //TODO make a string in strings.xml
+        String url = "https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users"; //TODO make a string in strings.xml
 
         // Request a string response from the provided URL.
 
@@ -114,7 +169,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                       // mTextView.setText("Response: " + response.toString());
+                        // mTextView.setText("Response: " + response.toString());
                     }
                 }, new Response.ErrorListener() {
 
@@ -126,7 +181,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 });
 // Add the request to the RequestQueue.
         queue.add(jsObjRequest);
-
 
 
     }
@@ -147,7 +201,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-        // connects googleAPIclient to google services
+    // connects googleAPIclient to google services
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -260,7 +314,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
             }
-            
+
         }
+    }
+
+
+    public void copyToCliboard(View v) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", meetupHash);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
 }

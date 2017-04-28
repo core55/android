@@ -25,7 +25,7 @@
         android:background="@drawable/custom_text"
         android:ems="10"
         android:inputType="none"
-        android:text="@string/url_value"
+        android:text=""
         android:textIsSelectable="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
