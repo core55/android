@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">JoinUp</string>
+    <string name="url_value">URL value</string>
 </resources>
