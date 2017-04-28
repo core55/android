@@ -31,8 +31,6 @@ public class Meetup extends BaseEntity {
         this.centerLongitude = centerLongitude;
         this.centerLatitude = centerLatitude;
         this.zoomLevel = zoomLevel;
-        //setCreatedAt();
-        //setUpdatedAt();
     }
 
 

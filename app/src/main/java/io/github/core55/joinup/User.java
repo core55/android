@@ -18,7 +18,6 @@ public class User extends BaseEntity {
     private Double lastLatitude;
     private String username;
     private List<String> meetupsList = new ArrayList<>();
-    //private List<Location> locations;
 
     protected User() {
         super();
@@ -28,8 +27,6 @@ public class User extends BaseEntity {
         this();
         this.lastLongitude = lastLongitude;
         this.lastLatitude = lastLatitude;
-        //setCreatedAt();
-        //setUpdatedAt();
     }
 
     public static User fromJson(JSONObject jsonUser, JSONArray jsonMeetupsArray) {
