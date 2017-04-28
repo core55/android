@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -23,10 +22,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -35,12 +36,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    public static final int REQUEST_USERS = 20;
+    public static final int REQUEST_MEETUP_INFO = 21;
+
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -48,11 +54,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker mCurrLocationMarker;
     private LocationRequest mLocationRequest;
 
+    private HashMap<Integer,MarkerOptions> markersOnMap = new HashMap<Integer,MarkerOptions>();
+
+
     //final TextView mTextView = (TextView) findViewById(R.id.text);
-    String meetupHash;
+    String meetupHash; //stores hash if accessed through app link
+    boolean appLinkAccess = false;
+    boolean centerUser = false; //used to center your location in the screen the first time
+
+    // Instantiate the RequestQueue to send requests to API.
+    RequestQueue queue;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
@@ -64,10 +78,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-      /*  String hash = this.getIntent().getStringExtra("name");
-        Toast.makeText(this, hash, Toast.LENGTH_LONG).show();
-        Log.d("hash",hash);*/
-        meetupHash = "472ae1023128483e989c1b0481659d00";//this.getIntent().getStringExtra("name");
+        //String hash = this.getIntent().getStringExtra("meetupHash");
+        //Toast.makeText(this, hash, Toast.LENGTH_LONG).show();
+        //Log.d("hash",hash + "nothing");
+        queue = Volley.newRequestQueue(this);
+
+
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        meetupHash = this.getIntent().getStringExtra("meetupHash");
+        if (meetupHash != null){
+            appLinkAccess = true;
+        }
+        else {appLinkAccess = false;}
+        Log.d("appLinkAccess", String.valueOf(appLinkAccess));
+
     }
 
 
@@ -96,25 +123,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
 
+        if (appLinkAccess){
+            requestToAPI(meetupHash,REQUEST_MEETUP_INFO); //requests meetup coordinates and displays meeting pin
+            requestToAPI(meetupHash,REQUEST_USERS); //requests to API and calls displayUsersOnMap
+        }
 
 
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users"; //TODO make a string in strings.xml
 
+    }
+
+    void requestToAPI(String hash, final int requestType){
+
+        String url ="https://dry-cherry.herokuapp.com/api/meetups/" + hash; //TODO make a string in strings.xml
+        switch (requestType){
+            case REQUEST_USERS: url += "/users";
+            case REQUEST_MEETUP_INFO: break;
+        }
         // Request a string response from the provided URL.
-
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONObject response) { //Request.Method.GET
                         try {
-                            displayUsersOnMap(response);
+                            switch (requestType){
+                                case REQUEST_USERS: displayUsersOnMap(response); break;
+                                case REQUEST_MEETUP_INFO: centerOnMeetupLocation(response);break;
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                       // mTextView.setText("Response: " + response.toString());
+                        // mTextView.setText("Response: " + response.toString());
                     }
                 }, new Response.ErrorListener() {
 
@@ -126,9 +165,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 });
 // Add the request to the RequestQueue.
         queue.add(jsObjRequest);
-
-
-
     }
 
     void displayUsersOnMap(JSONObject j) throws JSONException {
@@ -136,18 +172,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for (int i = 0; i < users.length(); i++) {// JSONObject user : users){
             JSONObject user = users.getJSONObject(i);
             Log.d("user", user.toString());
+            //if(user.getInt()) TODO do not display a user marker for the user of the app,
             LatLng latLng = new LatLng(user.getDouble("lastLatitude"), user.getDouble("lastLongitude"));
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title(user.getString("nickname"));
-            //Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
-            mMap.addMarker(markerOptions);
+
+            if (markersOnMap.containsKey(user.getInt("id"))){ //if the user has already a marker in the map, we update its location and nickname
+                MarkerOptions m = markersOnMap.get(user.getInt("id"));
+                m.position(latLng);
+                m.title(user.getString("nickname"));
+            }
+
+            else {
+                MarkerOptions newMO = new MarkerOptions();
+                newMO.position(latLng);
+                newMO.title(user.getString("nickname"));
+                if (newMO.getTitle()==null){
+                    newMO.icon(BitmapDescriptorFactory.fromResource(R.drawable.null_marker));
+                }
+                else{
+                    newMO.icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
+                }
+                //Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
+                markersOnMap.put(user.getInt("id"),newMO);
+                mMap.addMarker(newMO);
+            }
 
 
         }
     }
+    void centerOnMeetupLocation(JSONObject j) throws JSONException{
+        Log.d("JSONObject",j.toString());
+        LatLng latLng = new LatLng(j.getDouble("centerLatitude"), j.getDouble("centerLongitude"));
+        MarkerOptions mapCenter = new MarkerOptions();
+        mapCenter.position(latLng);
+        mapCenter.title(j.getString("name"));
+        mapCenter.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetingpoint));
+        mMap.addMarker(mapCenter);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo((float)j.getDouble("zoomLevel")));
 
-        // connects googleAPIclient to google services
+    }
+
+
+    // connects googleAPIclient to google services
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -198,12 +264,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        markerOptions.title("Here you are");
-        Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.you_marker));
+        //markerOptions.title("Here you are");
+        //Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
-        //move map camera
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        if (!centerUser){
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+            centerUser = true;
+        }
 
     }
 
