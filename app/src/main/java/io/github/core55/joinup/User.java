@@ -1,5 +1,9 @@
 package io.github.core55.joinup;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,14 +14,10 @@ import java.util.List;
 public class User extends BaseEntity {
 
     private String nickname;
-
     private Double lastLongitude;
     private Double lastLatitude;
-
     private String username;
-
-    private List<Meetup> meetups = new ArrayList<>();
-
+    private List<String> meetupsList = new ArrayList<>();
     //private List<Location> locations;
 
     protected User() {
@@ -28,8 +28,35 @@ public class User extends BaseEntity {
         this();
         this.lastLongitude = lastLongitude;
         this.lastLatitude = lastLatitude;
-        setCreatedAt();
-        setUpdatedAt();
+        //setCreatedAt();
+        //setUpdatedAt();
+    }
+
+    public static User fromJson(JSONObject jsonUser, JSONArray jsonMeetupsArray) {
+        User u = new User();
+
+        try {
+            u.nickname = jsonUser.getString("nickname");
+            u.lastLongitude = jsonUser.getDouble("lastLongitude");
+            u.lastLatitude = jsonUser.getDouble("lastLatitude");
+            u.username = jsonUser.getString("username");
+            u.createdAt = jsonUser.getString("createdAt");
+            u.updatedAt = jsonUser.getString("updatedAt");
+
+            List<String> meetupsList = new ArrayList<>();
+            if (jsonMeetupsArray != null) {
+                for (int i = 0; i < jsonMeetupsArray.length(); i++) {
+                    meetupsList.add(jsonMeetupsArray.getJSONObject(i).getString("hash"));
+                }
+            }
+            u.meetupsList = new ArrayList<>(meetupsList);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return u;
     }
 
     public String getNickname() {
@@ -64,11 +91,11 @@ public class User extends BaseEntity {
         this.username = username;
     }
 
-    public List<Meetup> getMeetups() {
-        return meetups;
+    public List<String> getMeetupsList() {
+        return meetupsList;
     }
 
-    public void setMeetups(List<Meetup> meetups) {
-        this.meetups = meetups;
+    public void setMeetupsList(List<String> meetupsList) {
+        this.meetupsList = meetupsList;
     }
 }

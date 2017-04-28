@@ -20,7 +20,7 @@ public class Meetup extends BaseEntity {
     private Double pinLongitude;
     private Double pinLatitude;
     private String name;
-    private List<User> users = new ArrayList<>();
+    private List<Long> usersList = new ArrayList<>();
 
     protected Meetup() {
         super();
@@ -31,52 +31,40 @@ public class Meetup extends BaseEntity {
         this.centerLongitude = centerLongitude;
         this.centerLatitude = centerLatitude;
         this.zoomLevel = zoomLevel;
-        setCreatedAt();
-        setUpdatedAt();
+        //setCreatedAt();
+        //setUpdatedAt();
     }
 
 
-    // Decodes business json into business model object
-    public static Meetup fromJson(JSONObject jsonObject) {
-
+    public static Meetup fromJson(JSONObject jsonMeetup, JSONArray jsonUsersArray) {
         Meetup m = new Meetup();
 
-        // Deserialize json into object fields
         try {
-            m.centerLongitude = jsonObject.getDouble("id");
-            m.centerLatitude = jsonObject.getDouble("name");
-            m.zoomLevel = jsonObject.getInt("display_phone");
-            m.hash = jsonObject.getString("image_url");
-            m.pinLongitude = jsonObject.getDouble("id");
-            m.pinLatitude = jsonObject.getDouble("id");
-            m.name = jsonObject.getString("id");
+            m.centerLongitude = jsonMeetup.getDouble("centerLongitude");
+            m.centerLatitude = jsonMeetup.getDouble("centerLatitude");
+            m.zoomLevel = jsonMeetup.getInt("zoomLevel");
+            m.hash = jsonMeetup.getString("hash");
+            m.pinLongitude = jsonMeetup.getDouble("pinLongitude");
+            m.pinLatitude = jsonMeetup.getDouble("pinLatitude");
+            m.name = jsonMeetup.getString("name");
+            m.createdAt = jsonMeetup.getString("createdAt");
+            m.updatedAt = jsonMeetup.getString("updatedAt");
 
-            //m.users = jsonObject.getJSONArray("id");
-
-            List<User> list = new ArrayList<>();
-            JSONArray jsonArray = jsonObject.getJSONArray("id");
-            if (jsonArray != null) {
-                int len = jsonArray.length();
-                for (int i = 0; i < len; i++) {
-                    //list.add((User) jsonArray.get(i));
-
-                    User u = new User();
-
-
-
+            List<Long> usersList = new ArrayList<>();
+            if (jsonUsersArray != null) {
+                for (int i = 0; i < jsonUsersArray.length(); i++) {
+                    usersList.add(jsonUsersArray.getJSONObject(i).getLong("id"));
                 }
             }
-
+            m.usersList = new ArrayList<>(usersList);
 
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
 
-        // Return new object
         return m;
     }
-
 
     public Double getCenterLongitude() {
         return centerLongitude;
@@ -134,11 +122,11 @@ public class Meetup extends BaseEntity {
         this.name = name;
     }
 
-    public List<User> getUsers() {
-        return users;
+    public List<Long> getUsersList() {
+        return usersList;
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public void setUsersList(List<Long> usersList) {
+        this.usersList = usersList;
     }
 }

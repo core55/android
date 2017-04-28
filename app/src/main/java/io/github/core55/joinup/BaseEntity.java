@@ -1,7 +1,6 @@
 package io.github.core55.joinup;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 
 /**
  * Created by prst on 2017-04-27.
@@ -9,10 +8,10 @@ import java.util.Date;
 
 public abstract class BaseEntity {
 
-    private final Long id;
+    protected final Long id;
 
-    private String createdAt;
-    private String updatedAt;
+    protected String createdAt;
+    protected String updatedAt;
 
     protected BaseEntity() {
         id = null;
@@ -26,16 +25,15 @@ public abstract class BaseEntity {
         return createdAt;
     }
 
-    public void setCreatedAt() {
-        this.createdAt = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt() {
-        this.updatedAt = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
-
 }
