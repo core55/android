@@ -4,12 +4,16 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -38,6 +42,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -46,6 +51,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     public static final int REQUEST_USERS = 20;
     public static final int REQUEST_MEETUP_INFO = 21;
+    public static final int UPDATE_MY_LOCATION = 22;
 
 
     private GoogleMap mMap;
@@ -62,8 +68,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean appLinkAccess = false;
     boolean centerUser = false; //used to center your location in the screen the first time
 
+    int userId = 42; //hardcoded to update user 42
+
     // Instantiate the RequestQueue to send requests to API.
     RequestQueue queue;
+
+    //handler for the loop to update user info
+    //Button sync = (Button)findViewById(button2);
+    private boolean started = true;
+    private Handler handler = new Handler();
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            requestToAPI(meetupHash,REQUEST_USERS); //requests to API and calls displayUsersOnMap
+            if(started) {
+                handlerStart();
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)  {
@@ -91,13 +114,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         meetupHash = this.getIntent().getStringExtra("meetupHash");
         if (meetupHash != null){
             appLinkAccess = true;
+            requestToAPI(meetupHash,REQUEST_USERS); //requests to API and calls displayUsersOnMap
+            requestToAPI(meetupHash,REQUEST_MEETUP_INFO); //requests meetup coordinates and displays meeting pin
         }
         else {appLinkAccess = false;}
         Log.d("appLinkAccess", String.valueOf(appLinkAccess));
 
+
     }
 
+   /* void syncWithDatabase() {
+        if (started) {
+            sync.setText("Off");
+            handlerStop();
+        } else {
+            sync.setText("On");
+            handlerStart();
+        }
+    }*/
 
+    public void handlerStop() {
+        started = false;
+        handler.removeCallbacks(runnable);
+    }
+
+    public void handlerStart() {
+        started = true;
+        handler.postDelayed(runnable, 7*1000);
+    }
 
     /**
      * Manipulates the map once available.
@@ -126,29 +170,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (appLinkAccess){
             requestToAPI(meetupHash,REQUEST_MEETUP_INFO); //requests meetup coordinates and displays meeting pin
             requestToAPI(meetupHash,REQUEST_USERS); //requests to API and calls displayUsersOnMap
+            handlerStart();
         }
+
 
 
 
     }
-
     void requestToAPI(String hash, final int requestType){
+        requestToAPI(hash,requestType,null);
+    }
+    void requestToAPI(String hash, final int requestType, JSONObject jsonObject){
 
-        String url ="https://dry-cherry.herokuapp.com/api/meetups/" + hash; //TODO make a string in strings.xml
+        String url ="https://dry-cherry.herokuapp.com/api"; //TODO make a string in strings.xml
+        int httpMethod = -1;
         switch (requestType){
-            case REQUEST_USERS: url += "/users";
-            case REQUEST_MEETUP_INFO: break;
+            case REQUEST_USERS:         url += "/meetups/" + hash + "/users";   httpMethod = Request.Method.GET;   break;
+            case REQUEST_MEETUP_INFO:   url += "/meetups/" + hash;              httpMethod = Request.Method.GET;   break;
+            case UPDATE_MY_LOCATION:    url += "/users/"+ userId;            httpMethod = Request.Method.PATCH; break;
         }
         // Request a string response from the provided URL.
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                (httpMethod, url, jsonObject, new Response.Listener<JSONObject>() {
 
                     @Override
-                    public void onResponse(JSONObject response) { //Request.Method.GET
+                    public void onResponse(JSONObject response) {
                         try {
                             switch (requestType){
                                 case REQUEST_USERS: displayUsersOnMap(response); break;
                                 case REQUEST_MEETUP_INFO: centerOnMeetupLocation(response);break;
+                                case UPDATE_MY_LOCATION: break;
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -274,6 +325,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
             centerUser = true;
         }
+        JSONObject newLocation = new JSONObject();
+
+        try {
+            newLocation.put("lastLongitude", location.getLongitude());
+            newLocation.put("lastLatitude", location.getLatitude());
+            //newLocation.put("nickname", "Juan Luis");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        requestToAPI(null,UPDATE_MY_LOCATION,newLocation);
 
     }
 
