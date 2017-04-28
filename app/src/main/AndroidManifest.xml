@@ -37,8 +37,7 @@
 
                 <data
                     android:scheme="https"
-                    android:host="culater.herokuapp.com"
-                    android:pathPrefix="/#" />
+                    android:host="culater.herokuapp.com" />
             </intent-filter>
         </activity>
         <!--
