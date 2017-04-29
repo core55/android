@@ -1,9 +1,11 @@
 package io.github.core55.joinup;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -18,6 +20,11 @@ import com.google.android.gms.location.LocationServices;
 
 public class LocationManager implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+
+    public static final String TAG = "LocationManager";
+
+    private static final long UPDATE_INTERVAL = 10 * 1000;  // 10 secs
+    private static final long FASTEST_INTERVAL = 2000; // 2 secs
 
     private Context context;
 
@@ -36,7 +43,6 @@ public class LocationManager implements
     }
 
     private synchronized void buildGoogleApiClient() {
-        Log.d("locationtesting", "buildGoogleApiClient");
         mGoogleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -46,11 +52,9 @@ public class LocationManager implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.d("locationtesting", "onConnected 1");
-
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000); // 120*1000
-        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         //mLocationRequest.setSmallestDisplacement(0.1F);
 
@@ -63,20 +67,36 @@ public class LocationManager implements
         // request location updates
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, mRequestLocationUpdatesPendingIntent);
-            Log.d("locationtesting", "onConnected 2");
         }
-
 
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        if (i == CAUSE_SERVICE_DISCONNECTED) {
+            //Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Disconnected. Please re-connect.");
+        } else if (i == CAUSE_NETWORK_LOST) {
+            //Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Network lost. Please re-connect.");
+        }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+        // this callback will be invoked when the connection attempt fails
 
+        if (connectionResult.hasResolution()) {
+            // Google Play services can fix the issue
+            try {
+                connectionResult.startResolutionForResult((Activity) context, 0);
+            } catch (IntentSender.SendIntentException e) {
+                // it happens if the resolution intent has been canceled, or is no longer able to execute the request
+                e.printStackTrace();
+            }
+        } else {
+            // Google Play services has no idea how to fix the issue
+        }
     }
 
     @Override

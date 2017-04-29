@@ -35,10 +35,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private GoogleMap mMap;
 
-    private LocationRequest mLocationRequest;
-    private GoogleApiClient mGoogleApiClient;
-    private PendingIntent mRequestLocationUpdatesPendingIntent;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
