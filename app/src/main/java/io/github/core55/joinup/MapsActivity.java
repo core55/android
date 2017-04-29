@@ -115,28 +115,6 @@ public class MapsActivity extends FragmentActivity
 
 
 
-
-        ImageButton mShowDialog = (ImageButton) findViewById(R.id.imageButton);
-        mShowDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapsActivity.this);
-                View mView = getLayoutInflater().inflate(R.layout.dialog_share, null);
-                mBuilder.setView(mView);
-
-                EditText url = (EditText) mView.findViewById(R.id.editText);
-                url.setText(meetupHash);
-
-                final AlertDialog dialog = mBuilder.create();
-                dialog.show();
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            }
-        });
-
-
-
-
-
     }
     @Override
     protected void onResume(){
@@ -335,15 +313,6 @@ public class MapsActivity extends FragmentActivity
 
     }
 
-
-
-
-    public void copyToCliboard(View v) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", meetupHash);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
-    }
 
 
 

@@ -2,24 +2,29 @@ package io.github.core55.joinup;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +54,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         LocationManager locationManager = new LocationManager(this);
         locationManager.start();
+
+        createShareButtonListener();
     }
 
     /**
@@ -126,7 +133,35 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 //meetupHash = matcher.group(1);
                 //Log.i("JoinUp", "Meetup hash " + meetupHash);
             }
-
         }
     }
+
+    private void createShareButtonListener() {
+        ImageButton mShowDialog = (ImageButton) findViewById(R.id.imageButton);
+        mShowDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.dialog_share, null);
+                mBuilder.setView(mView);
+
+                EditText url = (EditText) mView.findViewById(R.id.editText);
+                //url.setText(meetupHash);
+
+                final AlertDialog dialog = mBuilder.create();
+                dialog.show();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
+        });
+    }
+
+    public void copyToCliboard(View v) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("label", "it works!"); //meetupHash
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
+    }
+
+
 }
+
