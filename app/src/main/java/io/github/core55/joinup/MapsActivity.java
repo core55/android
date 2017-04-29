@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -11,6 +12,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -54,11 +56,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 
-
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+public class MapsActivity extends FragmentActivity
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     public static final int REQUEST_USERS = 20;
@@ -66,11 +65,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int UPDATE_MY_LOCATION = 22;
 
 
-    private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
-    private Marker mCurrLocationMarker;
-    private LocationRequest mLocationRequest;
 
     private HashMap<Integer,MarkerOptions> markersOnMap = new HashMap<Integer,MarkerOptions>();
 
@@ -88,6 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Button sync = (Button)findViewById(button2);
     private boolean started = true;
     private Handler handler = new Handler();
+
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -99,38 +94,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     };
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        // Handle app links
-        Intent appLinkIntent = getIntent();
-        String appLinkAction = appLinkIntent.getAction();
-        Uri appLinkData = appLinkIntent.getData();
 
-        if (appLinkData != null && appLinkData.isHierarchical()) {
-            String uri = appLinkIntent.getDataString();
-            Log.i("JoinUp", "Deep link clicked " + uri);
 
-            Pattern pattern = Pattern.compile("/meetups/(.*)");
-            Matcher matcher = pattern.matcher(uri);
-            if (matcher.find()) {
-                meetupHash = matcher.group(1);
-                Log.i("JoinUp", "Meetup hash " + meetupHash);
-            }
 
-        }
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        //String hash = this.getIntent().getStringExtra("meetupHash");
+        //Toast.makeText(this, hash, Toast.LENGTH_LONG).show();
+        //Log.d("hash",hash + "nothing");
+        queue = Volley.newRequestQueue(this);
+
+
 
 
         ImageButton mShowDialog = (ImageButton) findViewById(R.id.imageButton);
-
-
         mShowDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapsActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.dialog_share, null);
                 mBuilder.setView(mView);
@@ -141,26 +130,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-
             }
-
-
         });
 
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkLocationPermission();
-        }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        //String hash = this.getIntent().getStringExtra("meetupHash");
-        //Toast.makeText(this, hash, Toast.LENGTH_LONG).show();
-        //Log.d("hash",hash + "nothing");
-        queue = Volley.newRequestQueue(this);
 
 
     }
@@ -189,6 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }*/
 
+
+
     public void handlerStop() {
         started = false;
         handler.removeCallbacks(runnable);
@@ -198,6 +174,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         started = true;
         handler.postDelayed(runnable, 7*1000);
     }
+
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -209,18 +187,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
 
-        //Initialize Google Play Services
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                buildGoogleApiClient();
-                mMap.setMyLocationEnabled(true);
-            }
-        } else {
-            buildGoogleApiClient();
-            mMap.setMyLocationEnabled(true);
-        }
+
 
         if (appLinkAccess){
             requestToAPI(meetupHash,REQUEST_MEETUP_INFO); //requests meetup coordinates and displays meeting pin
@@ -229,6 +197,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
+
+
     void requestToAPI(String hash, final int requestType){
         requestToAPI(hash,requestType,null);
     }
@@ -296,7 +266,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 //Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
                 markersOnMap.put(user.getInt("id"),newMO);
-                mMap.addMarker(newMO);
+                //mMap.addMarker(newMO);
             }
 
 
@@ -309,34 +279,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapCenter.position(latLng);
         mapCenter.title(j.getString("name"));
         mapCenter.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetingpoint));
-        mMap.addMarker(mapCenter);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.moveCamera(CameraUpdateFactory.zoomTo((float)j.getDouble("zoomLevel")));
+       // mMap.addMarker(mapCenter);
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //mMap.moveCamera(CameraUpdateFactory.zoomTo((float)j.getDouble("zoomLevel")));
 
 
     }
 
-    // connects googleAPIclient to google services
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
-    }
+
 
     @Override
     public void onConnected(Bundle bundle) {
-
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000); //requests location every second
-
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); //PRIORITY_BALANCED_POWER_ACCURACY
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
 
     }
 
@@ -349,19 +302,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, connectionResult.toString(), Toast.LENGTH_LONG).show();
-        mGoogleApiClient.reconnect();
-    }
+
 
     @Override
     public void onLocationChanged(Location location) {
 
-        mLastLocation = location;
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
 
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
@@ -370,11 +315,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.you_marker));
         //markerOptions.title("Here you are");
         //Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
+        //mCurrLocationMarker = mMap.addMarker(markerOptions);
 
         if (!centerUser){
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-            mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+            //mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
             centerUser = true;
         }
         JSONObject newLocation = new JSONObject();
@@ -391,61 +336,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public boolean checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Asking user if explanation is needed
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-                //Prompt the user once explanation has been shown
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-
-
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted. Do the
-                    // contacts-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                        if (mGoogleApiClient == null) {
-                            buildGoogleApiClient();
-                        }
-                        mMap.setMyLocationEnabled(true);
-                    }
-
-                } else {
-
-                    // Permission denied, Disable the functionality that depends on this permission.
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
-                }
-
-            }
-
-        }
-    }
 
 
     public void copyToCliboard(View v) {
@@ -454,4 +344,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
+
+
+
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+
 }
