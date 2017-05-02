@@ -74,13 +74,10 @@
             android:textColor="@color/welcome_white"
             android:textStyle="bold" />
 
-        <ImageButton
-            android:id="@+id/imageButton2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/welcome_blue"
-            android:onClick="googleLogin"
-            android:src="@drawable/btn_google_red" />
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/google_sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 </ScrollView>
