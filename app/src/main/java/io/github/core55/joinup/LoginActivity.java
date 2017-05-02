@@ -2,7 +2,9 @@ package io.github.core55.joinup;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -28,6 +31,8 @@ import java.util.HashMap;
 public class LoginActivity extends Activity {
 
     private TextView mTextView;
+    String token;
+
 
 
     @Override
@@ -63,12 +68,19 @@ public class LoginActivity extends Activity {
         params.put("username", username);
         params.put("password", password);
 
-        JsonObjectRequest request_json = new JsonObjectRequest(Request.Method.POST,
+        HeaderRequest request_json = new HeaderRequest(Request.Method.POST,
                 URL,
                 new JSONObject(params),
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        try {
+                            JSONObject headers = response.getJSONObject("headers");
+                             token = headers.getString("Authorization");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                         Log.d("PEW", response.toString());
                         HashMap<String,String> user = new Gson().fromJson(response.toString(), new TypeToken<HashMap<String, String>>(){}.getType());
                         DataHolder.getInstance().setUser(user);
