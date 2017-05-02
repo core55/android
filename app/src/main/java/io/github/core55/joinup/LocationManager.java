@@ -17,6 +17,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 public class LocationManager implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -31,6 +32,8 @@ public class LocationManager implements
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private PendingIntent mRequestLocationUpdatesPendingIntent;
+
+    private Location location;
 
     public LocationManager(Context context) {
         this.context = context;
@@ -101,6 +104,15 @@ public class LocationManager implements
 
     @Override
     public void onLocationChanged(Location location) {
-
+        this.location = location;
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
 }

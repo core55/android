@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -219,5 +220,36 @@ public class NetworkService extends Service {
         VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
     */
+
+    public void sendLocation(Location location, String url) {
+
+        JSONObject newLocation = new JSONObject();
+
+        try {
+            newLocation.put("lastLongitude", location.getLongitude());
+            newLocation.put("lastLatitude", location.getLatitude());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        int method = Request.Method.PATCH;
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (method, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        // Add a request to your RequestQueue.
+        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
+    }
 
 }

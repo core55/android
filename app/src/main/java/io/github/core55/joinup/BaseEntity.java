@@ -9,7 +9,7 @@ import android.os.Parcelable;
 
 public abstract class BaseEntity implements Parcelable {
 
-    protected final Long id;
+    protected Long id;
 
     protected String createdAt;
     protected String updatedAt;

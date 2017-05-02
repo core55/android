@@ -33,6 +33,7 @@ public class User extends BaseEntity implements Parcelable {
     }
 
     private User (Parcel in) {
+        id = in.readLong();
         nickname = in.readString();
         lastLongitude = in.readDouble();
         lastLatitude = in.readDouble();
@@ -44,6 +45,7 @@ public class User extends BaseEntity implements Parcelable {
         User u = new User();
 
         try {
+            u.id = jsonUser.getLong("id");
             u.nickname = jsonUser.getString("nickname");
             u.lastLongitude = jsonUser.getDouble("lastLongitude");
             u.lastLatitude = jsonUser.getDouble("lastLatitude");
@@ -116,6 +118,7 @@ public class User extends BaseEntity implements Parcelable {
      */
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(id);
         out.writeString(nickname);
         out.writeDouble(lastLongitude);
         out.writeDouble(lastLatitude);

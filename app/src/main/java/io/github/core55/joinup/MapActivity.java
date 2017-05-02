@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +40,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private GoogleMap mMap;
+
+    LocationManager locationManager;
+
+    private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +58,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         askLocationPermission();
 
-        LocationManager locationManager = new LocationManager(this);
+        locationManager = new LocationManager(this);
         locationManager.start();
 
         launchNetworkService();
@@ -89,14 +94,33 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
-                Log.d(TAG, "in reveicer");
                 LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
                 mMap.addMarker(new MarkerOptions().position(latLng).title(m.getName()));
 
                 for (User u : m.getUsersList()) {
-                    LatLng latLng2 = new LatLng(u.getLastLatitude(), u.getLastLongitude());
-                    mMap.addMarker(new MarkerOptions().position(latLng2).title(m.getName()));
+                    Log.d(TAG, "id = "+u.getId());
+                    if (markersOnMap.containsKey(u.getId())) {
+                        MarkerOptions marker = markersOnMap.get(u.getId());
+                        marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                        marker.title(u.getNickname());
+                    } else {
+                        MarkerOptions newMarker = new MarkerOptions();
+                        newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                        newMarker.title(u.getNickname());
+                        if (newMarker.getTitle() == null) {
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                        } else {
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                        }
+                        markersOnMap.put(u.getId(), newMarker);
+                        mMap.addMarker(newMarker);
+                    }
+
+
                 }
+
+                locationManager.getLocation();
+
 
             }
         }
