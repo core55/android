@@ -142,6 +142,7 @@ public class MapsActivity extends FragmentActivity {
                 httpMethod = Request.Method.PATCH;
                 break;
         }
+
         // Request a string response from the provided URL.
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (httpMethod, url, jsonObject, new Response.Listener<JSONObject>() {
@@ -172,7 +173,9 @@ public class MapsActivity extends FragmentActivity {
 
                     }
                 });
-// Add the request to the RequestQueue.
+
+
+        // Add the request to the RequestQueue.
         queue.add(jsObjRequest);
     }
 

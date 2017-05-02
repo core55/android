@@ -1,6 +1,7 @@
 package io.github.core55.joinup;
 
 
+import android.os.Parcelable;
 
 /**
  * Created by prst on 2017-04-27.

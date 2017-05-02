@@ -1,5 +1,8 @@
 package io.github.core55.joinup;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +14,7 @@ import java.util.List;
  * Created by prst on 2017-04-27.
  */
 
-public class Meetup extends BaseEntity {
+public class Meetup extends BaseEntity implements Parcelable {
 
     private Double centerLongitude;
     private Double centerLatitude;
@@ -33,6 +36,16 @@ public class Meetup extends BaseEntity {
         this.zoomLevel = zoomLevel;
     }
 
+    private Meetup (Parcel in) {
+        centerLongitude = in.readDouble();
+        centerLatitude = in.readDouble();
+        zoomLevel = in.readInt();
+        hash = in.readString();
+        pinLongitude = in.readDouble();
+        pinLatitude = in.readDouble();
+        name = in.readString();
+        in.readList(usersList, Meetup.class.getClassLoader());
+    }
 
     public static Meetup fromJson(JSONObject jsonMeetup, JSONArray jsonUsersArray) {
         Meetup m = new Meetup();
@@ -127,4 +140,34 @@ public class Meetup extends BaseEntity {
     public void setUsersList(List<Long> usersList) {
         this.usersList = usersList;
     }
+
+
+    /*
+     * Methods for parcelable object
+     */
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeDouble(centerLongitude);
+        out.writeDouble(centerLatitude);
+        out.writeInt(zoomLevel);
+        out.writeString(hash);
+        out.writeDouble(pinLongitude);
+        out.writeDouble(pinLatitude);
+        out.writeString(name);
+        out.writeList(usersList);
+    }
+
+    public static final Parcelable.Creator<Meetup> CREATOR = new Parcelable.Creator<Meetup>() {
+        public Meetup createFromParcel(Parcel in) {
+            return new Meetup(in);
+        }
+
+        public Meetup[] newArray(int size) {
+            return new Meetup[size];
+        }
+    };
 }

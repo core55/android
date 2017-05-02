@@ -1,18 +1,21 @@
 package io.github.core55.joinup;
 
 import android.Manifest;
-import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -20,17 +23,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public static final String TAG = "MapActivity";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private GoogleMap mMap;
@@ -51,8 +56,45 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         LocationManager locationManager = new LocationManager(this);
         locationManager.start();
 
+        launchNetworkService();
+
         createShareButtonListener();
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register for the particular broadcast based on ACTION string
+        IntentFilter filter = new IntentFilter(NetworkService.ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(networkServiceReceiver, filter);
+        // or `registerReceiver(networkServiceReceiver, filter)` for a normal broadcast
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister the listener when the application is paused
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(networkServiceReceiver);
+        // or `unregisterReceiver(networkServiceReceiver)` for a normal broadcast
+    }
+
+    // Define the callback for what to do when message is received
+    private BroadcastReceiver networkServiceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String result = intent.getStringExtra("result");
+            Toast.makeText(MapActivity.this, result, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "onReceive");
+
+            Meetup m = intent.getParcelableExtra("meetup");
+            if (m != null) {
+                Log.d(TAG, "in reveicer");
+                LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
+                mMap.addMarker(new MarkerOptions().position(latLng).title(m.getName()));
+            }
+        }
+    };
 
     /**
      * Manipulates the map once available.
@@ -73,7 +115,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             mMap.setMyLocationEnabled(true);
         }
     }
-
 
     /**
      *
@@ -156,6 +197,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         ClipData clip = ClipData.newPlainText("label", "it works!"); //meetupHash
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void launchNetworkService() {
+        // Construct our Intent specifying the Service
+        Intent i = new Intent(this, NetworkService.class);
+
+        // Add extras to the bundle
+        i.putExtra("foo", "bar");
+
+        // Start the service
+        startService(i);
+
     }
 
 
