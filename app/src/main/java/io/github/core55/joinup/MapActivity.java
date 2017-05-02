@@ -75,8 +75,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
 
         Context context = getApplicationContext();
-        CharSequence text = DataHolder.getInstance().getUser().get("nickname");
-        int duration = Toast.LENGTH_SHORT;
+        CharSequence text = "Welcome " + DataHolder.getInstance().getUser().get("nickname") + "!";
+        int duration = Toast.LENGTH_LONG;
 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
@@ -120,12 +120,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
             // other 'case' lines to check for other permissions this app might request
         }
-    }
-
-    protected boolean openDrawer(View v){
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-        return true;
     }
 
     private void handleAppLink() {

@@ -24,40 +24,31 @@ import java.util.HashMap;
 
 public class LoginActivity extends Activity {
 
-    private TextView mTextView;
-    String token;
-    String jwt;
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login2);
+        setContentView(R.layout.activity_login);
 
     }
 
-    protected void skipLogin(View v){
-        Intent i = new Intent(this,MapActivity.class);
-        startActivity(i);
+    protected void ordinaryLogin(View v) {
+        EditText emailEditText = (EditText) findViewById(R.id.login_email);
+        String email = emailEditText.getText().toString();
 
-    }
-
-
-    protected void emailLogin(View v){
-        EditText emailEditText = (EditText) findViewById(R.id.etUsername);
-        String email =  emailEditText.getText().toString();
-
-        EditText passwordEditText = (EditText) findViewById(R.id.etPassword);
-        String password =  passwordEditText.getText().toString();
+        EditText passwordEditText = (EditText) findViewById(R.id.login_password);
+        String password = passwordEditText.getText().toString();
 
         loginBackend(email, password);
+    }
+
+    // TODO: Implement login with Google Sign-in
+    protected void googleLogin(View v) {
 
     }
 
     private void loginBackend(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String URL = "http://192.168.0.112:8080/api/login";
+        final String URL = "https://dry-cherry.herokuapp.com/api/login";
 
         HashMap<String, String> params = new HashMap<>();
         params.put("username", username);
@@ -75,11 +66,10 @@ public class LoginActivity extends Activity {
                             JSONObject headers = response.getJSONObject("headers");
                             String jwt = headers.getString("Authorization");
 
-                            HashMap<String,String> user = new Gson().fromJson(data.toString(), new TypeToken<HashMap<String, String>>(){}.getType());
+                            HashMap<String, String> user = new Gson().fromJson(data.toString(), new TypeToken<HashMap<String, String>>() {
+                            }.getType());
                             DataHolder.getInstance().setUser(user);
                             DataHolder.getInstance().setJwt(jwt);
-
-                            Log.d("PEW", DataHolder.getInstance().getUser().get("nickname"));
 
                             Intent intent = new Intent(LoginActivity.this,
                                     MapActivity.class);
