@@ -45,14 +45,7 @@ public class NetworkService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Fires when a service is started up, do work here!
 
-        // Send broadcast out with action filter and extras
-        Intent i = new Intent(ACTION);
-        i.putExtra("result", "baz");
-        mLocalBroadcastManager.sendBroadcast(i);
-
         handlerStart();
-
-        Log.d(TAG, "onStart");
 
         // Return "sticky" for services that are explicitly started and stopped as needed by the app.
         return START_STICKY;

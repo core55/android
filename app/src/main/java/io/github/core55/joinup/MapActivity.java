@@ -88,17 +88,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private BroadcastReceiver networkServiceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String result = intent.getStringExtra("result");
-            Toast.makeText(MapActivity.this, result, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "onReceive");
 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
                 LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
-                mMap.addMarker(new MarkerOptions().position(latLng).title(m.getName()));
+                MarkerOptions meetupMarker = new MarkerOptions();
+                meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
+                meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+                mMap.addMarker(meetupMarker);
 
                 for (User u : m.getUsersList()) {
-                    Log.d(TAG, "id = "+u.getId());
                     if (markersOnMap.containsKey(u.getId())) {
                         MarkerOptions marker = markersOnMap.get(u.getId());
                         marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
@@ -233,12 +232,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         // Construct our Intent specifying the Service
         Intent i = new Intent(this, NetworkService.class);
 
-        // Add extras to the bundle
-        i.putExtra("foo", "bar");
-
         // Start the service
         startService(i);
-
     }
 
 
