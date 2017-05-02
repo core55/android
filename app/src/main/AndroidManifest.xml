@@ -42,14 +42,11 @@
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
-        <service android:enabled="true" android:name=".LocationService" />
+        <service
+            android:name=".LocationService"
+            android:enabled="true" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -63,6 +60,17 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".RegisterActivity"></activity>
 
     </application>
 

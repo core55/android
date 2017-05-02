@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="io.github.core55.joinup.LoginActivity"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:weightSum="1"
+    android:background="#ffff"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="Username"
+        android:layout_height="wrap_content"
+        />
+    <EditText
+        android:id="@+id/etUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    <TextView
+        android:text="Password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        />
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        />
+
+
+    <LinearLayout
+
+        android:layout_width="392dp"
+        android:layout_height="78dp"
+        android:layout_weight="0.02"
+        android:orientation="horizontal"
+
+        android:padding="10dp"
+        android:weightSum="1">
+
+        <TextView
+            android:layout_width="61dp"
+            android:layout_height="55dp"
+            android:layout_weight="0.13"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/Login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:text="Login" />
+
+        <View
+            android:layout_width="77dp"
+            android:layout_height="1dp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/signup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:text="sign up" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:text="OR"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_height="45dp"
+        />
+
+
+    <ImageButton
+        android:id="@+id/imageButton10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/common_google_signin_btn_text_dark_default"
+        android:src="@drawable/btn_google_red" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="26dp"
+        android:layout_height="1dp"
+        android:layout_weight="0.04"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_dark"
+        android:onClick="skipLogin"
+        android:text="Continue without signing up" />
+
+</LinearLayout>
