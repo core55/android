@@ -1,8 +1,6 @@
 package io.github.core55.joinup;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Handler;
@@ -30,6 +28,8 @@ public class NetworkService extends Service {
     private boolean started = true;
     private Handler handler = new Handler();
 
+    private String meetupHash;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -38,12 +38,16 @@ public class NetworkService extends Service {
         RequestQueue queue = VolleyController.getInstance(this.getApplicationContext()).getRequestQueue();
 
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Log.d(TAG, "onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Fires when a service is started up, do work here!
+
+        if (intent != null) {
+            meetupHash = intent.getStringExtra("hash");
+        }
+
 
         handlerStart();
 
@@ -65,7 +69,7 @@ public class NetworkService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/089c11482c4e4cb1969c12157e1ba84e");
+            requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash);
 
             if (started) {
                 handlerStart();

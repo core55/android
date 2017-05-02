@@ -3,12 +3,8 @@ package io.github.core55.joinup;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by prst on 2017-04-27.
@@ -32,7 +28,7 @@ public class User extends BaseEntity implements Parcelable {
         this.lastLatitude = lastLatitude;
     }
 
-    private User (Parcel in) {
+    private User(Parcel in) {
         id = in.readLong();
         nickname = in.readString();
         lastLongitude = in.readDouble();

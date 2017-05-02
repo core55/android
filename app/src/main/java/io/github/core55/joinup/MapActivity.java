@@ -41,7 +41,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private GoogleMap mMap;
 
-    LocationManager locationManager;
+    private LocationManager locationManager;
+
+    private String meetupHash = "089c11482c4e4cb1969c12157e1ba84e";
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
@@ -191,13 +193,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         if (appLinkData != null && appLinkData.isHierarchical()) {
             String uri = appLinkIntent.getDataString();
-            Log.i("JoinUp", "Deep link clicked " + uri);
+            Log.d(TAG, "url = " + uri);
 
-            Pattern pattern = Pattern.compile("/meetups/(.*)");
+            Pattern pattern = Pattern.compile("/\\#/(.*)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
-                //meetupHash = matcher.group(1);
-                //Log.i("JoinUp", "Meetup hash " + meetupHash);
+                meetupHash = matcher.group(1);
+                Log.d(TAG, "hash = " + meetupHash);
             }
         }
     }
@@ -212,7 +214,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 mBuilder.setView(mView);
 
                 EditText url = (EditText) mView.findViewById(R.id.editText);
-                //url.setText(meetupHash);
+                url.setText(meetupHash);
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
@@ -223,7 +225,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     public void copyToCliboard(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", "it works!"); //meetupHash
+        ClipData clip = ClipData.newPlainText("label", meetupHash);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
@@ -231,6 +233,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void launchNetworkService() {
         // Construct our Intent specifying the Service
         Intent i = new Intent(this, NetworkService.class);
+
+        i.putExtra("hash", meetupHash);
 
         // Start the service
         startService(i);

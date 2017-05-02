@@ -2,7 +2,6 @@ package io.github.core55.joinup;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,7 +36,7 @@ public class Meetup extends BaseEntity implements Parcelable {
         this.zoomLevel = zoomLevel;
     }
 
-    private Meetup (Parcel in) {
+    private Meetup(Parcel in) {
         centerLongitude = in.readDouble();
         centerLatitude = in.readDouble();
         zoomLevel = in.readInt();
