@@ -68,12 +68,34 @@ public class NetworkService extends Service {
 
     }
 
-    public void requestMeetup(int method, String url, JSONObject data) {
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/089c11482c4e4cb1969c12157e1ba84e");
+
+            if (started) {
+                handlerStart();
+            }
+        }
+    };
+
+    public void handlerStart() {
+        started = true;
+        handler.postDelayed(runnable, 7 * 1000);
+    }
+
+    public void handlerStop() {
+        started = false;
+        handler.removeCallbacks(runnable);
+    }
+
+    public void requestMeetup(String url) {
 
         Log.d(TAG, "requestMeetup");
+        int method = Request.Method.GET;
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, data, new Response.Listener<JSONObject>() {
+                (method, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
 
@@ -101,10 +123,9 @@ public class NetworkService extends Service {
     private void requestUserList(final JSONObject meetup, String url) {
 
         int method = Request.Method.GET;
-        JSONObject data = new JSONObject();
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, data, new Response.Listener<JSONObject>() {
+                (method, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
 
@@ -132,25 +153,71 @@ public class NetworkService extends Service {
         VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            requestMeetup(Request.Method.GET, "https://dry-cherry.herokuapp.com/api/meetups/9c40b759e39c42838335bd5f143b26e5", null);
+    /*
+    public void requestUser(String url) {
 
-            if (started) {
-                handlerStart();
-            }
-        }
-    };
+        Log.d(TAG, "requestMeetup");
+        int method = Request.Method.GET;
 
-    public void handlerStart() {
-        started = true;
-        handler.postDelayed(runnable, 7 * 1000);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (method, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        String url = "";
+
+                        try {
+                            url = response.getJSONObject("_links").getJSONObject("meetups").getString("href");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        requestUserList(response, url);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        // Add a request to your RequestQueue.
+        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
     }
 
-    public void handlerStop() {
-        started = false;
-        handler.removeCallbacks(runnable);
+    private void requestMeetupList(final JSONObject user, String url) {
+
+        int method = Request.Method.GET;
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (method, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        JSONArray jsonMeetupArray = new JSONArray();
+
+                        try {
+                            jsonMeetupArray = response.getJSONObject("_embedded").getJSONArray("meetups");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        Intent i = new Intent(ACTION);
+                        i.putExtra("user", Meetup.fromJson(user, jsonMeetupArray));
+                        mLocalBroadcastManager.sendBroadcast(i);
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        // Add a request to your RequestQueue.
+        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
+    */
 
 }

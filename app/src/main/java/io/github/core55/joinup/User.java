@@ -1,5 +1,8 @@
 package io.github.core55.joinup;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,13 +14,13 @@ import java.util.List;
  * Created by prst on 2017-04-27.
  */
 
-public class User extends BaseEntity {
+public class User extends BaseEntity implements Parcelable {
 
     private String nickname;
     private Double lastLongitude;
     private Double lastLatitude;
     private String username;
-    private List<String> meetupsList = new ArrayList<>();
+    //private List<String> meetupsList = new ArrayList<>();
 
     protected User() {
         super();
@@ -29,7 +32,15 @@ public class User extends BaseEntity {
         this.lastLatitude = lastLatitude;
     }
 
-    public static User fromJson(JSONObject jsonUser, JSONArray jsonMeetupsArray) {
+    private User (Parcel in) {
+        nickname = in.readString();
+        lastLongitude = in.readDouble();
+        lastLatitude = in.readDouble();
+        username = in.readString();
+        //in.readList(meetupsList, User.class.getClassLoader());
+    }
+
+    public static User fromJson(JSONObject jsonUser) {
         User u = new User();
 
         try {
@@ -40,6 +51,7 @@ public class User extends BaseEntity {
             u.createdAt = jsonUser.getString("createdAt");
             u.updatedAt = jsonUser.getString("updatedAt");
 
+            /*
             List<String> meetupsList = new ArrayList<>();
             if (jsonMeetupsArray != null) {
                 for (int i = 0; i < jsonMeetupsArray.length(); i++) {
@@ -47,6 +59,7 @@ public class User extends BaseEntity {
                 }
             }
             u.meetupsList = new ArrayList<>(meetupsList);
+            */
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -88,11 +101,36 @@ public class User extends BaseEntity {
         this.username = username;
     }
 
-    public List<String> getMeetupsList() {
-        return meetupsList;
-    }
+    /*
+    public List<String> getMeetupsList() { return meetupsList; }
+    */
 
+    /*
     public void setMeetupsList(List<String> meetupsList) {
         this.meetupsList = meetupsList;
     }
+    */
+
+    /*
+     * Methods for parcelable object
+     */
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(nickname);
+        out.writeDouble(lastLongitude);
+        out.writeDouble(lastLatitude);
+        out.writeString(username);
+        //out.writeList(meetupsList);
+    }
+
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
+
 }

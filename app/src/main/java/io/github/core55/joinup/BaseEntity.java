@@ -7,7 +7,7 @@ import android.os.Parcelable;
  * Created by prst on 2017-04-27.
  */
 
-public abstract class BaseEntity {
+public abstract class BaseEntity implements Parcelable {
 
     protected final Long id;
 
@@ -37,4 +37,13 @@ public abstract class BaseEntity {
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    /*
+     * Methods for parcelable object
+     */
+
+    public int describeContents() {
+        return 0;
+    }
+
 }

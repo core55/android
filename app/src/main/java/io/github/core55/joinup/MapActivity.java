@@ -92,6 +92,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 Log.d(TAG, "in reveicer");
                 LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
                 mMap.addMarker(new MarkerOptions().position(latLng).title(m.getName()));
+
+                for (User u : m.getUsersList()) {
+                    LatLng latLng2 = new LatLng(u.getLastLatitude(), u.getLastLongitude());
+                    mMap.addMarker(new MarkerOptions().position(latLng2).title(m.getName()));
+                }
+
             }
         }
     };

@@ -23,7 +23,7 @@ public class Meetup extends BaseEntity implements Parcelable {
     private Double pinLongitude;
     private Double pinLatitude;
     private String name;
-    private List<Long> usersList = new ArrayList<>();
+    private List<User> usersList = new ArrayList<>();
 
     protected Meetup() {
         super();
@@ -61,10 +61,10 @@ public class Meetup extends BaseEntity implements Parcelable {
             m.createdAt = jsonMeetup.getString("createdAt");
             m.updatedAt = jsonMeetup.getString("updatedAt");
 
-            List<Long> usersList = new ArrayList<>();
+            List<User> usersList = new ArrayList<>();
             if (jsonUsersArray != null) {
                 for (int i = 0; i < jsonUsersArray.length(); i++) {
-                    usersList.add(jsonUsersArray.getJSONObject(i).getLong("id"));
+                    usersList.add(User.fromJson(jsonUsersArray.getJSONObject(i)));
                 }
             }
             m.usersList = new ArrayList<>(usersList);
@@ -133,11 +133,11 @@ public class Meetup extends BaseEntity implements Parcelable {
         this.name = name;
     }
 
-    public List<Long> getUsersList() {
+    public List<User> getUsersList() {
         return usersList;
     }
 
-    public void setUsersList(List<Long> usersList) {
+    public void setUsersList(List<User> usersList) {
         this.usersList = usersList;
     }
 
@@ -145,10 +145,6 @@ public class Meetup extends BaseEntity implements Parcelable {
     /*
      * Methods for parcelable object
      */
-
-    public int describeContents() {
-        return 0;
-    }
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeDouble(centerLongitude);
@@ -170,4 +166,5 @@ public class Meetup extends BaseEntity implements Parcelable {
             return new Meetup[size];
         }
     };
+
 }
