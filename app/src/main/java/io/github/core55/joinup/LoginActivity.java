@@ -18,6 +18,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 
@@ -68,6 +70,13 @@ public class LoginActivity extends Activity {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("PEW", response.toString());
+                        HashMap<String,String> user = new Gson().fromJson(response.toString(), new TypeToken<HashMap<String, String>>(){}.getType());
+                        DataHolder.getInstance().setUser(user);
+
+                        Intent intent = new Intent(LoginActivity.this,
+                                MapActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 },
                 new Response.ErrorListener() {
