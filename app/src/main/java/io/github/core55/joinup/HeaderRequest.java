@@ -32,7 +32,8 @@ public class HeaderRequest  extends JsonObjectRequest {
             try {
                 String jsonString = new String(response.data,
                         HttpHeaderParser.parseCharset(response.headers, PROTOCOL_CHARSET));
-                JSONObject jsonResponse = new JSONObject(jsonString);
+                JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("data", new JSONObject(jsonString));
                 jsonResponse.put("headers", new JSONObject(response.headers));
                 return Response.success(jsonResponse,
                         HttpHeaderParser.parseCacheHeaders(response));

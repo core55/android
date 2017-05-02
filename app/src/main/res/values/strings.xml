@@ -5,4 +5,13 @@
     <string name="url_value">URL value</string>
     <string name="title_activity_map">Map</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
+
+    <string-array name="lang_from">
+        <item>English</item>
+    </string-array>
+
+    <string-array name="lang_to">
+        <item>Swedish</item>
+    </string-array>
 </resources>

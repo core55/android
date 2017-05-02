@@ -3,4 +3,8 @@
     <color name="colorPrimary">#f0272e</color>
     <color name="colorPrimaryDark">#33af9c</color>
     <color name="colorAccent">#ff4081</color>
+    <color name="welcome_white">#f5f5f5</color>
+    <color name="welcome_blue">#364f6b</color>
+    <color name="welcome_light_blue">#3fc1c9</color>
+    <color name="welcome_pink">#FC5185</color>
 </resources>

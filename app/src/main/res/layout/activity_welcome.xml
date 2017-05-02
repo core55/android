@@ -9,62 +9,53 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:orientation="vertical"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
-        android:paddingTop="20dp">
+        android:paddingTop="56dp"
+        android:gravity="center">
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
             android:fontFamily="cursive"
             android:text="Joinup"
             android:textAlignment="center"
             android:textColor="@android:color/holo_red_light"
-            android:textSize="50sp"
+            android:textSize="100sp"
             android:textStyle="bold" />
 
-        <!-- Email Label -->
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/input_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:hint="Email" />
-        </android.support.design.widget.TextInputLayout>
+        <!--  Email Label -->
 
-        <!-- Password Label -->
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/input_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="Password"/>
-        </android.support.design.widget.TextInputLayout>
+        <!--  Password Label -->
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/btn_login"
             android:layout_width="@dimen/medium_button"
             android:layout_height="wrap_content"
             android:layout_marginBottom="60dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="60dp"
             android:background="@android:color/holo_red_light"
             android:fontFamily="sans-serif"
             android:gravity="center"
             android:padding="12dp"
-            android:text="Login"
+            android:text="Create Meetup"
             android:textColor="@color/welcome_white"
+            android:textStyle="bold" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_login_welcome"
+            android:layout_width="@dimen/medium_button"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp"
+            android:layout_marginTop="60dp"
+            android:background="@android:color/darker_gray"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="Login"
+            android:textColor="@color/welcome_blue"
             android:textStyle="bold" />
 
     </LinearLayout>

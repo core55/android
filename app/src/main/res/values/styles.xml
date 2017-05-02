@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="TextAppearence.App.TextInputLayout" parent="@android:style/TextAppearance">
+        //added attributes
+        <item name="colorControlActivated">@android:color/holo_red_light</item>
+        <item name="colorControlHighlight">@android:color/holo_red_light</item>
+
+    </style>
+
 </resources>
