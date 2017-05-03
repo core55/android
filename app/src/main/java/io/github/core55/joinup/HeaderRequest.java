@@ -11,36 +11,33 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-/**
- * Created by juanl on 02/05/2017.
- */
+public class HeaderRequest extends JsonObjectRequest {
 
-public class HeaderRequest  extends JsonObjectRequest {
+    public HeaderRequest(int method, String url, JSONObject jsonRequest, Response.Listener
+            <JSONObject> listener, Response.ErrorListener errorListener) {
+        super(method, url, jsonRequest, listener, errorListener);
+    }
 
-        public HeaderRequest(int method, String url, JSONObject jsonRequest, Response.Listener
-                <JSONObject> listener, Response.ErrorListener errorListener) {
-            super(method, url, jsonRequest, listener, errorListener);
-        }
+    public HeaderRequest(String url, JSONObject jsonRequest, Response.Listener<JSONObject>
+            listener, Response.ErrorListener errorListener) {
+        super(url, jsonRequest, listener, errorListener);
+    }
 
-        public HeaderRequest(String url, JSONObject jsonRequest, Response.Listener<JSONObject>
-                listener, Response.ErrorListener errorListener) {
-            super(url, jsonRequest, listener, errorListener);
-        }
-
-        @Override
-        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-            try {
-                String jsonString = new String(response.data,
-                        HttpHeaderParser.parseCharset(response.headers, PROTOCOL_CHARSET));
-                JSONObject jsonResponse = new JSONObject(jsonString);
-                jsonResponse.put("headers", new JSONObject(response.headers));
-                return Response.success(jsonResponse,
-                        HttpHeaderParser.parseCacheHeaders(response));
-            } catch (UnsupportedEncodingException e) {
-                return Response.error(new ParseError(e));
-            } catch (JSONException je) {
-                return Response.error(new ParseError(je));
-            }
+    @Override
+    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+        try {
+            String jsonString = new String(response.data,
+                    HttpHeaderParser.parseCharset(response.headers, PROTOCOL_CHARSET));
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("data", new JSONObject(jsonString));
+            jsonResponse.put("headers", new JSONObject(response.headers));
+            return Response.success(jsonResponse,
+                    HttpHeaderParser.parseCacheHeaders(response));
+        } catch (UnsupportedEncodingException e) {
+            return Response.error(new ParseError(e));
+        } catch (JSONException je) {
+            return Response.error(new ParseError(je));
         }
     }
+}
 

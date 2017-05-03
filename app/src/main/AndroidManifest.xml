@@ -20,9 +20,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data
-            android:name="asset_statements"
-            android:resource="@string/asset_statements" />
 
         <!--
         <activity android:name=".MapsActivity">
@@ -39,39 +36,55 @@
         </activity>
         -->
 
+        <!-- ACTIVITIES -->
+
+        <activity
+            android:name=".WelcomeActivity"
+            android:label="@string/title_activity_welcome">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login">
+        </activity>
+
+        <activity
+            android:name=".RegisterActivity"
+            android:label="@string/title_activity_login">
+        </activity>
+
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map">
         </activity>
 
+
+        <!-- SERVICES -->
+
         <service
             android:name=".LocationService"
             android:enabled="true" />
 
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+
+        <!-- META DATA -->
+
+        <!-- The API key for Google Maps-based APIs is defined as a string resource.
+        (See the file "res/values/google_maps_api.xml"). Note that the API key is linked to the
+        encryption key used to sign the APK. You need a different API key for each encryption key,
+        including the release key that is used to sign the APK for publishing. You can define the
+        keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".RegisterActivity"></activity>
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
 
     </application>
-
 </manifest>

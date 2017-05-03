@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -72,6 +73,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
+
+        Context context = getApplicationContext();
+        CharSequence text = "Welcome " + DataHolder.getInstance().getUser().get("nickname") + "!";
+        int duration = Toast.LENGTH_LONG;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
 

@@ -22,12 +22,12 @@
         android:id="@+id/editText"
         android:layout_width="370dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/custom_text"
         android:ems="10"
         android:inputType="none"
         android:text=""
-        android:textIsSelectable="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:textIsSelectable="true" />
 
 </RelativeLayout>

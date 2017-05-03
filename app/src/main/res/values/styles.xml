@@ -4,8 +4,15 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/welcome_blue</item>
+        <item name="colorAccent">@android:color/holo_red_light</item>
+    </style>
+
+    <style name="TextAppearence.App.TextInputLayout" parent="@android:style/TextAppearance">
+        //added attributes
+        <item name="colorControlActivated">@android:color/holo_red_light</item>
+        <item name="colorControlHighlight">@android:color/holo_red_light</item>
+
     </style>
 
 </resources>
