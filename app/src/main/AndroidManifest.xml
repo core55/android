@@ -21,20 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!--
-        <activity android:name=".MapsActivity">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="culater.herokuapp.com"
-                    android:scheme="https" />
-            </intent-filter>
-        </activity>
-        -->
 
         <!-- ACTIVITIES -->
 
@@ -60,6 +46,16 @@
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="culater.herokuapp.com" />
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+            </intent-filter>
         </activity>
 
 
@@ -67,6 +63,10 @@
 
         <service
             android:name=".LocationService"
+            android:enabled="true" />
+
+        <service
+            android:name=".NetworkService"
             android:enabled="true" />
 
 

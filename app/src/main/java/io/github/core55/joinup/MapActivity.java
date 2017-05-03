@@ -1,19 +1,21 @@
 package io.github.core55.joinup;
 
 import android.Manifest;
-import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -21,20 +23,29 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public static final String TAG = "MapActivity";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private GoogleMap mMap;
+
+    private LocationManager locationManager;
+
+    private String meetupHash = "089c11482c4e4cb1969c12157e1ba84e";
+
+    private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +60,72 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         askLocationPermission();
 
-        LocationManager locationManager = new LocationManager(this);
+        locationManager = new LocationManager(this);
         locationManager.start();
 
+        launchNetworkService();
+
         createShareButtonListener();
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Register for the particular broadcast based on ACTION string
+        IntentFilter filter = new IntentFilter(NetworkService.ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(networkServiceReceiver, filter);
+        // or `registerReceiver(networkServiceReceiver, filter)` for a normal broadcast
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister the listener when the application is paused
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(networkServiceReceiver);
+        // or `unregisterReceiver(networkServiceReceiver)` for a normal broadcast
+    }
+
+    // Define the callback for what to do when message is received
+    private BroadcastReceiver networkServiceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Meetup m = intent.getParcelableExtra("meetup");
+            if (m != null) {
+                LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
+                MarkerOptions meetupMarker = new MarkerOptions();
+                meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
+                meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+                mMap.addMarker(meetupMarker);
+
+                for (User u : m.getUsersList()) {
+                    if (markersOnMap.containsKey(u.getId())) {
+                        MarkerOptions marker = markersOnMap.get(u.getId());
+                        marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                        marker.title(u.getNickname());
+                    } else {
+                        MarkerOptions newMarker = new MarkerOptions();
+                        newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                        newMarker.title(u.getNickname());
+                        if (newMarker.getTitle() == null) {
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                        } else {
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                        }
+                        markersOnMap.put(u.getId(), newMarker);
+                        mMap.addMarker(newMarker);
+                    }
+
+
+                }
+
+                locationManager.getLocation();
+
+
+            }
+        }
+    };
 
     /**
      * Manipulates the map once available.
@@ -81,7 +153,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
     }
-
 
     /**
      *
@@ -129,13 +200,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         if (appLinkData != null && appLinkData.isHierarchical()) {
             String uri = appLinkIntent.getDataString();
-            Log.i("JoinUp", "Deep link clicked " + uri);
+            Log.d(TAG, "url = " + uri);
 
-            Pattern pattern = Pattern.compile("/meetups/(.*)");
+            Pattern pattern = Pattern.compile("/\\#/(.*)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
-                //meetupHash = matcher.group(1);
-                //Log.i("JoinUp", "Meetup hash " + meetupHash);
+                meetupHash = matcher.group(1);
+                Log.d(TAG, "hash = " + meetupHash);
             }
         }
     }
@@ -150,7 +221,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 mBuilder.setView(mView);
 
                 EditText url = (EditText) mView.findViewById(R.id.editText);
-                //url.setText(meetupHash);
+                url.setText(meetupHash);
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
@@ -161,9 +232,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     public void copyToCliboard(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", "it works!"); //meetupHash
+        ClipData clip = ClipData.newPlainText("label", meetupHash);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void launchNetworkService() {
+        // Construct our Intent specifying the Service
+        Intent i = new Intent(this, NetworkService.class);
+
+        i.putExtra("hash", meetupHash);
+
+        // Start the service
+        startService(i);
     }
 
 

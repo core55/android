@@ -26,7 +26,9 @@
         android:layout_centerHorizontal="true"
         android:background="@drawable/custom_text"
         android:ems="10"
-        android:inputType="none"
+        android:inputType="text"
+        android:maxLines="1"
+        android:scrollHorizontally="true"
         android:text=""
         android:textIsSelectable="true" />
 
