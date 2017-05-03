@@ -43,7 +43,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private LocationManager locationManager;
 
-    private String meetupHash = "089c11482c4e4cb1969c12157e1ba84e";
+    private String meetupHash = "42bb68ec81bb4164bb1d32cb27ca9898";
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
