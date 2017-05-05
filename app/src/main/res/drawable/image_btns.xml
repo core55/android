@@ -10,5 +10,7 @@
         android:state_pressed="true"/>
     <item android:drawable="@drawable/magic_link_blue"
         android:state_pressed="true"/>
+    <item android:drawable="@drawable/shadow_circle3"
+        android:state_pressed="true"/>
 
 </selector>
