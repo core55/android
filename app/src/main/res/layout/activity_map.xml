@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/holo_blue_dark"
-    tools:context="io.github.core55.joinup.MapActivity">
+    tools:context="io.github.core55.joinup.MapActivity"
+    >
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -15,6 +16,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="io.github.core55.joinup.MapActivity" />
+
+
+    <ImageView
+        android:id="@+id/overlapImage"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/custom_circle"
+
+        />
+    <ImageView
+        android:id="@+id/small_circle"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/custom_innercircle"
+        />
+
 
     <ImageButton
         android:id="@+id/imageButton"
@@ -28,5 +49,6 @@
         android:src="@drawable/share_btn"
         tools:layout_editor_absoluteX="286dp"
         tools:layout_editor_absoluteY="490dp" />
+
 
 </RelativeLayout>
