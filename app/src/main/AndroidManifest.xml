@@ -32,12 +32,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"></activity>
+
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/title_activity_login"></activity>
+            android:label="@string/title_activity_register"></activity>
+
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map">
@@ -53,6 +56,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".CreateActivity"
+            android:label="@string/title_activity_create"></activity>
+
         <!-- SERVICES -->
 
         <service
@@ -62,8 +69,12 @@
             android:name=".NetworkService"
             android:enabled="true" />
 
+
         <!-- META DATA -->
 
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
 
         <!--
         The API key for Google Maps-based APIs is defined as a string resource.
@@ -75,11 +86,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <meta-data
-            android:name="asset_statements"
-            android:resource="@string/asset_statements" />
 
-        <activity android:name=".CreateActivity"></activity>
     </application>
 
 </manifest>

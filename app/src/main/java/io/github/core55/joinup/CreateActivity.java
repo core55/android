@@ -19,15 +19,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -36,6 +40,9 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CreateActivity extends AppCompatActivity implements
         View.OnClickListener, OnMapReadyCallback,
@@ -53,7 +60,6 @@ public class CreateActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
 
     private Location mLastLocation;
-    private String hash = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,12 +90,6 @@ public class CreateActivity extends AppCompatActivity implements
         switch (v.getId()) {
             case R.id.createMapButton:
                 createMeetup();
-
-                Intent i = new Intent(this, MapActivity.class);
-                while (hash.equals(""));
-                i.putExtra("hash", hash);
-                startActivity(i);
-
                 break;
         }
     }
@@ -137,30 +137,13 @@ public class CreateActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        /*
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        //mLocationRequest.setSmallestDisplacement(0.1F);
-
-        // create the Intent to use WebViewActivity to handle results
-        Intent mRequestLocationUpdatesIntent = new Intent(this, LocationService.class);
-
-        // request location updates
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, null);
-        }
-        */
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         }
 
         if (mLastLocation != null) {
-            //mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-            //mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-            Log.d(TAG, "last location");
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
         }
 
     }
@@ -197,6 +180,8 @@ public class CreateActivity extends AppCompatActivity implements
 
     private void createMeetup() {
 
+        RequestQueue queue = Volley.newRequestQueue(this);
+
         int method = Request.Method.POST;
         String url = "https://dry-cherry.herokuapp.com/api/meetups";
         JSONObject data = new JSONObject();
@@ -212,10 +197,16 @@ public class CreateActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
+        Log.d(TAG, data.toString());
+
+        HeaderRequest jsonObjectRequest = new HeaderRequest
+                (method, url, data, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+
+                        Log.d(TAG, "response...");
+
+                        String hash = "";
 
                         try {
                             hash = response.getString("hash");
@@ -223,15 +214,21 @@ public class CreateActivity extends AppCompatActivity implements
                             e.printStackTrace();
                         }
 
+                        Intent i = new Intent(CreateActivity.this, MapActivity.class);
+                        i.putExtra("hash", hash);
+                        startActivity(i);
+
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        error.printStackTrace();
                     }
                 });
 
         // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+        //VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+        queue.add(jsonObjectRequest);
+
     }
 }

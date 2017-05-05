@@ -1,11 +1,14 @@
 <resources>
-    <string name="app_name">JoinUp</string>
-    <string name="title_activity_maps">Map</string>
     <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://culater.herokuapp.com\",\n  }\n}]</string>
-    <string name="url_value">URL value</string>
-    <string name="title_activity_map">Map</string>
+
+    <string name="app_name">JoinUp</string>
+    <string name="title_activity_map">MapActivity</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_create">CreateActivity</string>
+
+    <string name="url_value">URL value</string>
 
     <string-array name="lang_from">
         <item>English</item>
