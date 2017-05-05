@@ -35,6 +35,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.JsonObject;
 
@@ -42,6 +43,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,10 +55,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public static final String TAG = "MapActivity";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;
+    int count=0;
 
     private LocationManager locationManager;
 
-    private String meetupHash = "44603d26e39545d681d1eb7dd1fd5b08";
+    private String meetupHash = "028baffc294c434c8c8a4a610aa68e00";
     private int id_user=3;
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
@@ -108,11 +112,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
+                count++;
                 LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
-                MarkerOptions meetupMarker = new MarkerOptions();
+                MarkerOptions meetupMarker = (new MarkerOptions().draggable(true));
                 meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                 meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
-                mMap.addMarker(meetupMarker);
+
+                //Marker meme=mMap.addMarker(meetupMarker.position(latLng).draggable(true));
+                if(count<=1) {
+                    mMap.addMarker(meetupMarker);
+                }
 
                 for (User u : m.getUsersList()) {
                     if (markersOnMap.containsKey(u.getId())) {
@@ -134,11 +143,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
 
                 }
-
                 locationManager.getLocation();
 
 
             }
+
         }
     };
 
