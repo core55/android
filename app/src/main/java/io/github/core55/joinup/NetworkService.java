@@ -118,7 +118,7 @@ public class NetworkService extends Service {
         VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void requestUserList(final JSONObject meetup, String url) {
+        private void requestUserList(final JSONObject meetup, String url) {
 
         int method = Request.Method.GET;
 

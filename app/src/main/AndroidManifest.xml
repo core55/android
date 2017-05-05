@@ -24,6 +24,7 @@
 
         <!-- ACTIVITIES -->
 
+
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/title_activity_welcome">
@@ -42,6 +43,7 @@
             android:name=".RegisterActivity"
             android:label="@string/title_activity_login">
         </activity>
+
 
         <activity
             android:name=".MapActivity"
