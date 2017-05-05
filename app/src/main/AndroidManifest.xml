@@ -27,7 +27,7 @@
 
         <activity
             android:name=".WelcomeActivity"
-            android:label="@string/title_activity_welcome">
+            android:label="Joinup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
