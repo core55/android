@@ -217,7 +217,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             String uri = appLinkIntent.getDataString();
             Log.d(TAG, "url = " + uri);
 
-            Pattern pattern = Pattern.compile("/\\#/(.*)");
+            Pattern pattern = Pattern.compile("/\\#/m/(.*)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
                 meetupHash = matcher.group(1);
