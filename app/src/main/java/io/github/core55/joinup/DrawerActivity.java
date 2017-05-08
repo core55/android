@@ -4,9 +4,13 @@
 
 package io.github.core55.joinup;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,20 +21,40 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
+import android.widget.TextView;
+
+import org.json.JSONObject;
 
 public class DrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    SharedPreferences sharedPref;
+
     protected DrawerLayout fullLayout;
     protected FrameLayout frameLayout;
+
+    protected TextView navUsername;
+    protected TextView navNickname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer);
 
+        // Retrieve current user from shared preferences
+        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
+        String nickname = sharedPref.getString(getString(R.string.user_nickname), "Unknown User");
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Set username and nickname in drawer
+        View header = navigationView.getHeaderView(0);
+        navUsername = (TextView) header.findViewById(R.id.nav_username_view);
+        navNickname = (TextView) header.findViewById(R.id.nav_nickname_view);
+        navUsername.setText(username);
+        navNickname.setText(nickname);
     }
 
     @Override
@@ -81,8 +105,12 @@ public class DrawerActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_logout) {
+            sharedPref.edit().remove("username").commit();
+            sharedPref.edit().remove("nickname").commit();
 
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

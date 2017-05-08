@@ -101,7 +101,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
 
         SharedPreferences sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String currentUser = sharedPref.getString(getString(R.string.current_user), "Unknown User");
+        String currentUser = sharedPref.getString(getString(R.string.user_username), "Unknown User");
 
         Log.d("PEW", "Current user is: " + currentUser);
 

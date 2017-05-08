@@ -178,7 +178,8 @@ public class LoginActivity extends AppCompatActivity implements
 
                             sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString(getString(R.string.current_user), data.toString());
+                            editor.putString(getString(R.string.user_username), data.getString("username"));
+                            editor.putString(getString(R.string.user_nickname), data.getString("nickname"));
                             editor.putString(getString(R.string.jwt_string), jwt);
                             editor.commit();
 
