@@ -27,11 +27,9 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -64,8 +62,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
-    private Double latitude;
-    private Double longitude;
+    private Double centerLatitude;
+    private Double centerLongitude;
     private Integer zoomLevel;
 
     private MarkerOptions meetupMarker;
@@ -73,14 +71,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private Double pinLongitude;
     private Double pinLatitude;
 
+    private Double lastLatitude;
+    private Double lastLongitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
         meetupHash = getIntent().getStringExtra("hash");
-        latitude = getIntent().getDoubleExtra("centerLatitude", -1);
-        longitude = getIntent().getDoubleExtra("centerLongitude", -1);
+        centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
+        centerLongitude = getIntent().getDoubleExtra("centerLongitude", -1);
         zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
         pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
         pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
@@ -132,6 +133,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             Double lon = intent.getDoubleExtra("lon", -1);
 
             if (lat != null && lat != -1 && lon != null && lon != -1) {
+
+                lastLatitude = lat;
+                lastLongitude = lon;
 
                 int method = Request.Method.PATCH;
                 String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
@@ -227,7 +231,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoomLevel));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(centerLatitude, centerLongitude), zoomLevel));
 
         if (meetupMarker == null && pinLatitude != -1 && pinLongitude != -1) {
             meetupMarker = new MarkerOptions().draggable(true);
@@ -320,6 +324,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             if (matcher.find()) {
                 meetupHash = matcher.group(1);
                 Log.d(TAG, "hash = " + meetupHash);
+
+                createUser();
+
             }
         }
     }
@@ -425,6 +432,54 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         // Start the service
         startService(i);
+    }
+
+    private void createUser() {
+
+        int method = Request.Method.POST;
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users/save";
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("lastLongitude", lastLongitude);
+            data.put("lastLatitude", lastLatitude);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HeaderRequest userCreationRequest = new HeaderRequest
+                (method, url, data, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        int id = -1;
+
+                        try {
+                            id = response.getJSONObject("data").getInt("id");
+                        } catch (JSONException je) {
+                            je.printStackTrace();
+                        }
+
+                        id_user = id;
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
+
+        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
+
     }
 
 
