@@ -25,9 +25,9 @@
         android:ems="10"
         android:hint="Type your name"
         android:inputType="text"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:maxLines="1"
-        android:text=""
-        android:textIsSelectable="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
