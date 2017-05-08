@@ -36,6 +36,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
@@ -63,15 +64,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private Double longitude;
     private Integer zoomLevel;
 
+    private MarkerOptions meetupMarker;
+    private Marker meetupMarkerView;
+    private Double pinLongitude;
+    private Double pinLatitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
         meetupHash = getIntent().getStringExtra("hash");
-        latitude = getIntent().getDoubleExtra("centerLatitude", 0);
-        longitude = getIntent().getDoubleExtra("centerLongitude", 0);
-        zoomLevel = getIntent().getIntExtra("zoomLevel", 0);
+        latitude = getIntent().getDoubleExtra("centerLatitude", -1);
+        longitude = getIntent().getDoubleExtra("centerLongitude", -1);
+        zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
+        pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
+        pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
 
         handleAppLink();
 
@@ -117,17 +125,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
 
-                if (m.getPinLatitude() != null && m.getPinLongitude() != null) {
-                    count++;
-                    LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
-                    MarkerOptions meetupMarker = new MarkerOptions().draggable(true);
+                Log.d(TAG, "lat:"+m.getPinLatitude()+", lon:"+m.getPinLongitude());
+
+                if (meetupMarker == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
+                    meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
-
-                    //Marker meme=mMap.addMarker(meetupMarker.position(latLng).draggable(true));
-                    if (count <= 1) {
-                        mMap.addMarker(meetupMarker);
-                    }
+                    meetupMarkerView = mMap.addMarker(meetupMarker);
+                } else if (m.getPinLatitude() != null && m.getPinLongitude() != null) {
+                    Log.d(TAG, "in");
+                    meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
+                    meetupMarkerView.setPosition(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                 }
 
                 for (User u : m.getUsersList()) {
@@ -169,6 +177,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap = googleMap;
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoomLevel));
+
+        if (meetupMarker == null && pinLatitude != -1 && pinLongitude != -1) {
+            meetupMarker = new MarkerOptions().draggable(true);
+            meetupMarker.position(new LatLng(pinLatitude, pinLongitude));
+            meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+            mMap.addMarker(meetupMarker);
+        }
 
         try {
             // Customise map styling via json
