@@ -16,7 +16,7 @@ public class WelcomeActivity extends Activity {
     }
 
     protected void createMeetup(View v) {
-        Intent i = new Intent(this, MapActivity.class);
+        Intent i = new Intent(this, CreateActivity.class);
         startActivity(i);
     }
 

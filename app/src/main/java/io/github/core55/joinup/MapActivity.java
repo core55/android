@@ -67,6 +67,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        meetupHash = getIntent().getStringExtra("hash");
+        Log.d(TAG, "testiiing = "+meetupHash);
+
         handleAppLink();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -110,11 +113,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
-                LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
-                MarkerOptions meetupMarker = new MarkerOptions();
-                meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
-                meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
-                mMap.addMarker(meetupMarker);
+
+                if (m.getPinLatitude() != null && m.getPinLongitude() != null) {
+                    LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
+                    MarkerOptions meetupMarker = new MarkerOptions();
+                    meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
+                    meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+                    mMap.addMarker(meetupMarker);
+                }
 
                 for (User u : m.getUsersList()) {
                     if (markersOnMap.containsKey(u.getId())) {

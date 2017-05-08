@@ -21,7 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-
         <!-- ACTIVITIES -->
 
 
@@ -30,19 +29,18 @@
             android:label="Joinup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
-        </activity>
+            android:label="@string/title_activity_login"></activity>
 
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/title_activity_login">
-        </activity>
+            android:label="@string/title_activity_register"></activity>
 
 
         <activity
@@ -60,13 +58,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".CreateActivity"
+            android:label="@string/title_activity_create"></activity>
 
         <!-- SERVICES -->
 
         <service
             android:name=".LocationService"
             android:enabled="true" />
-
         <service
             android:name=".NetworkService"
             android:enabled="true" />
@@ -74,7 +74,12 @@
 
         <!-- META DATA -->
 
-        <!-- The API key for Google Maps-based APIs is defined as a string resource.
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
+
+        <!--
+        The API key for Google Maps-based APIs is defined as a string resource.
         (See the file "res/values/google_maps_api.xml"). Note that the API key is linked to the
         encryption key used to sign the APK. You need a different API key for each encryption key,
         including the release key that is used to sign the APK for publishing. You can define the
@@ -84,9 +89,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <meta-data
-            android:name="asset_statements"
-            android:resource="@string/asset_statements" />
-
     </application>
+
 </manifest>
