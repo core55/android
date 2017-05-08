@@ -19,10 +19,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.afollestad.bridge.Bridge;
+import com.afollestad.bridge.BridgeException;
+import com.afollestad.bridge.Request;
+import com.afollestad.bridge.Response;
+import com.afollestad.bridge.ResponseConvertCallback;
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -180,10 +182,10 @@ public class CreateActivity extends AppCompatActivity implements
 
     private void createMeetup() {
 
-        RequestQueue queue = Volley.newRequestQueue(this);
+        //RequestQueue queue = Volley.newRequestQueue(this);
 
-        int method = Request.Method.POST;
-        String url = "https://dry-cherry.herokuapp.com/api/meetups";
+        //int method = Request.Method.POST;
+        String url = "http://dry-cherry.herokuapp.com/api/meetups";
         JSONObject data = new JSONObject();
 
         LatLng centerLocation = mMap.getCameraPosition().target;
@@ -199,6 +201,42 @@ public class CreateActivity extends AppCompatActivity implements
 
         Log.d(TAG, data.toString());
 
+
+        Bridge.config()
+                .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("Cache-Control", "no-cache")
+                .defaultHeader("Accept", "application/json, application/hal+json");
+
+        Bridge
+            .post(url)
+            .body(data)
+            .asJsonObject(new ResponseConvertCallback<JSONObject>() {
+                @Override
+                public void onResponse(@NonNull Response response, @Nullable JSONObject object, @Nullable BridgeException e) {
+                    if (e != null) {
+                        // See the 'Error Handling' section for information on how to process BridgeExceptions
+                        int reason = e.reason();
+                    } else {
+
+                        Log.d(TAG, response.toString());
+
+                        String hash = "";
+
+                        try {
+                            hash = object.getString("hash");
+                        } catch (JSONException je) {
+                            je.printStackTrace();
+                        }
+
+                        Intent i = new Intent(CreateActivity.this, MapActivity.class);
+                        i.putExtra("hash", hash);
+                        startActivity(i);
+                    }
+                }
+            });
+
+
+        /*
         HeaderRequest jsonObjectRequest = new HeaderRequest
                 (method, url, data, new Response.Listener<JSONObject>() {
                     @Override
@@ -222,13 +260,16 @@ public class CreateActivity extends AppCompatActivity implements
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "response error...");
                         error.printStackTrace();
                     }
                 });
+           */
 
         // Add a request to your RequestQueue.
         //VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-        queue.add(jsonObjectRequest);
+        //queue.add(jsonObjectRequest);
 
     }
+
 }

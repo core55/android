@@ -2,6 +2,7 @@ package io.github.core55.joinup;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,8 +56,10 @@ public class Meetup extends BaseEntity implements Parcelable {
             m.centerLatitude = jsonMeetup.getDouble("centerLatitude");
             m.zoomLevel = jsonMeetup.getInt("zoomLevel");
             m.hash = jsonMeetup.getString("hash");
-            m.pinLongitude = jsonMeetup.getDouble("pinLongitude");
-            m.pinLatitude = jsonMeetup.getDouble("pinLatitude");
+            if (jsonMeetup.getString("pinLongitude") != "null" && jsonMeetup.getString("pinLatitude") != "null") {
+                m.pinLongitude = jsonMeetup.getDouble("pinLongitude");
+                m.pinLatitude = jsonMeetup.getDouble("pinLatitude");
+            }
             m.name = jsonMeetup.getString("name");
             m.createdAt = jsonMeetup.getString("createdAt");
             m.updatedAt = jsonMeetup.getString("updatedAt");
