@@ -29,8 +29,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,6 +54,9 @@ public class CreateActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
 
     private Location mLastLocation;
+
+    private MarkerOptions meetupMarker;
+    private LatLng pinLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +110,35 @@ public class CreateActivity extends AppCompatActivity implements
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (meetupMarker == null) {
+                    meetupMarker = new MarkerOptions().draggable(true);
+                    meetupMarker.position(latLng);
+                    meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+                    mMap.addMarker(meetupMarker);
+                }
+            }
+        });
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                pinLocation = marker.getPosition();
+            }
+        });
 
     }
 
@@ -195,6 +230,10 @@ public class CreateActivity extends AppCompatActivity implements
             data.put("centerLongitude", centerLocation.longitude);
             data.put("centerLatitude", centerLocation.latitude);
             data.put("zoomLevel", zoomLevel);
+            if (pinLocation != null) {
+                data.put("pinLongitude", pinLocation.longitude);
+                data.put("pinLatitude", pinLocation.latitude);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

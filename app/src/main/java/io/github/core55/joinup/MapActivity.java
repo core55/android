@@ -120,7 +120,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 if (m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     count++;
                     LatLng latLng = new LatLng(m.getPinLatitude(), m.getPinLongitude());
-                    MarkerOptions meetupMarker = new MarkerOptions();
+                    MarkerOptions meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
 
@@ -129,6 +129,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         mMap.addMarker(meetupMarker);
                     }
                 }
+
                 for (User u : m.getUsersList()) {
                     if (markersOnMap.containsKey(u.getId())) {
                         MarkerOptions marker = markersOnMap.get(u.getId());
@@ -149,7 +150,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
 
                 }
-                locationManager.getLocation();
+
+                //locationManager.getLocation();
 
 
             }
