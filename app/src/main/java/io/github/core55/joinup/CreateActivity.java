@@ -47,7 +47,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.util.List;
 
-public class CreateActivity extends AppCompatActivity implements
+public class CreateActivity extends DrawerActivity implements
         View.OnClickListener, OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 

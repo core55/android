@@ -23,7 +23,6 @@
 
         <!-- ACTIVITIES -->
 
-
         <activity
             android:name=".WelcomeActivity"
             android:label="Joinup">
@@ -33,16 +32,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login"></activity>
-
+            android:label="@string/title_activity_login" />
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/title_activity_register"></activity>
-
-
+            android:label="@string/title_activity_register" />
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map">
@@ -55,13 +50,11 @@
                 <data android:host="culater.herokuapp.com" />
                 <data android:scheme="https" />
                 <data android:scheme="http" />
-
             </intent-filter>
         </activity>
-
         <activity
             android:name=".CreateActivity"
-            android:label="@string/title_activity_create"></activity>
+            android:label="@string/title_activity_create" />
 
         <!-- SERVICES -->
 
@@ -71,7 +64,6 @@
         <service
             android:name=".NetworkService"
             android:enabled="true" />
-
 
         <!-- META DATA -->
 
@@ -90,6 +82,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <activity
+            android:name=".DrawerActivity"
+            android:label="@string/title_activity_drawer"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

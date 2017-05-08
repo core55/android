@@ -184,7 +184,7 @@ public class LoginActivity extends AppCompatActivity implements
 
 
                             Intent intent = new Intent(LoginActivity.this,
-                                    MapActivity.class);
+                                    CreateActivity.class);
                             startActivity(intent);
                             finish();
                         } catch (JSONException e) {
