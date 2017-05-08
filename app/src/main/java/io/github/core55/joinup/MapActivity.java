@@ -84,6 +84,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
         pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
         pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
+        id_user = getIntent().getIntExtra("id", -1);
 
         handleAppLink();
 
