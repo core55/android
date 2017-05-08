@@ -16,10 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.afollestad.bridge.Bridge;
-import com.afollestad.bridge.BridgeException;
-import com.afollestad.bridge.Response;
-import com.afollestad.bridge.ResponseConvertCallback;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -37,6 +37,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CreateActivity extends AppCompatActivity implements
         View.OnClickListener, OnMapReadyCallback,
@@ -57,6 +60,12 @@ public class CreateActivity extends AppCompatActivity implements
 
     private MarkerOptions meetupMarker;
     private LatLng pinLocation;
+
+    private String hash = "";
+    private LatLng centerLocation;
+    private int zoomLevel;
+
+    int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,14 +226,12 @@ public class CreateActivity extends AppCompatActivity implements
 
     private void createMeetup() {
 
-        //RequestQueue queue = Volley.newRequestQueue(this);
-
-        //int method = Request.Method.POST;
+        int method = Request.Method.POST;
         String url = "http://dry-cherry.herokuapp.com/api/meetups";
         JSONObject data = new JSONObject();
 
-        final LatLng centerLocation = mMap.getCameraPosition().target;
-        final int zoomLevel = (int) mMap.getCameraPosition().zoom;
+        centerLocation = mMap.getCameraPosition().target;
+        zoomLevel = (int) mMap.getCameraPosition().zoom;
 
         try {
             data.put("centerLongitude", centerLocation.longitude);
@@ -238,81 +245,99 @@ public class CreateActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
 
-        Log.d(TAG, data.toString());
-
-
-        Bridge.config()
-                .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("Cache-Control", "no-cache")
-                .defaultHeader("Accept", "application/json, application/hal+json");
-
-        Bridge
-                .post(url)
-                .body(data)
-                .asJsonObject(new ResponseConvertCallback<JSONObject>() {
-                    @Override
-                    public void onResponse(@NonNull Response response, @Nullable JSONObject object, @Nullable BridgeException e) {
-                        if (e != null) {
-                            // See the 'Error Handling' section for information on how to process BridgeExceptions
-                            int reason = e.reason();
-                        } else {
-                            String hash = "";
-
-                            try {
-                                hash = object.getString("hash");
-                            } catch (JSONException je) {
-                                je.printStackTrace();
-                            }
-
-                            Intent i = new Intent(CreateActivity.this, MapActivity.class);
-                            i.putExtra("hash", hash);
-                            i.putExtra("centerLongitude", centerLocation.longitude);
-                            i.putExtra("centerLatitude", centerLocation.latitude);
-                            i.putExtra("zoomLevel", zoomLevel);
-                            if (pinLocation != null) {
-                                i.putExtra("pinLongitude", pinLocation.longitude);
-                                i.putExtra("pinLatitude", pinLocation.latitude);
-                            }
-                            startActivity(i);
-                        }
-                    }
-                });
-
-
-        /*
-        HeaderRequest jsonObjectRequest = new HeaderRequest
+        HeaderRequest meetupCreationRequest = new HeaderRequest
                 (method, url, data, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
 
-                        Log.d(TAG, "response...");
-
-                        String hash = "";
-
                         try {
-                            hash = response.getString("hash");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            hash = response.getJSONObject("data").getString("hash");
+                        } catch (JSONException je) {
+                            je.printStackTrace();
                         }
 
-                        Intent i = new Intent(CreateActivity.this, MapActivity.class);
-                        i.putExtra("hash", hash);
-                        startActivity(i);
+                        createUser();
 
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "response error...");
                         error.printStackTrace();
                     }
-                });
-           */
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
 
-        // Add a request to your RequestQueue.
-        //VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-        //queue.add(jsonObjectRequest);
+        VolleyController.getInstance(this).addToRequestQueue(meetupCreationRequest);
 
+    }
+
+    private void createUser() {
+
+        int method = Request.Method.POST;
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/"+hash+"/users/save";
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("lastLongitude", mLastLocation.getLongitude());
+            data.put("lastLatitude", mLastLocation.getLatitude());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HeaderRequest userCreationRequest = new HeaderRequest
+                (method, url, data, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        id = -1;
+
+                        try {
+                            id = response.getJSONObject("data").getInt("id");
+                        } catch (JSONException je) {
+                            je.printStackTrace();
+                        }
+
+                        startMapActivity();
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
+
+        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
+
+    }
+
+    private void startMapActivity() {
+        Intent i = new Intent(CreateActivity.this, MapActivity.class);
+        i.putExtra("hash", hash);
+        i.putExtra("centerLongitude", centerLocation.longitude);
+        i.putExtra("centerLatitude", centerLocation.latitude);
+        i.putExtra("zoomLevel", zoomLevel);
+        if (pinLocation != null) {
+            i.putExtra("pinLongitude", pinLocation.longitude);
+            i.putExtra("pinLatitude", pinLocation.latitude);
+        }
+        i.putExtra("id", id);
+        startActivity(i);
     }
 
 }

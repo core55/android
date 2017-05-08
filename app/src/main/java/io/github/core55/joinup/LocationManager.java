@@ -32,8 +32,6 @@ public class LocationManager implements
     private GoogleApiClient mGoogleApiClient;
     private PendingIntent mRequestLocationUpdatesPendingIntent;
 
-    private Location location;
-
     public LocationManager(Context context) {
         this.context = context;
     }
@@ -103,15 +101,8 @@ public class LocationManager implements
 
     @Override
     public void onLocationChanged(Location location) {
-        this.location = location;
+
     }
 
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
 
 }

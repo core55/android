@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -44,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,18 +59,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private LocationManager locationManager;
 
     private String meetupHash = "028baffc294c434c8c8a4a610aa68e00";
-    private int id_user = 3;
+    private int id_user = 716;
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
-    private Double latitude;
-    private Double longitude;
+    private Double centerLatitude;
+    private Double centerLongitude;
     private Integer zoomLevel;
 
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
     private Double pinLongitude;
     private Double pinLatitude;
+
+    private Double lastLatitude;
+    private Double lastLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,11 +86,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         Log.d("PEW", "Current user is: " + currentUser);
 
         meetupHash = getIntent().getStringExtra("hash");
-        latitude = getIntent().getDoubleExtra("centerLatitude", -1);
-        longitude = getIntent().getDoubleExtra("centerLongitude", -1);
+        centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
+        centerLongitude = getIntent().getDoubleExtra("centerLongitude", -1);
         zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
         pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
         pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
+        id_user = getIntent().getIntExtra("id", -1);
 
         handleAppLink();
 
@@ -112,7 +118,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         // Register for the particular broadcast based on ACTION string
         IntentFilter filter = new IntentFilter(NetworkService.ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(networkServiceReceiver, filter);
-        // or `registerReceiver(networkServiceReceiver, filter)` for a normal broadcast
+
+        IntentFilter filter2 = new IntentFilter(LocationService.ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(locationReceiver, filter2);
     }
 
     @Override
@@ -123,6 +131,58 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         // or `unregisterReceiver(networkServiceReceiver)` for a normal broadcast
     }
 
+    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Double lat = intent.getDoubleExtra("lat", -1);
+            Double lon = intent.getDoubleExtra("lon", -1);
+
+            if (lat != null && lat != -1 && lon != null && lon != -1) {
+
+                lastLatitude = lat;
+                lastLongitude = lon;
+
+                int method = Request.Method.PATCH;
+                String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
+                JSONObject data = new JSONObject();
+
+                try {
+                    data.put("lastLongitude", lon);
+                    data.put("lastLatitude", lat);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                HeaderRequest jsonObjectRequest = new HeaderRequest
+                        (method, url, data, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                            }
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("Content-Type", "application/json");
+                        //params.put("Cache-Control", "no-cache");
+                        params.put("Accept", "application/json, application/hal+json");
+
+                        return params;
+                    }
+                };
+
+                VolleyController.getInstance(context).addToRequestQueue(jsonObjectRequest);
+            }
+
+        }
+    };
+
     // Define the callback for what to do when message is received
     private BroadcastReceiver networkServiceReceiver = new BroadcastReceiver() {
         @Override
@@ -130,8 +190,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
-
-                Log.d(TAG, "lat:"+m.getPinLatitude()+", lon:"+m.getPinLongitude());
 
                 if (meetupMarker == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker = new MarkerOptions().draggable(true);
@@ -165,9 +223,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                 }
 
-                //locationManager.getLocation();
-
-
             }
 
         }
@@ -182,7 +237,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoomLevel));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(centerLatitude, centerLongitude), zoomLevel));
 
         if (meetupMarker == null && pinLatitude != -1 && pinLongitude != -1) {
             meetupMarker = new MarkerOptions().draggable(true);
@@ -275,6 +330,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             if (matcher.find()) {
                 meetupHash = matcher.group(1);
                 Log.d(TAG, "hash = " + meetupHash);
+
+                createUser();
+
             }
         }
     }
@@ -380,6 +438,54 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         // Start the service
         startService(i);
+    }
+
+    private void createUser() {
+
+        int method = Request.Method.POST;
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users/save";
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("lastLongitude", lastLongitude);
+            data.put("lastLatitude", lastLatitude);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HeaderRequest userCreationRequest = new HeaderRequest
+                (method, url, data, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        int id = -1;
+
+                        try {
+                            id = response.getJSONObject("data").getInt("id");
+                        } catch (JSONException je) {
+                            je.printStackTrace();
+                        }
+
+                        id_user = id;
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
+
+        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
+
     }
 
 
