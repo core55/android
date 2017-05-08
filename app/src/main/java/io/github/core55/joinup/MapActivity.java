@@ -5,14 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -31,40 +29,39 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.R.attr.id;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     public static final String TAG = "MapActivity";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;
-    int count=0;
+    int count = 0;
 
     private LocationManager locationManager;
 
     private String meetupHash = "028baffc294c434c8c8a4a610aa68e00";
-    private int id_user=3;
+    private int id_user = 3;
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
+
+    private Double latitude;
+    private Double longitude;
+    private Integer zoomLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +69,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
 
         meetupHash = getIntent().getStringExtra("hash");
-        Log.d(TAG, "testiiing = "+meetupHash);
+        latitude = getIntent().getDoubleExtra("centerLatitude", 0);
+        longitude = getIntent().getDoubleExtra("centerLongitude", 0);
+        zoomLevel = getIntent().getIntExtra("zoomLevel", 0);
 
         handleAppLink();
 
@@ -167,11 +166,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoomLevel));
+
         try {
             // Customise map styling via json
             boolean success = googleMap.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    this, R.raw.map_styles));
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map_styles));
 
             if (!success) {
                 Log.e(TAG, "Style parsing failed.");
@@ -256,7 +257,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
 
-    private void namePrompt(){
+    private void namePrompt() {
 
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.dialog_name, null);
@@ -265,31 +266,32 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         final EditText name = (EditText) mView.findViewById(R.id.enter_name);
 
 
-        if(name.getText().toString().matches("")) {
-          final AlertDialog dialog = mBuilder.create();
+        if (name.getText().toString().matches("")) {
+            final AlertDialog dialog = mBuilder.create();
             dialog.show();
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-         Button enter = (Button) dialog.findViewById(R.id.enter);
-        enter.setOnClickListener(new View.OnClickListener() {
+            Button enter = (Button) dialog.findViewById(R.id.enter);
+            enter.setOnClickListener(new View.OnClickListener() {
 
-        @Override
-        public void onClick(View arg0) {
-            String nickname = name.getText().toString();
-            Log.d(TAG, nickname);
+                @Override
+                public void onClick(View arg0) {
+                    String nickname = name.getText().toString();
+                    Log.d(TAG, nickname);
 
-            patchNickName(nickname);
-            dialog.dismiss();
+                    patchNickName(nickname);
+                    dialog.dismiss();
 
+                }
+
+            });
         }
-
-    });
-}
-      //  Toast.makeText(this,"Name is set!", Toast.LENGTH_SHORT).show();
+        //  Toast.makeText(this,"Name is set!", Toast.LENGTH_SHORT).show();
 
     }
+
     public void patchNickName(String name) {
-   //     Log.d(TAG, name);
+        //     Log.d(TAG, name);
 
 
         int method = Request.Method.PATCH;
@@ -298,27 +300,26 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         try {
 
-            postname.put("nickname",name);
+            postname.put("nickname", name);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, "https://dry-cherry.herokuapp.com/api/users/"+id_user, postname, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, "https://dry-cherry.herokuapp.com/api/users/" + id_user, postname, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-                    }
-                });
+            }
+        });
         // Add a request to your RequestQueue.
         VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
 
     }
-
 
 
     private void createShareButtonListener() {
@@ -346,7 +347,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
-
 
 
     public void launchNetworkService() {

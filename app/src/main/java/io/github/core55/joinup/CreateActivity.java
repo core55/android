@@ -1,33 +1,24 @@
 package io.github.core55.joinup;
 
-import android.*;
 import android.Manifest;
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.bridge.Bridge;
 import com.afollestad.bridge.BridgeException;
-import com.afollestad.bridge.Request;
 import com.afollestad.bridge.Response;
 import com.afollestad.bridge.ResponseConvertCallback;
-import com.android.volley.AuthFailureError;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -39,12 +30,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CreateActivity extends AppCompatActivity implements
         View.OnClickListener, OnMapReadyCallback,
@@ -188,8 +175,8 @@ public class CreateActivity extends AppCompatActivity implements
         String url = "http://dry-cherry.herokuapp.com/api/meetups";
         JSONObject data = new JSONObject();
 
-        LatLng centerLocation = mMap.getCameraPosition().target;
-        float zoomLevel = mMap.getCameraPosition().zoom;
+        final LatLng centerLocation = mMap.getCameraPosition().target;
+        final int zoomLevel = (int) mMap.getCameraPosition().zoom;
 
         try {
             data.put("centerLongitude", centerLocation.longitude);
@@ -208,32 +195,32 @@ public class CreateActivity extends AppCompatActivity implements
                 .defaultHeader("Accept", "application/json, application/hal+json");
 
         Bridge
-            .post(url)
-            .body(data)
-            .asJsonObject(new ResponseConvertCallback<JSONObject>() {
-                @Override
-                public void onResponse(@NonNull Response response, @Nullable JSONObject object, @Nullable BridgeException e) {
-                    if (e != null) {
-                        // See the 'Error Handling' section for information on how to process BridgeExceptions
-                        int reason = e.reason();
-                    } else {
+                .post(url)
+                .body(data)
+                .asJsonObject(new ResponseConvertCallback<JSONObject>() {
+                    @Override
+                    public void onResponse(@NonNull Response response, @Nullable JSONObject object, @Nullable BridgeException e) {
+                        if (e != null) {
+                            // See the 'Error Handling' section for information on how to process BridgeExceptions
+                            int reason = e.reason();
+                        } else {
+                            String hash = "";
 
-                        Log.d(TAG, response.toString());
+                            try {
+                                hash = object.getString("hash");
+                            } catch (JSONException je) {
+                                je.printStackTrace();
+                            }
 
-                        String hash = "";
-
-                        try {
-                            hash = object.getString("hash");
-                        } catch (JSONException je) {
-                            je.printStackTrace();
+                            Intent i = new Intent(CreateActivity.this, MapActivity.class);
+                            i.putExtra("hash", hash);
+                            i.putExtra("centerLongitude", centerLocation.longitude);
+                            i.putExtra("centerLatitude", centerLocation.latitude);
+                            i.putExtra("zoomLevel", zoomLevel);
+                            startActivity(i);
                         }
-
-                        Intent i = new Intent(CreateActivity.this, MapActivity.class);
-                        i.putExtra("hash", hash);
-                        startActivity(i);
                     }
-                }
-            });
+                });
 
 
         /*
