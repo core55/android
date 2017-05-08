@@ -1,7 +1,9 @@
 package io.github.core55.joinup;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -36,11 +38,14 @@ public class LoginActivity extends AppCompatActivity implements
 
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_GET_TOKEN = 9002;
+    public SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
         // Set the dimensions of the sign-in button.
         SignInButton signInButton = (SignInButton) findViewById(R.id.google_sign_in_button);
@@ -170,6 +175,13 @@ public class LoginActivity extends AppCompatActivity implements
                             }.getType());
                             DataHolder.getInstance().setUser(user);
                             DataHolder.getInstance().setJwt(jwt);
+
+                            sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString(getString(R.string.current_user), data.toString());
+                            editor.putString(getString(R.string.jwt_string), jwt);
+                            editor.commit();
+
 
                             Intent intent = new Intent(LoginActivity.this,
                                     MapActivity.class);
