@@ -269,8 +269,10 @@ public class CreateActivity extends AppCompatActivity implements
                             i.putExtra("centerLongitude", centerLocation.longitude);
                             i.putExtra("centerLatitude", centerLocation.latitude);
                             i.putExtra("zoomLevel", zoomLevel);
-                            i.putExtra("pinLongitude", pinLocation.longitude);
-                            i.putExtra("pinLatitude", pinLocation.latitude);
+                            if (pinLocation != null) {
+                                i.putExtra("pinLongitude", pinLocation.longitude);
+                                i.putExtra("pinLatitude", pinLocation.latitude);
+                            }
                             startActivity(i);
                         }
                     }
