@@ -15,6 +15,43 @@
         android:layout_height="match_parent"
         tools:context="io.github.core55.joinup.CreateActivity" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="horizontal"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginStart="41dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/circle_center">
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="290dp"
+
+            android:layout_height="40dp"
+            android:paddingBottom="8dp"
+
+            android:background="@drawable/custom_text"
+            android:hint="Search a location...."
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingLeft="10dp"
+            android:layout_alignParentTop="true" />
+
+        <Button
+            android:id="@+id/search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/custom_button"
+            android:onClick="onMapSearch"
+            android:text="Search"
+            android:layout_alignParentTop="true"
+            android:layout_alignEnd="@+id/editText" />
+
+
+    </RelativeLayout>
     <ImageButton
         android:id="@+id/createMapButton"
         android:layout_width="wrap_content"
@@ -31,19 +68,13 @@
 
     <ImageView
         android:id="@+id/circle_center"
-        android:layout_width="310dp"
-        android:layout_height="310dp"
-        android:src="@drawable/custom_circle"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-
-    <ImageView
-        android:id="@+id/shadow_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:src="@drawable/shadow_circle3"
+        android:background="#00000000"
+        android:src="@drawable/center"
+        tools:layout_editor_absoluteX="286dp"
+        tools:layout_editor_absoluteY="490dp"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

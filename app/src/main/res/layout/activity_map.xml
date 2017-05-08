@@ -8,6 +8,8 @@
     tools:context="io.github.core55.joinup.MapActivity"
     >
 
+
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -16,6 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="io.github.core55.joinup.MapActivity" />
+
+
 
     <ImageButton
         android:id="@+id/imageButton"
