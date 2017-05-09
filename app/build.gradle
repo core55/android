@@ -28,6 +28,11 @@ dependencies {
     compile('com.afollestad:bridge:5.1.2') {
         exclude group: 'org.json', module: 'json'
     }
+
+    compile('com.mikepenz:materialdrawer:5.9.1@aar') {
+        transitive = true
+    }
+
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.android.gms:play-services-auth:10.2.4'

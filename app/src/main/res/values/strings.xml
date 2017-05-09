@@ -16,12 +16,6 @@
     <string name="user_nickname">USER_NICKNAME</string>
     <string name="jwt_string">JWT_STRING</string>
 
-    <!-- Navigation Drawer -->
-    <string name="title_activity_drawer">DrawerActivity</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_settings">Settings</string>
-
     <string-array name="lang_from">
         <item>English</item>
     </string-array>

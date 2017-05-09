@@ -1,8 +1,10 @@
 package io.github.core55.joinup;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Address;
@@ -11,6 +13,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +21,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -38,6 +42,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +61,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.util.List;
 
-public class CreateActivity extends DrawerActivity implements
+public class CreateActivity extends AppCompatActivity implements
         View.OnClickListener, OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -71,12 +85,24 @@ public class CreateActivity extends DrawerActivity implements
     private LatLng centerLocation;
     private int zoomLevel;
 
+    SharedPreferences sharedPref;
+
     int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
+
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Hello");
+        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("goodbye");
+
+        // Retrieve current user from shared preferences
+        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
+        String nickname = sharedPref.getString(getString(R.string.user_nickname), "Unknown User");
+
+        Drawer result = NavigationDrawer.buildDrawer(this, this.getApplicationContext());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapCreation);
