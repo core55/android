@@ -21,26 +21,33 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
         <!--android:theme="@style/AppTheme">-->
-        <!-- ACTIVITIES -->
 
+        <!-- ACTIVITIES -->
         <activity
             android:name=".activities.WelcomeActivity"
             android:label="Joinup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login" />
+
         <activity
             android:name=".activities.RegisterActivity"
             android:label="@string/title_activity_register" />
+
+        <activity
+            android:name=".activities.CreateActivity"
+            android:label="@string/title_activity_create" />
+
         <activity
             android:name=".activities.MapActivity"
             android:label="@string/title_activity_map">
+
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -52,19 +59,12 @@
                 <data android:scheme="http" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.CreateActivity"
-            android:label="@string/title_activity_create" />
-        <activity
-            android:name=".DrawerActivity"
-            android:label="@string/title_activity_drawer"></activity>
-
 
         <!-- SERVICES -->
-
         <service
             android:name=".services.LocationService"
             android:enabled="true" />
+
         <service
             android:name=".services.NetworkService"
             android:enabled="true" />
@@ -80,10 +80,10 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
         <meta-data
             android:name="asset_statements"
             android:resource="@string/asset_statements" />
-
 
     </application>
 
