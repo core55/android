@@ -1,4 +1,4 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -52,6 +52,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.github.core55.joinup.helpers.DataHolder;
+import io.github.core55.joinup.helpers.HeaderRequest;
+import io.github.core55.joinup.services.LocationManager;
+import io.github.core55.joinup.services.LocationService;
+import io.github.core55.joinup.entities.Meetup;
+import io.github.core55.joinup.helpers.NavigationDrawer;
+import io.github.core55.joinup.services.NetworkService;
+import io.github.core55.joinup.R;
+import io.github.core55.joinup.entities.User;
+import io.github.core55.joinup.helpers.UserAdapter;
+import io.github.core55.joinup.helpers.VolleyController;
 
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {

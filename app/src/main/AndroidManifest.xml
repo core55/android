@@ -24,7 +24,7 @@
         <!-- ACTIVITIES -->
 
         <activity
-            android:name=".WelcomeActivity"
+            android:name=".activities.WelcomeActivity"
             android:label="Joinup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,13 +33,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:label="@string/title_activity_register" />
         <activity
-            android:name=".MapActivity"
+            android:name=".activities.MapActivity"
             android:label="@string/title_activity_map">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -53,11 +53,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CreateActivity"
+            android:name=".activities.CreateActivity"
             android:label="@string/title_activity_create" />
-        <activity
-            android:name=".UserListActivity"
-            android:label="@string/title_activity_user_list"></activity>
         <activity
             android:name=".DrawerActivity"
             android:label="@string/title_activity_drawer"></activity>
@@ -66,10 +63,10 @@
         <!-- SERVICES -->
 
         <service
-            android:name=".LocationService"
+            android:name=".services.LocationService"
             android:enabled="true" />
         <service
-            android:name=".NetworkService"
+            android:name=".services.NetworkService"
             android:enabled="true" />
 
         <!-- META DATA -->

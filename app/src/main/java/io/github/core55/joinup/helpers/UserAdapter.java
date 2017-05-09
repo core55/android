@@ -1,4 +1,4 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.helpers;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -16,6 +16,9 @@ import com.lucasurbas.listitemview.ListItemView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.core55.joinup.R;
+import io.github.core55.joinup.entities.User;
 
 /**
  * Created by juanl on 04/05/2017.

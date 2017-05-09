@@ -1,7 +1,9 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import io.github.core55.joinup.R;
 
 public class RegisterActivity extends AppCompatActivity {
 

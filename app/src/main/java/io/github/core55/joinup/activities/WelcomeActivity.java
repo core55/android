@@ -2,7 +2,7 @@
   Authors: S. Stefani
  */
 
-package io.github.core55.joinup;
+package io.github.core55.joinup.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,6 +10,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+
+import io.github.core55.joinup.R;
+import io.github.core55.joinup.activities.CreateActivity;
+import io.github.core55.joinup.activities.LoginActivity;
 
 public class WelcomeActivity extends Activity {
 

@@ -1,4 +1,4 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.services;
 
 import android.Manifest;
 import android.app.Activity;

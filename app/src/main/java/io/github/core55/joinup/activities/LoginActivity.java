@@ -1,4 +1,4 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.activities;
 
 
 import android.content.Context;
@@ -30,6 +30,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+
+import io.github.core55.joinup.helpers.DataHolder;
+import io.github.core55.joinup.helpers.HeaderRequest;
+import io.github.core55.joinup.R;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,

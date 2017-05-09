@@ -1,4 +1,4 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.services;
 
 import android.app.Service;
 import android.content.Intent;
@@ -18,9 +18,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.github.core55.joinup.entities.Meetup;
+import io.github.core55.joinup.helpers.VolleyController;
+
 public class NetworkService extends Service {
 
-    public static final String ACTION = "io.github.core55.joinup.NetworkService";
+    public static final String ACTION = "io.github.core55.joinup.services.NetworkService";
     public static final String TAG = "NetworkService";
 
     private LocalBroadcastManager mLocalBroadcastManager;

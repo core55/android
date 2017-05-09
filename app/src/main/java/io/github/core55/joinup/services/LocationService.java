@@ -1,4 +1,4 @@
-package io.github.core55.joinup;
+package io.github.core55.joinup.services;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import com.google.android.gms.location.LocationResult;
 
 public class LocationService extends IntentService {
 
-    public static final String ACTION = "io.github.core55.joinup.LocationService";
+    public static final String ACTION = "io.github.core55.joinup.services.LocationService";
     public static final String TAG = "LocationService";
 
     private LocalBroadcastManager mLocalBroadcastManager;
