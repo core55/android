@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -13,14 +14,21 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.widget.DrawerLayout;
+
+import android.app.AlertDialog;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -29,8 +37,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.lucasurbas.listitemview.ListItemView;
+import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,9 +55,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private LocationManager locationManager;
 
-    private String meetupHash = "42bb68ec81bb4164bb1d32cb27ca9898";
+    private String meetupHash = "6f41e80d685a409eb144a3a9c76ce97e";
 
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
+
+
+    private String mActivityTitle;
+    private String[] mMeetups = {"Hola", "Hej", "Hello", "Bonjour","Gurka", "Mandelbrot"};
+    private ListView lv;
+    private ArrayList userList = new ArrayList();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +83,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         locationManager.start();
 
         launchNetworkService();
-
         createShareButtonListener();
+        createPeopleButtonListener();
+
+
+        mActivityTitle = getTitle().toString();
+
 
     }
 
@@ -225,7 +248,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+               // dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             }
         });
     }
@@ -247,6 +270,39 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         startService(i);
     }
 
+    private void createPeopleButtonListener() {
+        final ImageButton mShowDialog = (ImageButton) findViewById(R.id.peopleButton);
+        mShowDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+                importUsers();
+                UserAdapter adapter = new UserAdapter(getApplicationContext(),0, userList);
+                mBuilder.setAdapter(adapter,  new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                View mView = getLayoutInflater().inflate(R.layout.content_user_list, null);
+                mBuilder.setView(mView);
+                final AlertDialog dialog = mBuilder.create();
+                dialog.show();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
+        });
+    }
+    void importUsers() {
+
+        String[] nicknames = {"Hussam", "Patrick", "Marcel", "Phillip", "Simone", "Dean", "Juan Luis", "Jiho", "Pepe", "Pablo"};
+        String[] status = {"Hello, its me", "Maple syrup", "applestrudel", "biscuits please, not cookies", "Planet-tricky", "Baras", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies"};
+        int[] profilePictures = {R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_3, R.drawable.emoji_4, R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_2, R.drawable.emoji_1, R.drawable.emoji_3, R.drawable.emoji_4};
+        for (int i = 0; i < nicknames.length; i++) {
+            User u = new User(nicknames[i], status[i], profilePictures[i]);
+            userList.add(u);
+        }
+
+    }
 
 }
+
 

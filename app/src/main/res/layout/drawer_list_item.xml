@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lucasurbas.listitemview.ListItemView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/user_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/round_rect_shape"
+    android:padding="0dp"
+    app:liv_displayMode="standard"
+    app:liv_forceKeyline="false"
+    app:liv_keyline="@dimen/liv_keyline"
+    app:liv_menuOverflowColor="@color/colorPrimaryDark"
+    app:liv_subtitle="status"
+    app:liv_title="Nickname"
+    tools:ignore="PxUsage"
+    />
+
+
+
+
