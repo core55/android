@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.mikepenz.materialdrawer.Drawer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -543,6 +544,46 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     void importUsers() {
+        int method = Request.Method.GET;
+        meetupHash = "062fa82457d347879217069f2aafbf4d";
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users";
+        Log.e("url",url);
+        HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
+                (method, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray usersJson = response.getJSONObject("_embedded").getJSONArray("users");
+                            Log.e("usersJson",usersJson.toString());
+                            JSONObject userJson; //one user
+                            for (int i = 0; i < usersJson.length(); i++) {
+                                userJson = (JSONObject) usersJson.get(i);
+                                String nickname = userJson.getString("nickname");
+                                String status = userJson.getString("status");
+                                String username = userJson.getString("username");
+                                int profilePicture = R.drawable.emoji_2; //we leave picture for now
+                                Double lastLongitude = userJson.getDouble("lastLongitude");
+                                Double lastLatitude = userJson.getDouble("lastLatitude");
+
+                                User u = new User(nickname, status, profilePicture);
+                                userList.add(u);
+                            }
+                            Log.e("user_list", response.toString());
+                        } catch (Exception je) {
+                            je.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                });
+        VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
+    }
+
+    /* void importUsers() {
         String[] nicknames = {"Hussam", "Patrick", "Marcel", "Phillip", "Simone", "Dean", "Juan Luis", "Jiho", "Pepe", "Pablo"};
         String[] status = {"Hello, its me", "Maple syrup", "applestrudel", "biscuits please, not cookies", "Planet-tricky", "Baras", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies"};
         int[] profilePictures = {R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_3, R.drawable.emoji_4, R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_2, R.drawable.emoji_1, R.drawable.emoji_3, R.drawable.emoji_4};
@@ -550,7 +591,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             User u = new User(nicknames[i], status[i], profilePictures[i]);
             userList.add(u);
         }
-    }
+    }*/
 
     private void sendMeetupPinLocation() {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
