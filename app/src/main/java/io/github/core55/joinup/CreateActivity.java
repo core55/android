@@ -102,7 +102,7 @@ public class CreateActivity extends AppCompatActivity implements
         String username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
         String nickname = sharedPref.getString(getString(R.string.user_nickname), "Unknown User");
 
-        Drawer result = NavigationDrawer.buildDrawer(this, this.getApplicationContext());
+        Drawer result = NavigationDrawer.buildDrawer(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapCreation);
