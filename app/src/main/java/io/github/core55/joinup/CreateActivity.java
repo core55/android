@@ -152,6 +152,7 @@ public class CreateActivity extends DrawerActivity implements
                     meetupMarker.position(latLng);
                     meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
                     mMap.addMarker(meetupMarker);
+                    pinLocation = meetupMarker.getPosition();
                 }
             }
         });

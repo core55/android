@@ -124,8 +124,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         locationManager = new LocationManager(this);
         locationManager.start();
 
-        launchNetworkService();
-
         createShareButtonListener();
 
         namePrompt();
@@ -211,12 +209,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
 
-                if (meetupMarker == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
+                if (meetupMarker == null && meetupMarkerView == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
                     meetupMarkerView = mMap.addMarker(meetupMarker);
-                } else if (m.getPinLatitude() != null && m.getPinLongitude() != null) {
+                } else if (meetupMarker != null && meetupMarkerView != null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     Log.d(TAG, "in");
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarkerView.setPosition(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
@@ -259,11 +257,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(centerLatitude, centerLongitude), zoomLevel));
 
-        if (meetupMarker == null && pinLatitude != -1 && pinLongitude != -1) {
+        if (meetupMarker == null && meetupMarkerView == null && pinLatitude != -1 && pinLongitude != -1) {
             meetupMarker = new MarkerOptions().draggable(true);
             meetupMarker.position(new LatLng(pinLatitude, pinLongitude));
             meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
-            mMap.addMarker(meetupMarker);
+            meetupMarkerView = mMap.addMarker(meetupMarker);
         }
 
         try {
@@ -295,6 +293,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+
+        launchNetworkService();
     }
 
     /**
