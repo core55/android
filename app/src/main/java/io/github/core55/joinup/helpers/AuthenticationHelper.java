@@ -21,10 +21,13 @@ public class AuthenticationHelper {
     public static void syncDataHolder(Activity activity) {
         final Context context = activity.getApplicationContext();
 
+        // Retrieve data about authenticated user from shared preferences
         SharedPreferences sharedPref = activity.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         String currentUser = sharedPref.getString(context.getString(R.string.current_user), "Unknown User");
         String jwt = sharedPref.getString(context.getString(R.string.jwt_string), "No JWT");
 
+        // If user data exist then update dataHolder and set isAuthenticated flag to true. Otherwise
+        // clean dataHolder and set isAuthenticated flag to false
         if (!currentUser.equals("Unknown User")) {
             HashMap<String, String> parsedUser = new Gson().fromJson(currentUser, new TypeToken<HashMap<String, String>>() {
             }.getType());

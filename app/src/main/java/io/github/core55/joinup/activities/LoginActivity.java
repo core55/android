@@ -9,13 +9,15 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -36,9 +38,9 @@ import io.github.core55.joinup.helpers.DataHolder;
 import io.github.core55.joinup.helpers.HeaderRequest;
 import io.github.core55.joinup.R;
 
-public class LoginActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+
+    public static final String TAG = "LoginActivity";
 
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_GET_TOKEN = 9002;
@@ -52,7 +54,7 @@ public class LoginActivity extends AppCompatActivity implements
 
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
-        // Set the dimensions of the sign-in button.
+        // Set the dimensions of the Google sign-in button.
         SignInButton signInButton = (SignInButton) findViewById(R.id.google_sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
@@ -71,6 +73,7 @@ public class LoginActivity extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     protected void ordinaryLogin(View v) {
@@ -89,7 +92,6 @@ public class LoginActivity extends AppCompatActivity implements
         // consent screen will be shown here.
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_GET_TOKEN);
-
     }
 
     @Override
@@ -97,17 +99,14 @@ public class LoginActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_GET_TOKEN) {
-            // [START get_id_token]
+
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
             if (result.isSuccess()) {
                 String idToken = result.getSignInAccount().getIdToken();
-                Log.d("PEW", idToken);
 
                 loginGoogleBackend(idToken);
             }
-            // [END get_id_token]
-
         }
     }
 
@@ -136,6 +135,12 @@ public class LoginActivity extends AppCompatActivity implements
                             DataHolder.getInstance().setUser(user);
                             DataHolder.getInstance().setJwt(jwt);
 
+                            sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString(getString(R.string.current_user), data.toString());
+                            editor.putString(getString(R.string.jwt_string), jwt);
+                            editor.commit();
+
                             Intent intent = new Intent(LoginActivity.this,
                                     MapActivity.class);
                             startActivity(intent);
@@ -149,7 +154,21 @@ public class LoginActivity extends AppCompatActivity implements
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        VolleyLog.e("Error: ", error.getMessage());
+                        NetworkResponse response = error.networkResponse;
+
+                        if (response != null && response.data != null) {
+                            String json = new String(response.data);
+                            String message = trimMessage(json, "message");
+
+                            switch (response.statusCode) {
+                                case 422:
+                                    if (message != null) displayMessage(message);
+                                    break;
+                                case 401:
+                                    if (message != null) displayMessage(message);
+                                    break;
+                            }
+                        }
                     }
                 });
 
@@ -169,7 +188,6 @@ public class LoginActivity extends AppCompatActivity implements
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("PEW", response.toString());
 
                         try {
                             JSONObject data = response.getJSONObject("data");
@@ -184,8 +202,6 @@ public class LoginActivity extends AppCompatActivity implements
                             sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString(getString(R.string.current_user), data.toString());
-                            editor.putString(getString(R.string.user_username), data.getString("username"));
-                            editor.putString(getString(R.string.user_nickname), data.getString("nickname"));
                             editor.putString(getString(R.string.jwt_string), jwt);
                             editor.commit();
 
@@ -203,7 +219,21 @@ public class LoginActivity extends AppCompatActivity implements
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        VolleyLog.e("Error: ", error.getMessage());
+                        NetworkResponse response = error.networkResponse;
+
+                        if (response != null && response.data != null) {
+                            String json = new String(response.data);
+                            String message = trimMessage(json, "message");
+
+                            switch (response.statusCode) {
+                                case 422:
+                                    if (message != null) displayMessage(message);
+                                    break;
+                                case 401:
+                                    if (message != null) displayMessage(message);
+                                    break;
+                            }
+                        }
                     }
                 });
 
@@ -224,5 +254,24 @@ public class LoginActivity extends AppCompatActivity implements
                 googleLogin();
                 break;
         }
+    }
+
+    public String trimMessage(String json, String key) {
+        String trimmedString = null;
+
+        try {
+            JSONObject obj = new JSONObject(json);
+            trimmedString = obj.getString(key);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return trimmedString;
+    }
+
+    //Somewhere that has access to a context
+    public void displayMessage(String toastString) {
+        Toast.makeText(this, toastString, Toast.LENGTH_LONG).show();
     }
 }

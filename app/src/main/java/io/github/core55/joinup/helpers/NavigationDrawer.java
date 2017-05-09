@@ -32,7 +32,7 @@ public class NavigationDrawer {
         final Context context = activity.getApplicationContext();
         final SharedPreferences sharedPref = activity.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
-        // Retrieve current user from shared preferences
+        // Retrieve current user from shared preferences with default
         boolean isAuthenticated = DataHolder.getInstance().isAuthenticated();
         String username = isAuthenticated ? DataHolder.getInstance().getUser().get("username") : "";
         String nickname = isAuthenticated ? DataHolder.getInstance().getUser().get("nickname") : "";
@@ -82,6 +82,7 @@ public class NavigationDrawer {
                 .withSelectedItem(-1)
                 .build();
 
+        // If the user is authenticated show logout button otherwise show login link
         if (isAuthenticated) {
             result.addItem(new DividerDrawerItem());
             result.addItem(new PrimaryDrawerItem().withIdentifier(3).withName("Logout").withIcon(GoogleMaterial.Icon.gmd_exit_to_app));

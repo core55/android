@@ -12,6 +12,8 @@ import com.squareup.picasso.Transformation;
  *
  * @author urbl
  */
+
+// TODO: Cleanup CircleTransform
 public class CircleTransform implements Transformation {
 
     @Override
