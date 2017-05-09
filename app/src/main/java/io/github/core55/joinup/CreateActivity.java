@@ -93,14 +93,11 @@ public class CreateActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
 
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Hello");
-        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("goodbye");
-
         // Retrieve current user from shared preferences
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         String username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
-        String nickname = sharedPref.getString(getString(R.string.user_nickname), "Unknown User");
 
+        // Inject the navigation drawer
         Drawer result = NavigationDrawer.buildDrawer(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -109,7 +106,6 @@ public class CreateActivity extends AppCompatActivity implements
 
         askLocationPermission();
         buildGoogleApiClient();
-
     }
 
     protected void onStart() {

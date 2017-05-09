@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mikepenz.materialdrawer.Drawer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,16 +82,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private ListView lv;
     private ArrayList userList = new ArrayList();
 
+    SharedPreferences sharedPref;
+    String username;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        SharedPreferences sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String currentUser = sharedPref.getString(getString(R.string.user_username), "Unknown User");
+        // Inject the navigation drawer
+        Drawer result = NavigationDrawer.buildDrawer(this);
 
-        Log.d("PEW", "Current user is: " + currentUser);
+        // Retrieve current user from shared preferences
+        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
 
         meetupHash = getIntent().getStringExtra("hash");
         centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
@@ -114,12 +120,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         createShareButtonListener();
         createPeopleButtonListener();
 
-
         mActivityTitle = getTitle().toString();
 
-
-        namePrompt();
-
+        if (username.equals("Unknown User")) {
+            namePrompt();
+        }
     }
 
     @Override
@@ -278,12 +283,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             mMap.setMyLocationEnabled(true);
         }
 
-        Context context = getApplicationContext();
-        CharSequence text = "Welcome " + DataHolder.getInstance().getUser().get("nickname") + "!";
-        int duration = Toast.LENGTH_LONG;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+        String tempNickname = DataHolder.getInstance().getUser().get("nickname");
+        if (username.equals("Unknown User") && !tempNickname.equals("")) {
+            Context context = getApplicationContext();
+            CharSequence text = "Welcome " + tempNickname + "!";
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
 
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
