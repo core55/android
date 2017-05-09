@@ -3,11 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.github.core55.joinup.DrawerActivity">
+    tools:context="io.github.core55.joinup.UserListActivity">
 
-    <FrameLayout
-        android:id="@+id/drawer_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <include layout="@layout/content_user_list" />
 
 </android.support.design.widget.CoordinatorLayout>

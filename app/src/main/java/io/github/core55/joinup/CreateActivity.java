@@ -13,9 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -42,10 +40,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CreateActivity extends DrawerActivity implements
         View.OnClickListener, OnMapReadyCallback,
@@ -105,6 +103,7 @@ public class CreateActivity extends DrawerActivity implements
                 break;
         }
     }
+
     public void onMapSearch(View view) {
         EditText locationSearch = (EditText) findViewById(R.id.editText);
         String location = locationSearch.getText().toString();
@@ -305,7 +304,7 @@ public class CreateActivity extends DrawerActivity implements
     private void createUser() {
 
         int method = Request.Method.POST;
-        String url = "http://dry-cherry.herokuapp.com/api/meetups/"+hash+"/users/save";
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
         JSONObject data = new JSONObject();
 
         try {

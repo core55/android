@@ -16,6 +16,10 @@ public class User extends BaseEntity implements Parcelable {
     private Double lastLongitude;
     private Double lastLatitude;
     private String username;
+    private String status;
+    private int profilePicture;
+
+
     //private List<String> meetupsList = new ArrayList<>();
 
     protected User() {
@@ -97,6 +101,28 @@ public class User extends BaseEntity implements Parcelable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(int profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public User(String nickname, String status, int profilePicture) {
+        this.nickname = nickname;
+        this.status = status;
+        this.profilePicture = profilePicture;
     }
 
     /*

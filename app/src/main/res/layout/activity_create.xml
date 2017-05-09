@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="io.github.core55.joinup.CreateActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/mapCreation"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -22,7 +20,7 @@
         android:orientation="horizontal"
         android:layout_marginRight="5dp"
         android:layout_marginTop="11dp"
-        android:layout_marginStart="41dp"
+        android:layout_marginStart="4dp"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/circle_center">
 
@@ -52,6 +50,7 @@
 
 
     </RelativeLayout>
+
     <ImageButton
         android:id="@+id/createMapButton"
         android:layout_width="wrap_content"

@@ -19,8 +19,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
+        android:theme="@style/AppTheme.NoActionBar">
+        <!--android:theme="@style/AppTheme">-->
         <!-- ACTIVITIES -->
 
         <activity
@@ -55,6 +55,13 @@
         <activity
             android:name=".CreateActivity"
             android:label="@string/title_activity_create" />
+        <activity
+            android:name=".UserListActivity"
+            android:label="@string/title_activity_user_list"></activity>
+        <activity
+            android:name=".DrawerActivity"
+            android:label="@string/title_activity_drawer"></activity>
+
 
         <!-- SERVICES -->
 
@@ -66,11 +73,6 @@
             android:enabled="true" />
 
         <!-- META DATA -->
-
-        <meta-data
-            android:name="asset_statements"
-            android:resource="@string/asset_statements" />
-
         <!--
         The API key for Google Maps-based APIs is defined as a string resource.
         (See the file "res/values/google_maps_api.xml"). Note that the API key is linked to the
@@ -81,11 +83,11 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
 
-        <activity
-            android:name=".DrawerActivity"
-            android:label="@string/title_activity_drawer"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+
     </application>
 
 </manifest>

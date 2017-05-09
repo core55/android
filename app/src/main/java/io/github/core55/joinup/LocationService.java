@@ -6,7 +6,6 @@ import android.location.Location;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.android.volley.RequestQueue;
 import com.google.android.gms.location.LocationResult;
 
 public class LocationService extends IntentService {

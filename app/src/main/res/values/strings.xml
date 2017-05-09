@@ -29,4 +29,11 @@
     <string-array name="lang_to">
         <item>Swedish</item>
     </string-array>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="title_activity_nav_bar">NavBarActivity</string>
+    <string name="title_activity_user_list">UserListActivity</string>
+
+
 </resources>
