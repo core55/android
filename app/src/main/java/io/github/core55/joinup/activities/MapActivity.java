@@ -297,7 +297,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
 
         String tempNickname = DataHolder.getInstance().getUser().get("nickname");
-        if (username.equals("Unknown User") && !tempNickname.equals("")) {
+        if (username.equals("Unknown User") && tempNickname != null && !tempNickname.equals("")) {
             Context context = getApplicationContext();
             CharSequence text = "Welcome " + tempNickname + "!";
             int duration = Toast.LENGTH_LONG;
