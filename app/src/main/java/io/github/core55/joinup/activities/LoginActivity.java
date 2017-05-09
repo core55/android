@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+import io.github.core55.joinup.helpers.AuthenticationHelper;
 import io.github.core55.joinup.helpers.DataHolder;
 import io.github.core55.joinup.helpers.HeaderRequest;
 import io.github.core55.joinup.R;
@@ -47,6 +48,7 @@ public class LoginActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        AuthenticationHelper.syncDataHolder(this);
 
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
@@ -181,6 +183,7 @@ public class LoginActivity extends AppCompatActivity implements
 
                             sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString(getString(R.string.current_user), data.toString());
                             editor.putString(getString(R.string.user_username), data.getString("username"));
                             editor.putString(getString(R.string.user_nickname), data.getString("nickname"));
                             editor.putString(getString(R.string.jwt_string), jwt);

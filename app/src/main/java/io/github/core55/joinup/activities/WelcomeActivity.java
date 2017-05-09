@@ -9,12 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.activities.CreateActivity;
 import io.github.core55.joinup.activities.LoginActivity;
+import io.github.core55.joinup.helpers.AuthenticationHelper;
+import io.github.core55.joinup.helpers.DataHolder;
 
 public class WelcomeActivity extends Activity {
 
@@ -22,11 +25,10 @@ public class WelcomeActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+        AuthenticationHelper.syncDataHolder(this);
 
-        SharedPreferences sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
-
-        if (!username.equals("Unknown User")) {
+        // If user is authenticated move to create meetup activity
+        if (DataHolder.getInstance().isAuthenticated()) {
             Intent i = new Intent(this, CreateActivity.class);
             startActivity(i);
         }

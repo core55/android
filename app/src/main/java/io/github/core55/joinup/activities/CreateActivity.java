@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.github.core55.joinup.helpers.AuthenticationHelper;
 import io.github.core55.joinup.helpers.HeaderRequest;
 import io.github.core55.joinup.helpers.NavigationDrawer;
 import io.github.core55.joinup.R;
@@ -86,6 +87,7 @@ public class CreateActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
+        AuthenticationHelper.syncDataHolder(this);
 
         // Retrieve current user from shared preferences
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
@@ -380,5 +382,7 @@ public class CreateActivity extends AppCompatActivity implements
         i.putExtra("id", id);
         startActivity(i);
     }
+
+
 
 }
