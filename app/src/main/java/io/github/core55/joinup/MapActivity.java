@@ -215,7 +215,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
                     meetupMarkerView = mMap.addMarker(meetupMarker);
                 } else if (meetupMarker != null && meetupMarkerView != null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
-                    Log.d(TAG, "in");
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarkerView.setPosition(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                 }
@@ -293,6 +292,26 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                Log.d(TAG, "marker drag end");
+                pinLongitude = marker.getPosition().longitude;
+                pinLatitude = marker.getPosition().latitude;
+                sendMeetupPinLocation();
+            }
+        });
 
         launchNetworkService();
     }
@@ -507,6 +526,43 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
 
     }
+
+    private void sendMeetupPinLocation() {
+        int method = Request.Method.PATCH;
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash;
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("pinLongitude", pinLongitude);
+            data.put("pinLatitude", pinLatitude);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HeaderRequest userCreationRequest = new HeaderRequest
+                (method, url, data, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
+
+        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
+    }
+
 
 
 
