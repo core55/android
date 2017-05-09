@@ -428,7 +428,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
-                // dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             }
         });
     }
