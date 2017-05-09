@@ -26,7 +26,6 @@ import io.github.core55.joinup.activities.LoginActivity;
 
 public class NavigationDrawer {
 
-
     public static Drawer buildDrawer(final Activity activity) {
         final Context context = activity.getApplicationContext();
 

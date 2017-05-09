@@ -20,6 +20,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -66,7 +67,7 @@ import io.github.core55.joinup.helpers.UserAdapter;
 import io.github.core55.joinup.helpers.VolleyController;
 
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String TAG = "MapActivity";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
