@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.View;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -23,16 +24,18 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.activities.LoginActivity;
+import io.github.core55.joinup.activities.WelcomeActivity;
 
 public class NavigationDrawer {
 
     public static Drawer buildDrawer(final Activity activity) {
         final Context context = activity.getApplicationContext();
+        final SharedPreferences sharedPref = activity.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
         // Retrieve current user from shared preferences
-        final SharedPreferences sharedPref = activity.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String username = sharedPref.getString(context.getString(R.string.user_username), "Unknown User");
-        String nickname = sharedPref.getString(context.getString(R.string.user_nickname), "Unknown User");
+        boolean isAuthenticated = DataHolder.getInstance().isAuthenticated();
+        String username = isAuthenticated ? DataHolder.getInstance().getUser().get("username") : "";
+        String nickname = isAuthenticated ? DataHolder.getInstance().getUser().get("nickname") : "";
 
         // Create profile header
         AccountHeader headerResult = new AccountHeaderBuilder()
@@ -55,22 +58,22 @@ public class NavigationDrawer {
                 .withAccountHeader(headerResult)
                 .addDrawerItems(
                         new PrimaryDrawerItem().withIdentifier(1).withName("Hello").withIcon(GoogleMaterial.Icon.gmd_wb_sunny),
-                        new PrimaryDrawerItem().withIdentifier(2).withName("Goodbye").withIcon(GoogleMaterial.Icon.gmd_wb_cloudy),
-                        new DividerDrawerItem(),
-                        new PrimaryDrawerItem().withIdentifier(3).withName("Logout").withIcon(GoogleMaterial.Icon.gmd_exit_to_app)
-
+                        new PrimaryDrawerItem().withIdentifier(2).withName("Goodbye").withIcon(GoogleMaterial.Icon.gmd_wb_cloudy)
                 )
                 .withOnDrawerItemClickListener(new com.mikepenz.materialdrawer.Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
 
-                        if (position == 4) {
-                            sharedPref.edit().remove("username").commit();
-                            sharedPref.edit().remove("nickname").commit();
+                        if (drawerItem.getIdentifier() == 3) {
+                            sharedPref.edit().remove(context.getString(R.string.current_user)).commit();
+                            sharedPref.edit().remove(context.getString(R.string.jwt_string)).commit();
+                            AuthenticationHelper.syncDataHolder(activity);
 
+                            Intent intent = new Intent(activity, WelcomeActivity.class);
+                            context.startActivity(intent);
+                        } else if (drawerItem.getIdentifier() == 4) {
                             Intent intent = new Intent(activity, LoginActivity.class);
                             context.startActivity(intent);
-
                         }
 
                         return true;
@@ -78,6 +81,14 @@ public class NavigationDrawer {
                 })
                 .withSelectedItem(-1)
                 .build();
+
+        if (isAuthenticated) {
+            result.addItem(new DividerDrawerItem());
+            result.addItem(new PrimaryDrawerItem().withIdentifier(3).withName("Logout").withIcon(GoogleMaterial.Icon.gmd_exit_to_app));
+        } else {
+            result.addItem(new DividerDrawerItem());
+            result.addItem(new PrimaryDrawerItem().withIdentifier(4).withName("Login").withIcon(GoogleMaterial.Icon.gmd_account_circle));
+        }
 
         return result;
     }
