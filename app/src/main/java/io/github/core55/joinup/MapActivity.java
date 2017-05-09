@@ -111,7 +111,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         locationManager = new LocationManager(this);
         locationManager.start();
 
-        launchNetworkService();
         createShareButtonListener();
         createPeopleButtonListener();
 
@@ -202,13 +201,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             Meetup m = intent.getParcelableExtra("meetup");
             if (m != null) {
 
-                if (meetupMarker == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
+                if (meetupMarker == null && meetupMarkerView == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
                     meetupMarkerView = mMap.addMarker(meetupMarker);
-                } else if (m.getPinLatitude() != null && m.getPinLongitude() != null) {
-                    Log.d(TAG, "in");
+                } else if (meetupMarker != null && meetupMarkerView != null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarkerView.setPosition(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                 }
@@ -250,11 +248,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(centerLatitude, centerLongitude), zoomLevel));
 
-        if (meetupMarker == null && pinLatitude != -1 && pinLongitude != -1) {
+        if (meetupMarker == null && meetupMarkerView == null && pinLatitude != -1 && pinLongitude != -1) {
             meetupMarker = new MarkerOptions().draggable(true);
             meetupMarker.position(new LatLng(pinLatitude, pinLongitude));
             meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
-            mMap.addMarker(meetupMarker);
+            meetupMarkerView = mMap.addMarker(meetupMarker);
         }
 
         try {
@@ -286,6 +284,28 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                Log.d(TAG, "marker drag end");
+                pinLongitude = marker.getPosition().longitude;
+                pinLatitude = marker.getPosition().latitude;
+                sendMeetupPinLocation();
+            }
+        });
+
+        launchNetworkService();
     }
 
     /**
@@ -428,7 +448,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
-                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             }
         });
     }
@@ -522,7 +542,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     void importUsers() {
-
         String[] nicknames = {"Hussam", "Patrick", "Marcel", "Phillip", "Simone", "Dean", "Juan Luis", "Jiho", "Pepe", "Pablo"};
         String[] status = {"Hello, its me", "Maple syrup", "applestrudel", "biscuits please, not cookies", "Planet-tricky", "Baras", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies"};
         int[] profilePictures = {R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_3, R.drawable.emoji_4, R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_2, R.drawable.emoji_1, R.drawable.emoji_3, R.drawable.emoji_4};
@@ -530,7 +549,42 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             User u = new User(nicknames[i], status[i], profilePictures[i]);
             userList.add(u);
         }
+    }
 
+    private void sendMeetupPinLocation() {
+        int method = Request.Method.PATCH;
+        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash;
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("pinLongitude", pinLongitude);
+            data.put("pinLatitude", pinLatitude);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HeaderRequest userCreationRequest = new HeaderRequest
+                (method, url, data, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
+
+        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
     }
 
 }
