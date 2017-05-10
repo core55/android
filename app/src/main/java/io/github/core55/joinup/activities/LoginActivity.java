@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -74,6 +75,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .build();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        registerOnClickListener();
+    }
+
+    private void registerOnClickListener() {
+        Button btn_login = (Button) findViewById(R.id.btn_login);
+        btn_login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ordinaryLogin(v);
+            }
+        });
     }
 
     protected void ordinaryLogin(View v) {
