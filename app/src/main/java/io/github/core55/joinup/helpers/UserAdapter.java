@@ -72,15 +72,19 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
             TextView statusTV = (TextView) v.findViewById(R.id.status);
             ImageView profilePicIV = (ImageView) v.findViewById(R.id.profilePicture);
 
-            if (nicknameTV != null) {
+            if (nicknameTV != null && u.getNickname() != null) {
                 nicknameTV.setText(u.getNickname());
             }
 
-            if (statusTV != null) {
+            if (statusTV != null && u.getStatus() != null) {
                 statusTV.setText(u.getStatus());
             }
             if (profilePicIV != null) {
-                profilePicIV.setImageResource(u.getProfilePicture());
+                if (u.getProfilePicture() != 0) {
+                    profilePicIV.setImageResource(u.getProfilePicture());
+                } else {
+                    profilePicIV.setImageResource(R.drawable.emoji_2);
+                }
             }
 
         }
@@ -99,5 +103,4 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
         return listItemView;*/
     }
 }
-
 

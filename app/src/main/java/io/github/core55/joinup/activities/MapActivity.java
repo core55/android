@@ -545,27 +545,29 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     void importUsers() {
         int method = Request.Method.GET;
-        meetupHash = "062fa82457d347879217069f2aafbf4d";
+        meetupHash = "98c06bfb82ad425e845057d2b2129c83";
         String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users";
-        Log.e("url",url);
+        Log.e("url", url);
         HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
                 (method, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        Log.e("response", response.toString());
                         try {
-                            JSONArray usersJson = response.getJSONObject("_embedded").getJSONArray("users");
-                            Log.e("usersJson",usersJson.toString());
+                            JSONArray usersJson = response.getJSONObject("data").getJSONObject("_embedded").getJSONArray("users");
+                            Log.e("usersJson", usersJson.toString());
                             JSONObject userJson; //one user
                             for (int i = 0; i < usersJson.length(); i++) {
                                 userJson = (JSONObject) usersJson.get(i);
                                 String nickname = userJson.getString("nickname");
                                 String status = userJson.getString("status");
-                                String username = userJson.getString("username");
-                                int profilePicture = R.drawable.emoji_2; //we leave picture for now
-                                Double lastLongitude = userJson.getDouble("lastLongitude");
-                                Double lastLatitude = userJson.getDouble("lastLatitude");
 
-                                User u = new User(nickname, status, profilePicture);
+                                //if (status==null){status = "No status";}
+                                //Double lastLongitude = userJson.getDouble("lastLongitude");
+                                //Double lastLatitude = userJson.getDouble("lastLatitude");
+                                //String username = userJson.getString("username");
+
+                                User u = new User(nickname, status, 0);
                                 userList.add(u);
                             }
                             Log.e("user_list", response.toString());
@@ -574,12 +576,23 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         }
 
                     }
+
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        Log.e("errorResponse", "dihvsvdh");
                     }
-                });
+
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/json");
+                params.put("Accept", "application/json, application/hal+json");
+                return params;
+            }
+        };
         VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
     }
 
