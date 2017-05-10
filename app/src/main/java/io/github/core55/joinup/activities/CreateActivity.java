@@ -18,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -102,6 +103,16 @@ public class CreateActivity extends AppCompatActivity implements
 
         askLocationPermission();
         buildGoogleApiClient();
+
+        // register search button
+        Button search_button = (Button) findViewById(R.id.search_button);
+        search_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onMapSearch(v);
+            }
+        });
+
     }
 
     protected void onStart() {
@@ -136,9 +147,15 @@ public class CreateActivity extends AppCompatActivity implements
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Address address = addressList.get(0);
-            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            if (!addressList.isEmpty()) {
+                Address address = addressList.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            } else {
+                Toast.makeText(this, "Could not find location", Toast.LENGTH_SHORT).show();
+            }
+
+
         }
     }
 
