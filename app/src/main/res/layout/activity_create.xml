@@ -43,7 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:background="@drawable/custom_button"
-            android:onClick="onMapSearch"
             android:text="Search"
             android:layout_alignParentTop="true"
             android:layout_alignEnd="@+id/editText" />
