@@ -2,6 +2,7 @@
 
 app/src/main/res/values/google_maps_api.xml
 app/src/main/res/values/google_signin_api.xml
+.idea/codeStyleSettings.xml
 
 # Custome release
 app/src/release/res/values/google_maps_api.xml

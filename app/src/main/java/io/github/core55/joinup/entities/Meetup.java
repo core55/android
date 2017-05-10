@@ -36,6 +36,15 @@ public class Meetup extends BaseEntity implements Parcelable {
         this.zoomLevel = zoomLevel;
     }
 
+    public Meetup(Double centerLongitude, Double centerLatitude, Integer zoomLevel, Double pinLongitude, Double pinLatitude) {
+        this();
+        this.centerLongitude = centerLongitude;
+        this.centerLatitude = centerLatitude;
+        this.zoomLevel = zoomLevel;
+        this.pinLongitude = pinLongitude;
+        this.pinLatitude = pinLatitude;
+    }
+
     private Meetup(Parcel in) {
         centerLongitude = in.readDouble();
         centerLatitude = in.readDouble();
