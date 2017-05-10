@@ -323,6 +323,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
 
         launchNetworkService();
+        importUsers();
     }
 
     @Override
@@ -527,7 +528,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
-                importUsers();
                 UserAdapter adapter = new UserAdapter(getApplicationContext(), 0, userList);
                 mBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
                     @Override
