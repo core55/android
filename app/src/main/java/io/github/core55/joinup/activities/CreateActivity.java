@@ -90,10 +90,6 @@ public class CreateActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_create);
         AuthenticationHelper.syncDataHolder(this);
 
-        // Retrieve current user from shared preferences
-        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
-
         // Inject the navigation drawer
         Drawer result = NavigationDrawer.buildDrawer(this);
 
@@ -104,7 +100,7 @@ public class CreateActivity extends AppCompatActivity implements
         askLocationPermission();
         buildGoogleApiClient();
 
-        // register search button
+        // Register search button
         Button search_button = (Button) findViewById(R.id.search_button);
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,7 +108,6 @@ public class CreateActivity extends AppCompatActivity implements
                 onMapSearch(v);
             }
         });
-
     }
 
     protected void onStart() {

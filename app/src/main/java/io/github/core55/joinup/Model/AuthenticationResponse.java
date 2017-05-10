@@ -1,10 +1,10 @@
+/*
+  Authors: S. Stefani
+ */
+
 package io.github.core55.joinup.Model;
 
 import io.github.core55.joinup.entities.User;
-
-/**
- * Created by simone on 2017-05-10.
- */
 
 public class AuthenticationResponse {
     private User user;

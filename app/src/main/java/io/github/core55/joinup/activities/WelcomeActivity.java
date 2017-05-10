@@ -5,19 +5,14 @@
 package io.github.core55.joinup.activities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.activities.CreateActivity;
-import io.github.core55.joinup.activities.LoginActivity;
 import io.github.core55.joinup.helpers.AuthenticationHelper;
-import io.github.core55.joinup.helpers.DataHolder;
+import io.github.core55.joinup.Model.DataHolder;
 
 public class WelcomeActivity extends Activity {
 

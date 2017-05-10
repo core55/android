@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.View;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -22,6 +21,7 @@ import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.activities.LoginActivity;
 import io.github.core55.joinup.activities.WelcomeActivity;

@@ -1,8 +1,8 @@
-package io.github.core55.joinup.Model;
-
-/**
- * Created by simone on 2017-05-10.
+/*
+  Authors: S. Stefani
  */
+
+package io.github.core55.joinup.Model;
 
 public class GoogleToken {
     private String idToken;

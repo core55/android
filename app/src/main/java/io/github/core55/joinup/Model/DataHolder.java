@@ -2,9 +2,7 @@
   Authors: S. Stefani
  */
 
-package io.github.core55.joinup.helpers;
-
-import java.util.HashMap;
+package io.github.core55.joinup.Model;
 
 import io.github.core55.joinup.entities.User;
 

@@ -17,7 +17,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -55,7 +54,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.github.core55.joinup.helpers.DataHolder;
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.helpers.HeaderRequest;
 import io.github.core55.joinup.services.LocationManager;
 import io.github.core55.joinup.services.LocationService;

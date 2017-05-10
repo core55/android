@@ -7,13 +7,10 @@ package io.github.core55.joinup.helpers;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.util.HashMap;
-
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.entities.User;
 

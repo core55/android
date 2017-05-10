@@ -8,6 +8,7 @@ import com.android.volley.toolbox.Volley;
 
 public class VolleyController {
 
+    // TODO: This cause memory leaks!!!
     private static VolleyController mInstance;
     private RequestQueue mRequestQueue;
     private static Context mCtx;

@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.github.core55.joinup.Model.DataHolder;
+
 public class GsonRequest<T> extends Request<T> {
     private final Gson gson = new Gson();
     private final Object body;
