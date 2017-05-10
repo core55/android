@@ -1,12 +1,18 @@
+/*
+  Authors: S. Stefani
+ */
+
 package io.github.core55.joinup.helpers;
 
 import java.util.HashMap;
 
 public class DataHolder {
-    private HashMap<String, String> user = new HashMap<>();
-    private String jwt;
 
     private static final DataHolder holder = new DataHolder();
+
+    private HashMap<String, String> user = new HashMap<>();
+    private String jwt;
+    private boolean isAuthenticated;
 
     public static DataHolder getInstance() {
         return holder;
@@ -26,6 +32,14 @@ public class DataHolder {
 
     public void setJwt(String jwt) {
         this.jwt = jwt;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+        isAuthenticated = authenticated;
     }
 }
 
