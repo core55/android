@@ -584,13 +584,22 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 userJson = (JSONObject) usersJson.get(i);
                                 String nickname = userJson.getString("nickname");
                                 String status = userJson.getString("status");
+                                //retrieve link for picture: first google, if it doesn't exist -> gravatar, if it doesn't exist -> emoji
+                                String profileURL = userJson.getString("googlePictureURI"); //googlePictureURI gravatarURI
+                                if (profileURL==null){
+                                    profileURL = userJson.getString("gravatarURI");
+                                    if (profileURL==null){
+                                        profileURL="emoji";
+                                    }
+                                }
+
 
                                 //if (status==null){status = "No status";}
                                 //Double lastLongitude = userJson.getDouble("lastLongitude");
                                 //Double lastLatitude = userJson.getDouble("lastLatitude");
                                 //String username = userJson.getString("username");
 
-                                User u = new User(nickname, status, 0);
+                                User u = new User(nickname, status, profileURL);
                                 userList.add(u);
                             }
                             Log.e("user_list", response.toString());
@@ -606,7 +615,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         error.printStackTrace();
                         Log.e("errorResponse", "dihvsvdh");
                     }
-
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {

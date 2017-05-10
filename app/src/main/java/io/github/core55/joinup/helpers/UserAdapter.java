@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lucasurbas.listitemview.ListItemView;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,11 +76,15 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
                 statusTV.setText(u.getStatus());
             }
             if (profilePicIV != null) {
-                if (u.getProfilePicture()!=0){
-                    profilePicIV.setImageResource(u.getProfilePicture());
+                if (u.getProfilePicture().equals("emoji")){
+                    profilePicIV.setImageResource(R.drawable.emoji_2);
+                    Log.e("pew","emoji");
                 }
                 else{
-                    profilePicIV.setImageResource(R.drawable.emoji_2);
+                    Picasso.with(getContext())
+                            .load(u.getProfilePicture())
+                            .transform(new CircleTransform())
+                            .into(profilePicIV);
                 }
             }
 
