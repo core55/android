@@ -295,8 +295,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
+        String tempNickname;
+        try{ tempNickname = DataHolder.getInstance().getUser().get("nickname");}
+        catch (NullPointerException e){
+            tempNickname = null;
+        }
 
-        String tempNickname = DataHolder.getInstance().getUser().get("nickname");
         if (username.equals("Unknown User") && tempNickname != null && !tempNickname.equals("")) {
             Context context = getApplicationContext();
             CharSequence text = "Welcome " + tempNickname + "!";
