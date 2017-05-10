@@ -17,7 +17,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -55,17 +54,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.github.core55.joinup.R;
+import io.github.core55.joinup.entities.Meetup;
+import io.github.core55.joinup.entities.User;
 import io.github.core55.joinup.helpers.DataHolder;
 import io.github.core55.joinup.helpers.HeaderRequest;
-import io.github.core55.joinup.services.LocationManager;
-import io.github.core55.joinup.services.LocationService;
-import io.github.core55.joinup.entities.Meetup;
 import io.github.core55.joinup.helpers.NavigationDrawer;
-import io.github.core55.joinup.services.NetworkService;
-import io.github.core55.joinup.R;
-import io.github.core55.joinup.entities.User;
 import io.github.core55.joinup.helpers.UserAdapter;
 import io.github.core55.joinup.helpers.VolleyController;
+import io.github.core55.joinup.services.LocationManager;
+import io.github.core55.joinup.services.LocationService;
+import io.github.core55.joinup.services.NetworkService;
 
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -297,8 +296,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
         String tempNickname;
-        try{ tempNickname = DataHolder.getInstance().getUser().get("nickname");}
-        catch (NullPointerException e){
+        try {
+            tempNickname = DataHolder.getInstance().getUser().get("nickname");
+        } catch (NullPointerException e) {
             tempNickname = null;
         }
 
@@ -568,7 +568,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     void importUsers() {
         int method = Request.Method.GET;
-        meetupHash = "98c06bfb82ad425e845057d2b2129c83";
+        meetupHash = "062fa82457d347879217069f2aafbf4d";
         String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users";
         Log.e("url", url);
         HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
@@ -589,8 +589,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 //Double lastLongitude = userJson.getDouble("lastLongitude");
                                 //Double lastLatitude = userJson.getDouble("lastLatitude");
                                 //String username = userJson.getString("username");
-
                                 User u = new User(nickname, status, 0);
+
                                 userList.add(u);
                             }
                             Log.e("user_list", response.toString());
@@ -604,7 +604,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        Log.e("errorResponse", "dihvsvdh");
+                        Log.e("errorResponse", "error");
                     }
 
                 }) {
@@ -615,9 +615,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 params.put("Accept", "application/json, application/hal+json");
                 return params;
             }
+
         };
         VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
     }
+
 
     /* void importUsers() {
         String[] nicknames = {"Hussam", "Patrick", "Marcel", "Phillip", "Simone", "Dean", "Juan Luis", "Jiho", "Pepe", "Pablo"};
