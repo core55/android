@@ -23,6 +23,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -401,11 +402,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         final EditText name = (EditText) mView.findViewById(R.id.enter_name);
 
-
+        final AlertDialog dialog = mBuilder.create();
         if (name.getText().toString().matches("")) {
-            final AlertDialog dialog = mBuilder.create();
             dialog.show();
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
 
             Button enter = (Button) dialog.findViewById(R.id.enter);
             enter.setOnClickListener(new View.OnClickListener() {
@@ -422,7 +424,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             });
         }
+
         //  Toast.makeText(this,"Name is set!", Toast.LENGTH_SHORT).show();
+        name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
 
     }
 
