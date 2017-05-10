@@ -568,7 +568,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     void importUsers() {
         int method = Request.Method.GET;
-        meetupHash = "062fa82457d347879217069f2aafbf4d";
+        meetupHash = "98c06bfb82ad425e845057d2b2129c83";
         String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users";
         Log.e("url", url);
         HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
@@ -589,8 +589,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 //Double lastLongitude = userJson.getDouble("lastLongitude");
                                 //Double lastLatitude = userJson.getDouble("lastLatitude");
                                 //String username = userJson.getString("username");
-                                User u = new User(nickname, status, 0);
 
+                                User u = new User(nickname, status, 0);
                                 userList.add(u);
                             }
                             Log.e("user_list", response.toString());
@@ -604,7 +604,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        Log.e("errorResponse", "error");
+                        Log.e("errorResponse", "dihvsvdh");
                     }
 
                 }) {
@@ -615,7 +615,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 params.put("Accept", "application/json, application/hal+json");
                 return params;
             }
-
         };
         VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
     }
