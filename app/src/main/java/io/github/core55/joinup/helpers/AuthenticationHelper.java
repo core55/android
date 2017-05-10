@@ -15,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 
 import io.github.core55.joinup.R;
+import io.github.core55.joinup.entities.User;
 
 public class AuthenticationHelper {
 
@@ -29,9 +30,8 @@ public class AuthenticationHelper {
         // If user data exist then update dataHolder and set isAuthenticated flag to true. Otherwise
         // clean dataHolder and set isAuthenticated flag to false
         if (!currentUser.equals("Unknown User")) {
-            HashMap<String, String> parsedUser = new Gson().fromJson(currentUser, new TypeToken<HashMap<String, String>>() {
-            }.getType());
-            DataHolder.getInstance().setUser(parsedUser);
+            User user = new Gson().fromJson(currentUser, User.class);
+            DataHolder.getInstance().setUser(user);
             DataHolder.getInstance().setJwt(jwt);
             DataHolder.getInstance().setAuthenticated(true);
         } else {

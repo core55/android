@@ -297,7 +297,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
         String tempNickname;
-        try{ tempNickname = DataHolder.getInstance().getUser().get("nickname");}
+        try{ tempNickname = DataHolder.getInstance().getUser().getNickname();}
         catch (NullPointerException e){
             tempNickname = null;
         }

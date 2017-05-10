@@ -34,18 +34,26 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+import io.github.core55.joinup.Model.AccountCredentials;
+import io.github.core55.joinup.Model.AuthenticationResponse;
+import io.github.core55.joinup.Model.GoogleToken;
+import io.github.core55.joinup.entities.User;
 import io.github.core55.joinup.helpers.AuthenticationHelper;
 import io.github.core55.joinup.helpers.DataHolder;
+import io.github.core55.joinup.helpers.GsonRequest;
 import io.github.core55.joinup.helpers.HeaderRequest;
 import io.github.core55.joinup.R;
 
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     public static final String TAG = "LoginActivity";
 
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_GET_TOKEN = 9002;
     public SharedPreferences sharedPref;
+
+    private final Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,46 +133,37 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void loginBackend(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String URL = "https://dry-cherry.herokuapp.com/api/login";
+        final String url = "https://dry-cherry.herokuapp.com/api/login";
 
-        HashMap<String, String> params = new HashMap<>();
-        params.put("username", username);
-        params.put("password", password);
+        AccountCredentials credentials = new AccountCredentials(username, password);
 
-        HeaderRequest request_json = new HeaderRequest(Request.Method.POST,
-                URL,
-                new JSONObject(params),
-                new Response.Listener<JSONObject>() {
+        GsonRequest<AuthenticationResponse> request = new GsonRequest<>(
+                Request.Method.POST, url, credentials, AuthenticationResponse.class,
+                new Response.Listener<AuthenticationResponse>() {
+
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(AuthenticationResponse authenticationResponse) {
+                        User user = authenticationResponse.getUser();
+                        String jwt = authenticationResponse.getJwt();
 
-                        try {
-                            JSONObject data = response.getJSONObject("data");
-                            JSONObject headers = response.getJSONObject("headers");
-                            String jwt = headers.getString("Authorization");
+                        sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(getString(R.string.current_user), gson.toJson(user));
+                        editor.putString(getString(R.string.jwt_string), jwt);
+                        editor.commit();
 
-                            HashMap<String, String> user = new Gson().fromJson(data.toString(), new TypeToken<HashMap<String, String>>() {
-                            }.getType());
-                            DataHolder.getInstance().setUser(user);
-                            DataHolder.getInstance().setJwt(jwt);
+                        DataHolder.getInstance().setUser(user);
+                        DataHolder.getInstance().setJwt(jwt);
 
-                            sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString(getString(R.string.current_user), data.toString());
-                            editor.putString(getString(R.string.jwt_string), jwt);
-                            editor.commit();
-
-                            Intent intent = new Intent(LoginActivity.this,
-                                    MapActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                        Intent intent = new Intent(LoginActivity.this,
+                                CreateActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 },
+
                 new Response.ErrorListener() {
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         NetworkResponse response = error.networkResponse;
@@ -184,52 +183,42 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         }
                     }
                 });
-
-        queue.add(request_json);
+        queue.add(request);
     }
 
     private void loginGoogleBackend(String idToken) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String URL = "https://dry-cherry.herokuapp.com/api/login/token";
+        final String url = "https://dry-cherry.herokuapp.com/api/login/token";
 
-        HashMap<String, String> params = new HashMap<>();
-        params.put("idToken", idToken);
+        GoogleToken googleToken = new GoogleToken(idToken);
 
-        HeaderRequest request_json = new HeaderRequest(Request.Method.POST,
-                URL,
-                new JSONObject(params),
-                new Response.Listener<JSONObject>() {
+        GsonRequest<AuthenticationResponse> request = new GsonRequest<>(
+                Request.Method.POST, url, googleToken, AuthenticationResponse.class,
+                new Response.Listener<AuthenticationResponse>() {
+
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(AuthenticationResponse authenticationResponse) {
+                        User user = authenticationResponse.getUser();
+                        String jwt = authenticationResponse.getJwt();
 
-                        try {
-                            JSONObject data = response.getJSONObject("data");
-                            JSONObject headers = response.getJSONObject("headers");
-                            String jwt = headers.getString("Authorization");
+                        sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(getString(R.string.current_user), gson.toJson(user));
+                        editor.putString(getString(R.string.jwt_string), jwt);
+                        editor.commit();
 
-                            HashMap<String, String> user = new Gson().fromJson(data.toString(), new TypeToken<HashMap<String, String>>() {
-                            }.getType());
-                            DataHolder.getInstance().setUser(user);
-                            DataHolder.getInstance().setJwt(jwt);
+                        DataHolder.getInstance().setUser(user);
+                        DataHolder.getInstance().setJwt(jwt);
 
-                            sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString(getString(R.string.current_user), data.toString());
-                            editor.putString(getString(R.string.jwt_string), jwt);
-                            editor.commit();
-
-
-                            Intent intent = new Intent(LoginActivity.this,
-                                    CreateActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                        Intent intent = new Intent(LoginActivity.this,
+                                CreateActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 },
+
                 new Response.ErrorListener() {
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         NetworkResponse response = error.networkResponse;
@@ -249,8 +238,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         }
                     }
                 });
-
-        queue.add(request_json);
+        queue.add(request);
     }
 
 

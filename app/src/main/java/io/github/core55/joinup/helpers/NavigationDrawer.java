@@ -34,8 +34,8 @@ public class NavigationDrawer {
 
         // Retrieve current user from shared preferences with default
         boolean isAuthenticated = DataHolder.getInstance().isAuthenticated();
-        String username = isAuthenticated ? DataHolder.getInstance().getUser().get("username") : "";
-        String nickname = isAuthenticated ? DataHolder.getInstance().getUser().get("nickname") : "";
+        String username = isAuthenticated ? DataHolder.getInstance().getUser().getUsername() : "";
+        String nickname = isAuthenticated ? DataHolder.getInstance().getUser().getNickname() : "";
 
         // Create profile header
         AccountHeader headerResult = new AccountHeaderBuilder()

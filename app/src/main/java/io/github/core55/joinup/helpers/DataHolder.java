@@ -6,11 +6,13 @@ package io.github.core55.joinup.helpers;
 
 import java.util.HashMap;
 
+import io.github.core55.joinup.entities.User;
+
 public class DataHolder {
 
     private static final DataHolder holder = new DataHolder();
 
-    private HashMap<String, String> user = new HashMap<>();
+    private User user;
     private String jwt;
     private boolean isAuthenticated;
 
@@ -18,11 +20,11 @@ public class DataHolder {
         return holder;
     }
 
-    public HashMap<String, String> getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(HashMap<String, String> user) {
+    public void setUser(User user) {
         this.user = user;
     }
 
