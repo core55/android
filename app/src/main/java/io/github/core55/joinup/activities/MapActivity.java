@@ -552,10 +552,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 (method, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.e("response", response.toString());
                         try {
                             JSONArray usersJson = response.getJSONObject("data").getJSONObject("_embedded").getJSONArray("users");
-                            Log.e("usersJson", usersJson.toString());
                             JSONObject userJson; //one user
                             for (int i = 0; i < usersJson.length(); i++) {
                                 userJson = (JSONObject) usersJson.get(i);
@@ -563,23 +561,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 String status = userJson.getString("status");
                                 //retrieve link for picture: first google, if it doesn't exist -> gravatar, if it doesn't exist -> emoji
                                 String profileURL = userJson.getString("googlePictureURI"); //googlePictureURI gravatarURI
-                                if (profileURL==null){
+                                if (profileURL.equals("null")){
                                     profileURL = userJson.getString("gravatarURI");
-                                    if (profileURL==null){
+                                    if (profileURL.equals("null")){
                                         profileURL="emoji";
                                     }
                                 }
-
-
-                                //if (status==null){status = "No status";}
-                                //Double lastLongitude = userJson.getDouble("lastLongitude");
-                                //Double lastLatitude = userJson.getDouble("lastLatitude");
-                                //String username = userJson.getString("username");
-
                                 User u = new User(nickname, status, profileURL);
                                 userList.add(u);
                             }
-                            Log.e("user_list", response.toString());
                         } catch (Exception je) {
                             je.printStackTrace();
                         }
@@ -590,7 +580,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        Log.e("errorResponse", "dihvsvdh");
                     }
                 }) {
             @Override
@@ -604,15 +593,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
     }
 
-    /* void importUsers() {
-        String[] nicknames = {"Hussam", "Patrick", "Marcel", "Phillip", "Simone", "Dean", "Juan Luis", "Jiho", "Pepe", "Pablo"};
-        String[] status = {"Hello, its me", "Maple syrup", "applestrudel", "biscuits please, not cookies", "Planet-tricky", "Baras", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies"};
-        int[] profilePictures = {R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_3, R.drawable.emoji_4, R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_2, R.drawable.emoji_1, R.drawable.emoji_3, R.drawable.emoji_4};
-        for (int i = 0; i < nicknames.length; i++) {
-            User u = new User(nicknames[i], status[i], profilePictures[i]);
-            userList.add(u);
-        }
-    }*/
 
     private void sendMeetupPinLocation() {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);

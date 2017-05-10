@@ -78,7 +78,6 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
             if (profilePicIV != null) {
                 if (u.getProfilePicture().equals("emoji")){
                     profilePicIV.setImageResource(R.drawable.emoji_2);
-                    Log.e("pew","emoji");
                 }
                 else{
                     Picasso.with(getContext())
@@ -86,6 +85,7 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
                             .transform(new CircleTransform())
                             .into(profilePicIV);
                 }
+                Log.e("picture",u.getProfilePicture() +"u.getProfilePicture().equal" + String.valueOf(u.getProfilePicture().equals("emoji")));
             }
 
         }
