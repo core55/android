@@ -33,6 +33,10 @@ public class WelcomeActivity extends Activity {
             startActivity(i);
         }
 
+        registerOnClickListener();
+    }
+
+    private void registerOnClickListener() {
         Button btn_login = (Button) findViewById(R.id.btn_login);
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,7 +52,6 @@ public class WelcomeActivity extends Activity {
                 loginActivity(v);
             }
         });
-
     }
 
     protected void createMeetup(View v) {

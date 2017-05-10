@@ -67,7 +67,6 @@
             android:background="@android:color/holo_red_light"
             android:fontFamily="sans-serif"
             android:gravity="center"
-            android:onClick="ordinaryLogin"
             android:padding="12dp"
             android:text="Login"
             android:textColor="@color/welcome_white"
