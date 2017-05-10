@@ -135,7 +135,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         mActivityTitle = getTitle().toString();
 
-        if (username.equals("Unknown User")) {
+        if (!DataHolder.getInstance().isAuthenticated()) {
             namePrompt();
         }
     }
