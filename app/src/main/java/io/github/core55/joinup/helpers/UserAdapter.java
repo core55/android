@@ -48,11 +48,6 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
 
     }
 
-/*
-    @Override
-    public int getCount() {
-        return userList.size();
-    }*/
 
     @NonNull
     @Override
@@ -72,17 +67,18 @@ public class UserAdapter extends ArrayAdapter<User> { //This class is the adapte
             TextView statusTV = (TextView) v.findViewById(R.id.status);
             ImageView profilePicIV = (ImageView) v.findViewById(R.id.profilePicture);
 
-            if (nicknameTV != null && u.getNickname() != null) {
+            if (nicknameTV != null && u.getNickname()!=null) {
                 nicknameTV.setText(u.getNickname());
             }
 
-            if (statusTV != null && u.getStatus() != null) {
+            if (statusTV != null && u.getStatus()!=null) {
                 statusTV.setText(u.getStatus());
             }
             if (profilePicIV != null) {
-                if (u.getProfilePicture() != 0) {
+                if (u.getProfilePicture()!=0){
                     profilePicIV.setImageResource(u.getProfilePicture());
-                } else {
+                }
+                else{
                     profilePicIV.setImageResource(R.drawable.emoji_2);
                 }
             }
