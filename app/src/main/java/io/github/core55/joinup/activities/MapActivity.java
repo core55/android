@@ -65,12 +65,19 @@ import io.github.core55.joinup.helpers.LocationHelper;
 import io.github.core55.joinup.services.LocationManager;
 import io.github.core55.joinup.services.LocationService;
 import io.github.core55.joinup.entities.Meetup;
-import io.github.core55.joinup.helpers.NavigationDrawer;
-import io.github.core55.joinup.services.NetworkService;
+
 import io.github.core55.joinup.R;
+import io.github.core55.joinup.entities.Meetup;
 import io.github.core55.joinup.entities.User;
+
+import io.github.core55.joinup.helpers.HeaderRequest;
+
+import io.github.core55.joinup.helpers.NavigationDrawer;
 import io.github.core55.joinup.helpers.UserAdapter;
 import io.github.core55.joinup.helpers.VolleyController;
+import io.github.core55.joinup.services.LocationManager;
+import io.github.core55.joinup.services.LocationService;
+import io.github.core55.joinup.services.NetworkService;
 
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -545,15 +552,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     void importUsers() {
         int method = Request.Method.GET;
-        meetupHash = "98c06bfb82ad425e845057d2b2129c83";
+        meetupHash = "021b1236483445f19d0f32a18ca391d9";
         String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users";
         Log.e("url", url);
         HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
                 (method, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        Log.e("response", response.toString());
                         try {
                             JSONArray usersJson = response.getJSONObject("data").getJSONObject("_embedded").getJSONArray("users");
+                            Log.e("usersJson", usersJson.toString());
                             JSONObject userJson; //one user
                             for (int i = 0; i < usersJson.length(); i++) {
                                 userJson = (JSONObject) usersJson.get(i);
@@ -561,15 +570,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 String status = userJson.getString("status");
                                 //retrieve link for picture: first google, if it doesn't exist -> gravatar, if it doesn't exist -> emoji
                                 String profileURL = userJson.getString("googlePictureURI"); //googlePictureURI gravatarURI
-                                if (profileURL.equals("null")){
+                                if (profileURL=="null"){
                                     profileURL = userJson.getString("gravatarURI");
-                                    if (profileURL.equals("null")){
+                                    if (profileURL=="null"){
                                         profileURL="emoji";
                                     }
                                 }
+
+
                                 User u = new User(nickname, status, profileURL);
                                 userList.add(u);
                             }
+                            Log.e("user_list", response.toString());
                         } catch (Exception je) {
                             je.printStackTrace();
                         }
@@ -580,6 +592,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        Log.e("errorResponse", "dihvsvdh");
                     }
                 }) {
             @Override
@@ -592,6 +605,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         };
         VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
     }
+
+
 
 
     private void sendMeetupPinLocation() {
