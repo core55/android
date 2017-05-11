@@ -23,8 +23,8 @@ public class LocationManager implements
 
     public static final String TAG = "LocationManager";
 
-    private static final long UPDATE_INTERVAL = 10 * 1000;  // 10 secs
-    private static final long FASTEST_INTERVAL = 2000; // 2 secs
+    private static final long UPDATE_INTERVAL = 30 * 1000;  // 10 secs
+    private static final long FASTEST_INTERVAL = 10 * 1000; // 2 secs
 
     private Context context;
 

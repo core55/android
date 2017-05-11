@@ -45,6 +45,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.mikepenz.materialdrawer.Drawer;
 
 import org.json.JSONException;
@@ -78,26 +79,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public static final String API_URL = "https://dry-cherry.herokuapp.com/api/";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;
-    int count = 0;
 
     private LocationManager locationManager;
-    private String meetupHash = "028baffc294c434c8c8a4a610aa68e00";
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
-
-    private Double centerLatitude;
-    private Double centerLongitude;
-    private Integer zoomLevel;
 
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
-    private Double pinLongitude;
-    private Double pinLatitude;
 
-    private Double lastLatitude;
-    private Double lastLongitude;
+    private Double lat;
+    private Double lon;
 
-    private String mActivityTitle;
-    private ListView lv;
     private ArrayList userList = new ArrayList();
 
     @Override
@@ -109,13 +100,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
 
-//        meetupHash = getIntent().getStringExtra("hash");
-//        centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
-//        centerLongitude = getIntent().getDoubleExtra("centerLongitude", -1);
-//        zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
-//        pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
-//        pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
-
         // Retrieve map hash from applink
         handleAppLink();
 
@@ -124,7 +108,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         LocationHelper.askLocationPermission(this);
-//        askLocationPermission();
 
         locationManager = new LocationManager(this);
         locationManager.start();
@@ -132,10 +115,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         createShareButtonListener();
         createPeopleButtonListener();
 
-        mActivityTitle = getTitle().toString();
-
-        //TODO: Check if the user has nickname. Not only auth problem
-        if (!DataHolder.getInstance().isAuthenticated()) {
+        if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
     }
@@ -164,8 +144,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Double lat = intent.getDoubleExtra("lat", -1);
-            Double lon = intent.getDoubleExtra("lon", -1);
+            lat = intent.getDoubleExtra("lat", -1);
+            lon = intent.getDoubleExtra("lon", -1);
 
             if (lat != null && lat != -1 && lon != null && lon != -1) {
 
@@ -250,12 +230,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Meetup meetup = DataHolder.getInstance().getMeetup();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
+                meetup.getZoomLevel()));
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(centerLatitude, centerLongitude), zoomLevel));
-
-        if (meetupMarker == null && meetupMarkerView == null && pinLatitude != -1 && pinLongitude != -1) {
+        if (meetupMarker == null && meetupMarkerView == null && meetup.getPinLatitude() != -1 && meetup.getPinLongitude() != -1) {
             meetupMarker = new MarkerOptions().draggable(true);
-            meetupMarker.position(new LatLng(pinLatitude, pinLongitude));
+            meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
             meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
             meetupMarkerView = mMap.addMarker(meetupMarker);
         }
@@ -273,25 +255,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         // show blue dot on map
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
-        String tempNickname;
-        try {
-            tempNickname = DataHolder.getInstance().getUser().getNickname();
-        } catch (NullPointerException e) {
-            tempNickname = null;
-        }
 
-        if (DataHolder.getInstance().isAuthenticated() && tempNickname != null && !tempNickname.equals("")) {
+        if (DataHolder.getInstance().getUser().getNickname() != null) {
             Context context = getApplicationContext();
-            CharSequence text = "Welcome " + tempNickname + "!";
+            CharSequence text = "Welcome " + DataHolder.getInstance().getUser().getNickname() + "!";
             int duration = Toast.LENGTH_LONG;
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
@@ -311,9 +282,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onMarkerDragEnd(Marker marker) {
                 Log.d(TAG, "marker drag end");
-                pinLongitude = marker.getPosition().longitude;
-                pinLatitude = marker.getPosition().latitude;
-                sendMeetupPinLocation();
+                sendMeetupPinLocation(marker.getPosition().longitude, marker.getPosition().latitude);
             }
         });
 
@@ -348,11 +317,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Pattern pattern = Pattern.compile("/\\#/m/(.*)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
-                meetupHash = matcher.group(1);
-                Log.d(TAG, "hash = " + meetupHash);
+                String applinkHash = matcher.group(1);
+                fetchMeetup(applinkHash);
+                Log.d(TAG, "hash = " + DataHolder.getInstance().getMeetup().getHash());
 
-                createUser();
+                User user;
+                if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
+                    user = DataHolder.getInstance().getUser();
+                } else {
+                    // TODO: Handle error if coordinates are not available
+                    user = new User(lon, lat);
+                }
 
+                linkUserToMeetup(user);
+
+                if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
+                    namePrompt();
+                } else if (!DataHolder.getInstance().isAuthenticated() && !DataHolder.getInstance().isAnonymous()) {
+                    namePrompt();
+                }
             }
         }
     }
@@ -403,12 +386,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    public void patchNickname(String name) {
+    public void patchNickname(String nickname) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
 
         User user = new User();
-        user.setNickname(name);
+        user.setNickname(nickname);
 
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.PATCH, url, user, User.class,
@@ -472,7 +455,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         String hash = DataHolder.getInstance().getMeetup().getHash();
         final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
 
-        User user = new User(lastLongitude,lastLatitude);
+        User user = new User(lon,lat);
 
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, user, User.class,
@@ -482,6 +465,31 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(User user) {
                         DataHolder.getInstance().setUser(user);
+                    }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
+
+    private void fetchMeetup(String hash) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash;
+
+        GsonRequest<Meetup> request = new GsonRequest<>(
+                Request.Method.GET, url, Meetup.class,
+
+                new Response.Listener<Meetup>() {
+
+                    @Override
+                    public void onResponse(Meetup meetup) {
+                        DataHolder.getInstance().setMeetup(meetup);
                     }
                 },
 
@@ -527,9 +535,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    private void sendMeetupPinLocation() {
+    private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash;
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
         Meetup meetup = new Meetup();
         meetup.setPinLongitude(pinLongitude);
@@ -554,5 +562,39 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 });
         queue.add(request);
+    }
+
+    private void linkUserToMeetup(User user) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String hash = DataHolder.getInstance().getMeetup().getHash();
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
+
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.POST, url, user, User.class,
+
+                new Response.Listener<User>() {
+
+                    @Override
+                    public void onResponse(User user) {
+                        setSharedPreferences(new Gson().toJson(user));
+                        DataHolder.getInstance().setUser(user);
+                    }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
+
+    private void setSharedPreferences(String user) {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.anonymous_user), user);
+        editor.commit();
     }
 }
