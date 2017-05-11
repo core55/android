@@ -14,6 +14,7 @@ public class DataHolder {
     private User user;
     private String jwt;
     private boolean isAuthenticated;
+    private boolean isAnonymous;
     private Meetup meetup;
 
     public static DataHolder getInstance() {
@@ -42,6 +43,14 @@ public class DataHolder {
 
     public void setAuthenticated(boolean authenticated) {
         isAuthenticated = authenticated;
+    }
+
+    public boolean isAnonymous() {
+        return isAnonymous;
+    }
+
+    public void setAnonymous(boolean anonymous) {
+        isAnonymous = anonymous;
     }
 
     public Meetup getMeetup() {

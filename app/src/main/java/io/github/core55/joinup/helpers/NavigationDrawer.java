@@ -65,7 +65,7 @@ public class NavigationDrawer {
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
 
                         if (drawerItem.getIdentifier() == 3) {
-                            sharedPref.edit().remove(context.getString(R.string.current_user)).commit();
+                            sharedPref.edit().remove(context.getString(R.string.auth_user)).commit();
                             sharedPref.edit().remove(context.getString(R.string.jwt_string)).commit();
                             AuthenticationHelper.syncDataHolder(activity);
 

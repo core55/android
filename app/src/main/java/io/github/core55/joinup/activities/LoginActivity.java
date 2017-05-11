@@ -212,7 +212,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void setSharedPreferences(String user, String jwt) {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.current_user), user);
+        editor.putString(getString(R.string.auth_user), user);
         editor.putString(getString(R.string.jwt_string), jwt);
         editor.commit();
     }

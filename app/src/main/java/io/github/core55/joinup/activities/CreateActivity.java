@@ -1,8 +1,10 @@
 package io.github.core55.joinup.activities;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Address;
@@ -39,15 +41,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.List;
 
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.entities.Meetup;
 import io.github.core55.joinup.entities.User;
 import io.github.core55.joinup.helpers.AuthenticationHelper;
 import io.github.core55.joinup.helpers.GsonRequest;
 import io.github.core55.joinup.helpers.HttpRequestHelper;
+import io.github.core55.joinup.helpers.LocationHelper;
 import io.github.core55.joinup.helpers.NavigationDrawer;
 import io.github.core55.joinup.R;
 
@@ -55,17 +60,14 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     public static final String TAG = "CreateActivity";
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private MarkerOptions meetupMarker;
     private LatLng pinLocation;
-    private String hash = "";
     private LatLng centerLocation;
     private int zoomLevel;
-    private Long id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +82,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapCreation);
         mapFragment.getMapAsync(this);
 
-        askLocationPermission();
+        LocationHelper.askLocationPermission(this);
         buildGoogleApiClient();
 
         // Register search button listener
@@ -188,26 +190,6 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
     }
 
-    // TODO: move into a helper
-    public void askLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Asking user if explanation is needed
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-                //Prompt the user once explanation has been shown
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
-
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-        }
-    }
-
     // TODO: move into a helper but before check "synchronized"
     private synchronized void buildGoogleApiClient() {
         if (mGoogleApiClient == null) {
@@ -284,9 +266,17 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
                     @Override
                     public void onResponse(Meetup meetup) {
-                        hash = meetup.getHash();
-                        // TODO: check if user is auth and eventually create new user
-                        createUser();
+                        DataHolder.getInstance().setMeetup(meetup);
+
+                        User user;
+                        if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
+                            user = DataHolder.getInstance().getUser();
+                        } else {
+                            // TODO: Handle error if coordinates are not available
+                            user = new User(mLastLocation.getLongitude(), mLastLocation.getLatitude());
+                        }
+
+                        linkUserToMeetup(user);
                     }
                 },
 
@@ -300,11 +290,10 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         queue.add(request);
     }
 
-    private void createUser() {
+    private void linkUserToMeetup(User user) {
         RequestQueue queue = Volley.newRequestQueue(this);
+        String hash = DataHolder.getInstance().getMeetup().getHash();
         final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
-
-        User user = new User(mLastLocation.getLongitude(), mLastLocation.getLatitude());
 
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, user, User.class,
@@ -313,8 +302,10 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
                     @Override
                     public void onResponse(User user) {
-                        id = user.getId();
-                        startMapActivity();
+                        setSharedPreferences(new Gson().toJson(user));
+                        DataHolder.getInstance().setUser(user);
+                        Intent i = new Intent(CreateActivity.this, MapActivity.class);
+                        startActivity(i);
                     }
                 },
 
@@ -328,18 +319,10 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         queue.add(request);
     }
 
-    // TODO: Remove extra data. Should do with data holder
-    private void startMapActivity() {
-        Intent i = new Intent(CreateActivity.this, MapActivity.class);
-        i.putExtra("hash", hash);
-        i.putExtra("centerLongitude", centerLocation.longitude);
-        i.putExtra("centerLatitude", centerLocation.latitude);
-        i.putExtra("zoomLevel", zoomLevel);
-        if (pinLocation != null) {
-            i.putExtra("pinLongitude", pinLocation.longitude);
-            i.putExtra("pinLatitude", pinLocation.latitude);
-        }
-        i.putExtra("id", id);
-        startActivity(i);
+    private void setSharedPreferences(String user) {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.anonymous_user), user);
+        editor.commit();
     }
 }

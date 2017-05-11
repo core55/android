@@ -57,6 +57,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.github.core55.joinup.Model.DataHolder;
+import io.github.core55.joinup.helpers.AuthenticationHelper;
 import io.github.core55.joinup.helpers.GsonRequest;
 import io.github.core55.joinup.helpers.HeaderRequest;
 import io.github.core55.joinup.helpers.HttpRequestHelper;
@@ -71,17 +72,16 @@ import io.github.core55.joinup.entities.User;
 import io.github.core55.joinup.helpers.UserAdapter;
 import io.github.core55.joinup.helpers.VolleyController;
 
-
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String TAG = "MapActivity";
+    public static final String API_URL = "https://dry-cherry.herokuapp.com/api/";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;
     int count = 0;
 
     private LocationManager locationManager;
     private String meetupHash = "028baffc294c434c8c8a4a610aa68e00";
-    private int id_user = 716;
     private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
 
     private Double centerLatitude;
@@ -104,17 +104,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        AuthenticationHelper.syncDataHolder(this);
 
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
 
-        meetupHash = getIntent().getStringExtra("hash");
-        centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
-        centerLongitude = getIntent().getDoubleExtra("centerLongitude", -1);
-        zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
-        pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
-        pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
-        id_user = getIntent().getIntExtra("id", -1);
+//        meetupHash = getIntent().getStringExtra("hash");
+//        centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
+//        centerLongitude = getIntent().getDoubleExtra("centerLongitude", -1);
+//        zoomLevel = getIntent().getIntExtra("zoomLevel", -1);
+//        pinLongitude = getIntent().getDoubleExtra("pinLongitude", -1);
+//        pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
 
         // Retrieve map hash from applink
         handleAppLink();
@@ -167,14 +167,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Double lat = intent.getDoubleExtra("lat", -1);
             Double lon = intent.getDoubleExtra("lon", -1);
 
-            // TODO: Why the null check?
             if (lat != null && lat != -1 && lon != null && lon != -1) {
 
-                lastLatitude = lat;
-                lastLongitude = lon;
-
                 RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-                final String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
+                final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
 
                 User user = new User(lon, lat);
 
@@ -185,7 +181,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                             @Override
                             public void onResponse(User user) {
-                                // TODO: Update user coords here?
+                                DataHolder.getInstance().setUser(user);
                             }
                         },
 
@@ -389,7 +385,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     String nickname = name.getText().toString();
                     Log.d(TAG, nickname);
 
-                    patchNickName(nickname);
+                    patchNickname(nickname);
                     dialog.dismiss();
                 }
 
@@ -407,9 +403,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    public void patchNickName(String name) {
+    public void patchNickname(String name) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-        final String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
+        final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
 
         User user = new User();
         user.setNickname(name);
@@ -421,7 +417,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     @Override
                     public void onResponse(User user) {
-                        // TODO: Update shared prefs and data holder
+                        DataHolder.getInstance().setUser(user);
                     }
                 },
 
@@ -445,7 +441,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mBuilder.setView(mView);
 
                 EditText url = (EditText) mView.findViewById(R.id.editText);
-                url.setText(meetupHash);
+                url.setText(DataHolder.getInstance().getMeetup().getHash());
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
@@ -456,68 +452,47 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     public void copyToCliboard(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", meetupHash);
+        ClipData clip = ClipData.newPlainText("label", DataHolder.getInstance().getMeetup().getHash());
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
-
 
     public void launchNetworkService() {
         // Construct our Intent specifying the Service
         Intent i = new Intent(this, NetworkService.class);
 
-        i.putExtra("hash", meetupHash);
+        i.putExtra("hash", DataHolder.getInstance().getMeetup().getHash());
 
         // Start the service
         startService(i);
     }
 
     private void createUser() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String hash = DataHolder.getInstance().getMeetup().getHash();
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
 
-        int method = Request.Method.POST;
-        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash + "/users/save";
-        JSONObject data = new JSONObject();
+        User user = new User(lastLongitude,lastLatitude);
 
-        try {
-            data.put("lastLongitude", lastLongitude);
-            data.put("lastLatitude", lastLatitude);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.POST, url, user, User.class,
 
-        HeaderRequest userCreationRequest = new HeaderRequest
-                (method, url, data, new Response.Listener<JSONObject>() {
+                new Response.Listener<User>() {
+
                     @Override
-                    public void onResponse(JSONObject response) {
-
-                        int id = -1;
-
-                        try {
-                            id = response.getJSONObject("data").getInt("id");
-                        } catch (JSONException je) {
-                            je.printStackTrace();
-                        }
-
-                        id_user = id;
-
+                    public void onResponse(User user) {
+                        DataHolder.getInstance().setUser(user);
                     }
-                }, new Response.ErrorListener() {
+                },
+
+                new Response.ErrorListener() {
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Content-Type", "application/json");
-                params.put("Accept", "application/json, application/hal+json");
-                return params;
-            }
-        };
-
-        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
-
+                });
+        queue.add(request);
     }
 
     private void createPeopleButtonListener() {
@@ -567,7 +542,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     @Override
                     public void onResponse(Meetup meetup) {
-                        // TODO: Update shared prefs and data holder
+                        DataHolder.getInstance().setMeetup(meetup);
                     }
                 },
 
@@ -580,5 +555,4 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 });
         queue.add(request);
     }
-
 }

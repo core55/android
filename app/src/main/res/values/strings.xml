@@ -12,7 +12,8 @@
 
     <!-- Shared Preferences -->
     <string name="preference_file_key">io.github.core55.joinup.PREFERENCE_FILE_KEY</string>
-    <string name="current_user">CURRENT_USER</string>
+    <string name="auth_user">AUTH_USER</string>
+    <string name="anonymous_user">ANONYMOUS_USER</string>
     <string name="jwt_string">JWT_STRING</string>
     <!--TODO: Remove following -->
     <string name="user_username">USER_USERNAME</string>

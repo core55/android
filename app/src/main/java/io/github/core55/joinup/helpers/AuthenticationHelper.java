@@ -18,22 +18,32 @@ public class AuthenticationHelper {
 
     public static void syncDataHolder(Activity activity) {
         final Context context = activity.getApplicationContext();
+        final String UNKNOWN_USER = "Unknown User";
 
         // Retrieve data about authenticated user from shared preferences
         SharedPreferences sharedPref = activity.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String currentUser = sharedPref.getString(context.getString(R.string.current_user), "Unknown User");
+        String authUser = sharedPref.getString(context.getString(R.string.auth_user), UNKNOWN_USER);
+        String anonymousUser = sharedPref.getString(context.getString(R.string.anonymous_user), UNKNOWN_USER);
         String jwt = sharedPref.getString(context.getString(R.string.jwt_string), "No JWT");
 
         // If user data exist then update dataHolder and set isAuthenticated flag to true. Otherwise
         // clean dataHolder and set isAuthenticated flag to false
-        if (!currentUser.equals("Unknown User")) {
-            User user = new Gson().fromJson(currentUser, User.class);
+        if (!authUser.equals(UNKNOWN_USER)) {
+            User user = new Gson().fromJson(authUser, User.class);
             DataHolder.getInstance().setUser(user);
             DataHolder.getInstance().setJwt(jwt);
+            DataHolder.getInstance().setAnonymous(false);
             DataHolder.getInstance().setAuthenticated(true);
+        } else if (!anonymousUser.equals(UNKNOWN_USER)){
+            User user = new Gson().fromJson(anonymousUser, User.class);
+            DataHolder.getInstance().setUser(user);
+            DataHolder.getInstance().setJwt(null);
+            DataHolder.getInstance().setAnonymous(true);
+            DataHolder.getInstance().setAuthenticated(false);
         } else {
             DataHolder.getInstance().setUser(null);
             DataHolder.getInstance().setJwt(null);
+            DataHolder.getInstance().setAnonymous(false);
             DataHolder.getInstance().setAuthenticated(false);
         }
     }
