@@ -60,7 +60,7 @@
         android:layout_marginEnd="9dp"
         android:background="#00000000"
         android:onClick="onClick"
-        android:src="@drawable/create_meetup_btn"
+        android:src="@drawable/btn_create_meetup"
         tools:layout_editor_absoluteX="286dp"
         tools:layout_editor_absoluteY="490dp" />
 
