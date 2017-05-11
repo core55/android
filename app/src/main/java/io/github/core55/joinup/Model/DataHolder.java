@@ -4,6 +4,7 @@
 
 package io.github.core55.joinup.Model;
 
+import io.github.core55.joinup.entities.Meetup;
 import io.github.core55.joinup.entities.User;
 
 public class DataHolder {
@@ -13,6 +14,7 @@ public class DataHolder {
     private User user;
     private String jwt;
     private boolean isAuthenticated;
+    private Meetup meetup;
 
     public static DataHolder getInstance() {
         return holder;
@@ -40,6 +42,14 @@ public class DataHolder {
 
     public void setAuthenticated(boolean authenticated) {
         isAuthenticated = authenticated;
+    }
+
+    public Meetup getMeetup() {
+        return meetup;
+    }
+
+    public void setMeetup(Meetup meetup) {
+        this.meetup = meetup;
     }
 }
 

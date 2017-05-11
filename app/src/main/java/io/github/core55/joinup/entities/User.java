@@ -22,7 +22,7 @@ public class User extends BaseEntity implements Parcelable {
 
     //private List<String> meetupsList = new ArrayList<>();
 
-    protected User() {
+    public User() {
         super();
     }
 
@@ -30,6 +30,11 @@ public class User extends BaseEntity implements Parcelable {
         this();
         this.lastLongitude = lastLongitude;
         this.lastLatitude = lastLatitude;
+    }
+
+    public User(String nickname) {
+        this();
+        this.nickname = nickname;
     }
 
     private User(Parcel in) {

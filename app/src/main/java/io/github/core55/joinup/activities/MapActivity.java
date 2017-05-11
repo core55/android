@@ -31,9 +31,11 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -55,7 +57,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.github.core55.joinup.Model.DataHolder;
+import io.github.core55.joinup.helpers.GsonRequest;
 import io.github.core55.joinup.helpers.HeaderRequest;
+import io.github.core55.joinup.helpers.HttpRequestHelper;
+import io.github.core55.joinup.helpers.LocationHelper;
 import io.github.core55.joinup.services.LocationManager;
 import io.github.core55.joinup.services.LocationService;
 import io.github.core55.joinup.entities.Meetup;
@@ -95,21 +100,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private ListView lv;
     private ArrayList userList = new ArrayList();
 
-    SharedPreferences sharedPref;
-    String username;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
         // Inject the navigation drawer
-        Drawer result = NavigationDrawer.buildDrawer(this);
-
-        // Retrieve current user from shared preferences
-        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        username = sharedPref.getString(getString(R.string.user_username), "Unknown User");
+        NavigationDrawer.buildDrawer(this);
 
         meetupHash = getIntent().getStringExtra("hash");
         centerLatitude = getIntent().getDoubleExtra("centerLatitude", -1);
@@ -119,13 +116,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         pinLatitude = getIntent().getDoubleExtra("pinLatitude", -1);
         id_user = getIntent().getIntExtra("id", -1);
 
+        // Retrieve map hash from applink
         handleAppLink();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        askLocationPermission();
+        LocationHelper.askLocationPermission(this);
+//        askLocationPermission();
 
         locationManager = new LocationManager(this);
         locationManager.start();
@@ -135,11 +134,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         mActivityTitle = getTitle().toString();
 
+        //TODO: Check if the user has nickname. Not only auth problem
         if (!DataHolder.getInstance().isAuthenticated()) {
             namePrompt();
         }
     }
 
+    // TODO: What these methods do?
     @Override
     protected void onResume() {
         super.onResume();
@@ -166,46 +167,36 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Double lat = intent.getDoubleExtra("lat", -1);
             Double lon = intent.getDoubleExtra("lon", -1);
 
+            // TODO: Why the null check?
             if (lat != null && lat != -1 && lon != null && lon != -1) {
 
                 lastLatitude = lat;
                 lastLongitude = lon;
 
-                int method = Request.Method.PATCH;
-                String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
-                JSONObject data = new JSONObject();
+                RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+                final String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
 
-                try {
-                    data.put("lastLongitude", lon);
-                    data.put("lastLatitude", lat);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                User user = new User(lon, lat);
 
-                HeaderRequest jsonObjectRequest = new HeaderRequest
-                        (method, url, data, new Response.Listener<JSONObject>() {
+                GsonRequest<User> request = new GsonRequest<>(
+                        Request.Method.PATCH, url, user, User.class,
+
+                        new Response.Listener<User>() {
+
                             @Override
-                            public void onResponse(JSONObject response) {
-
+                            public void onResponse(User user) {
+                                // TODO: Update user coords here?
                             }
-                        }, new Response.ErrorListener() {
+                        },
+
+                        new Response.ErrorListener() {
+
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                error.printStackTrace();
+                                HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                             }
-                        }) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("Content-Type", "application/json");
-                        //params.put("Cache-Control", "no-cache");
-                        params.put("Accept", "application/json, application/hal+json");
-
-                        return params;
-                    }
-                };
-
-                VolleyController.getInstance(context).addToRequestQueue(jsonObjectRequest);
+                        });
+                queue.add(request);
             }
 
         }
@@ -296,12 +287,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
         String tempNickname;
-        try{ tempNickname = DataHolder.getInstance().getUser().getNickname();}
-        catch (NullPointerException e){
+        try {
+            tempNickname = DataHolder.getInstance().getUser().getNickname();
+        } catch (NullPointerException e) {
             tempNickname = null;
         }
 
-        if (username.equals("Unknown User") && tempNickname != null && !tempNickname.equals("")) {
+        if (DataHolder.getInstance().isAuthenticated() && tempNickname != null && !tempNickname.equals("")) {
             Context context = getApplicationContext();
             CharSequence text = "Welcome " + tempNickname + "!";
             int duration = Toast.LENGTH_LONG;
@@ -330,29 +322,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
 
         launchNetworkService();
-    }
-
-    /**
-     *
-     */
-    public void askLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Asking user if explanation is needed
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-                //Prompt the user once explanation has been shown
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
-
-
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-        }
     }
 
     @Override
@@ -395,13 +364,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void namePrompt() {
 
+        // Build modal to fill in user nickname
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.dialog_name, null);
         mBuilder.setView(mView);
 
         final EditText name = (EditText) mView.findViewById(R.id.enter_name);
 
+        // Prompt modal
         final AlertDialog dialog = mBuilder.create();
+
+        // TODO: Introduce validation
         if (name.getText().toString().matches("")) {
             dialog.show();
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -418,13 +391,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     patchNickName(nickname);
                     dialog.dismiss();
-
                 }
 
             });
         }
 
-        //  Toast.makeText(this,"Name is set!", Toast.LENGTH_SHORT).show();
+        // Prompt for keyboard
         name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -433,40 +405,35 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             }
         });
-
     }
 
     public void patchNickName(String name) {
-        //     Log.d(TAG, name);
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        final String url = "https://dry-cherry.herokuapp.com/api/users/" + id_user;
 
+        User user = new User();
+        user.setNickname(name);
 
-        int method = Request.Method.PATCH;
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.PATCH, url, user, User.class,
 
-        final JSONObject postname = new JSONObject();
+                new Response.Listener<User>() {
 
-        try {
+                    @Override
+                    public void onResponse(User user) {
+                        // TODO: Update shared prefs and data holder
+                    }
+                },
 
-            postname.put("nickname", name);
+                new Response.ErrorListener() {
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, "https://dry-cherry.herokuapp.com/api/users/" + id_user, postname, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
     }
-
 
     private void createShareButtonListener() {
         ImageButton mShowDialog = (ImageButton) findViewById(R.id.imageButton);
@@ -586,41 +553,32 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void sendMeetupPinLocation() {
-        int method = Request.Method.PATCH;
-        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash;
-        JSONObject data = new JSONObject();
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + meetupHash;
 
-        try {
-            data.put("pinLongitude", pinLongitude);
-            data.put("pinLatitude", pinLatitude);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        Meetup meetup = new Meetup();
+        meetup.setPinLongitude(pinLongitude);
+        meetup.setPinLatitude(pinLatitude);
 
-        HeaderRequest userCreationRequest = new HeaderRequest
-                (method, url, data, new Response.Listener<JSONObject>() {
+        GsonRequest<Meetup> request = new GsonRequest<>(
+                Request.Method.PATCH, url, meetup, Meetup.class,
+
+                new Response.Listener<Meetup>() {
+
                     @Override
-                    public void onResponse(JSONObject response) {
-
+                    public void onResponse(Meetup meetup) {
+                        // TODO: Update shared prefs and data holder
                     }
-                }, new Response.ErrorListener() {
+                },
+
+                new Response.ErrorListener() {
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Content-Type", "application/json");
-                params.put("Accept", "application/json, application/hal+json");
-                return params;
-            }
-        };
-
-        VolleyController.getInstance(this).addToRequestQueue(userCreationRequest);
+                });
+        queue.add(request);
     }
 
 }
-
-

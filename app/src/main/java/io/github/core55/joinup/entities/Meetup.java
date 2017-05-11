@@ -25,7 +25,7 @@ public class Meetup extends BaseEntity implements Parcelable {
     private String name;
     private List<User> usersList = new ArrayList<>();
 
-    protected Meetup() {
+    public Meetup() {
         super();
     }
 
