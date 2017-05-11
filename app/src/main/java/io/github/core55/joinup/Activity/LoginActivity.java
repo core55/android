@@ -1,11 +1,9 @@
 /*
   Authors: S. Stefani
  */
-package io.github.core55.joinup.activities;
+package io.github.core55.joinup.Activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -30,11 +28,11 @@ import com.google.gson.Gson;
 import io.github.core55.joinup.Model.AccountCredentials;
 import io.github.core55.joinup.Model.AuthenticationResponse;
 import io.github.core55.joinup.Model.GoogleToken;
-import io.github.core55.joinup.entities.User;
-import io.github.core55.joinup.helpers.AuthenticationHelper;
-import io.github.core55.joinup.helpers.GsonRequest;
+import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.Helper.AuthenticationHelper;
+import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.helpers.HttpRequestHelper;
+import io.github.core55.joinup.Helper.HttpRequestHelper;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -50,6 +48,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         AuthenticationHelper.syncDataHolder(this);
+        AuthenticationHelper.authenticationLogger(this);
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -149,7 +148,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         User user = authenticationResponse.getUser();
                         String jwt = authenticationResponse.getJwt();
 
-                        setSharedPreferences(gson.toJson(user), jwt);
+                        AuthenticationHelper.persistAuthenticatedUser(LoginActivity.this, user, jwt);
 
                         AuthenticationHelper.syncDataHolder(LoginActivity.this);
 
@@ -183,7 +182,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         User user = authenticationResponse.getUser();
                         String jwt = authenticationResponse.getJwt();
 
-                        setSharedPreferences(gson.toJson(user), jwt);
+                        AuthenticationHelper.persistAuthenticatedUser(LoginActivity.this, user, jwt);
 
                         AuthenticationHelper.syncDataHolder(LoginActivity.this);
 
@@ -202,18 +201,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         queue.add(request);
     }
 
-
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
-    }
-
-    private void setSharedPreferences(String user, String jwt) {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.auth_user), user);
-        editor.putString(getString(R.string.jwt_string), jwt);
-        editor.commit();
     }
 }

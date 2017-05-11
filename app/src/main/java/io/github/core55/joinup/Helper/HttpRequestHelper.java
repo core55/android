@@ -2,7 +2,7 @@
   Authors: S. Stefani
  */
 
-package io.github.core55.joinup.helpers;
+package io.github.core55.joinup.Helper;
 
 import android.app.Activity;
 import android.widget.Toast;

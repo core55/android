@@ -1,4 +1,4 @@
-package io.github.core55.joinup.activities;
+package io.github.core55.joinup.Activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -9,14 +9,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -26,15 +24,12 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,33 +40,25 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-import com.mikepenz.materialdrawer.Drawer;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.github.core55.joinup.Model.DataHolder;
-import io.github.core55.joinup.helpers.AuthenticationHelper;
-import io.github.core55.joinup.helpers.GsonRequest;
-import io.github.core55.joinup.helpers.HeaderRequest;
-import io.github.core55.joinup.helpers.HttpRequestHelper;
-import io.github.core55.joinup.helpers.LocationHelper;
-import io.github.core55.joinup.services.LocationManager;
-import io.github.core55.joinup.services.LocationService;
-import io.github.core55.joinup.entities.Meetup;
-import io.github.core55.joinup.helpers.NavigationDrawer;
-import io.github.core55.joinup.services.NetworkService;
+import io.github.core55.joinup.Helper.AuthenticationHelper;
+import io.github.core55.joinup.Helper.GsonRequest;
+import io.github.core55.joinup.Helper.HttpRequestHelper;
+import io.github.core55.joinup.Helper.LocationHelper;
+import io.github.core55.joinup.Service.LocationManager;
+import io.github.core55.joinup.Service.LocationService;
+import io.github.core55.joinup.Entity.Meetup;
+import io.github.core55.joinup.Helper.NavigationDrawer;
+import io.github.core55.joinup.Service.NetworkService;
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.entities.User;
-import io.github.core55.joinup.helpers.UserAdapter;
-import io.github.core55.joinup.helpers.VolleyController;
+import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.Helper.UserAdapter;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -96,6 +83,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         AuthenticationHelper.syncDataHolder(this);
+        AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
@@ -120,6 +108,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        AuthenticationHelper.syncDataHolder(this);
+    }
+
     // TODO: What these methods do?
     @Override
     protected void onResume() {
@@ -130,6 +124,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         IntentFilter filter2 = new IntentFilter(LocationService.ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(locationReceiver, filter2);
+        AuthenticationHelper.syncDataHolder(this);
     }
 
     @Override
@@ -138,6 +133,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Unregister the listener when the application is paused
         LocalBroadcastManager.getInstance(this).unregisterReceiver(networkServiceReceiver);
         // or `unregisterReceiver(networkServiceReceiver)` for a normal broadcast
+        AuthenticationHelper.syncSharedPreferences(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AuthenticationHelper.syncSharedPreferences(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AuthenticationHelper.syncSharedPreferences(this);
     }
 
     private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
@@ -147,7 +155,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             lat = intent.getDoubleExtra("lat", -1);
             lon = intent.getDoubleExtra("lon", -1);
 
-            if (lat != null && lat != -1 && lon != null && lon != -1) {
+            if (lat != null && lat != -1 && lon != null && lon != -1 && (DataHolder.getInstance().isAnonymous() || DataHolder.getInstance().isAnonymous())) {
 
                 RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                 final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
@@ -327,6 +335,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 } else {
                     // TODO: Handle error if coordinates are not available
                     user = new User(lon, lat);
+                    DataHolder.getInstance().setAnonymous(true);
                 }
 
                 linkUserToMeetup(user);
@@ -450,34 +459,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         startService(i);
     }
 
-    private void createUser() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String hash = DataHolder.getInstance().getMeetup().getHash();
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
-
-        User user = new User(lon,lat);
-
-        GsonRequest<User> request = new GsonRequest<>(
-                Request.Method.POST, url, user, User.class,
-
-                new Response.Listener<User>() {
-
-                    @Override
-                    public void onResponse(User user) {
-                        DataHolder.getInstance().setUser(user);
-                    }
-                },
-
-                new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
     private void fetchMeetup(String hash) {
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash;
@@ -576,8 +557,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     @Override
                     public void onResponse(User user) {
-                        setSharedPreferences(new Gson().toJson(user));
                         DataHolder.getInstance().setUser(user);
+                        AuthenticationHelper.syncSharedPreferences(MapActivity.this);
                     }
                 },
 
@@ -589,12 +570,5 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 });
         queue.add(request);
-    }
-
-    private void setSharedPreferences(String user) {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.anonymous_user), user);
-        editor.commit();
     }
 }

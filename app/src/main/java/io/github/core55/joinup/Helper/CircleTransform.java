@@ -1,4 +1,4 @@
-package io.github.core55.joinup.helpers;
+package io.github.core55.joinup.Helper;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

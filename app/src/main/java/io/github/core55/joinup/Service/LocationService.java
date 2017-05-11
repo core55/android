@@ -1,4 +1,4 @@
-package io.github.core55.joinup.services;
+package io.github.core55.joinup.Service;
 
 import android.app.IntentService;
 import android.content.Intent;

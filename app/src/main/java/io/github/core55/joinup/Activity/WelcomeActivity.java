@@ -2,7 +2,7 @@
   Authors: S. Stefani
  */
 
-package io.github.core55.joinup.activities;
+package io.github.core55.joinup.Activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.helpers.AuthenticationHelper;
+import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Model.DataHolder;
 
 public class WelcomeActivity extends Activity {
@@ -21,9 +21,10 @@ public class WelcomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         AuthenticationHelper.syncDataHolder(this);
+        AuthenticationHelper.authenticationLogger(this);
 
         // If user is authenticated move to create meetup activity
-        if (DataHolder.getInstance().isAuthenticated()) {
+        if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
             Intent i = new Intent(this, CreateActivity.class);
             startActivity(i);
         }

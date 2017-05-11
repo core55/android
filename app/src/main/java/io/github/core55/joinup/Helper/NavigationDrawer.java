@@ -2,7 +2,7 @@
   Authors: S. Stefani
  */
 
-package io.github.core55.joinup.helpers;
+package io.github.core55.joinup.Helper;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,8 +23,8 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.activities.LoginActivity;
-import io.github.core55.joinup.activities.WelcomeActivity;
+import io.github.core55.joinup.Activity.LoginActivity;
+import io.github.core55.joinup.Activity.WelcomeActivity;
 
 public class NavigationDrawer {
 
@@ -66,6 +66,7 @@ public class NavigationDrawer {
 
                         if (drawerItem.getIdentifier() == 3) {
                             sharedPref.edit().remove(context.getString(R.string.auth_user)).commit();
+                            sharedPref.edit().remove(context.getString(R.string.anonymous_user)).commit();
                             sharedPref.edit().remove(context.getString(R.string.jwt_string)).commit();
                             AuthenticationHelper.syncDataHolder(activity);
 

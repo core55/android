@@ -2,7 +2,7 @@
   Authors: S. Stefani
  */
 
-package io.github.core55.joinup.helpers;
+package io.github.core55.joinup.Helper;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;

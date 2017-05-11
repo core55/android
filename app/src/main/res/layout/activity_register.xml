@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="10dp"
     android:weightSum="1"
-    tools:context="io.github.core55.joinup.activities.LoginActivity">
+    tools:context="io.github.core55.joinup.Activity.LoginActivity">
 
     <TextView
         android:layout_width="match_parent"

@@ -1,10 +1,8 @@
-package io.github.core55.joinup.activities;
+package io.github.core55.joinup.Activity;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Address;
@@ -13,7 +11,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -41,19 +38,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.List;
 
 import io.github.core55.joinup.Model.DataHolder;
-import io.github.core55.joinup.entities.Meetup;
-import io.github.core55.joinup.entities.User;
-import io.github.core55.joinup.helpers.AuthenticationHelper;
-import io.github.core55.joinup.helpers.GsonRequest;
-import io.github.core55.joinup.helpers.HttpRequestHelper;
-import io.github.core55.joinup.helpers.LocationHelper;
-import io.github.core55.joinup.helpers.NavigationDrawer;
+import io.github.core55.joinup.Entity.Meetup;
+import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.Helper.AuthenticationHelper;
+import io.github.core55.joinup.Helper.GsonRequest;
+import io.github.core55.joinup.Helper.HttpRequestHelper;
+import io.github.core55.joinup.Helper.LocationHelper;
+import io.github.core55.joinup.Helper.NavigationDrawer;
 import io.github.core55.joinup.R;
 
 public class CreateActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -74,6 +70,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
         AuthenticationHelper.syncDataHolder(this);
+        AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
@@ -107,11 +104,13 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+        AuthenticationHelper.syncDataHolder(this);
     }
 
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
+        AuthenticationHelper.syncSharedPreferences(this);
     }
 
     // TODO: to check
@@ -244,7 +243,9 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     @Override
-    public void onLocationChanged(Location location) { }
+    public void onLocationChanged(Location location) {
+
+    }
 
     private void createMeetup() {
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -302,8 +303,13 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
                     @Override
                     public void onResponse(User user) {
-                        setSharedPreferences(new Gson().toJson(user));
+                        if (!DataHolder.getInstance().isAuthenticated() && !DataHolder.getInstance().isAnonymous()) {
+                            DataHolder.getInstance().setAnonymous(true);
+                        }
+
                         DataHolder.getInstance().setUser(user);
+                        AuthenticationHelper.syncSharedPreferences(CreateActivity.this);
+
                         Intent i = new Intent(CreateActivity.this, MapActivity.class);
                         startActivity(i);
                     }
@@ -319,10 +325,21 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         queue.add(request);
     }
 
-    private void setSharedPreferences(String user) {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.anonymous_user), user);
-        editor.commit();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AuthenticationHelper.syncDataHolder(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AuthenticationHelper.syncSharedPreferences(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AuthenticationHelper.syncSharedPreferences(this);
     }
 }

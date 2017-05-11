@@ -1,4 +1,4 @@
-package io.github.core55.joinup.services;
+package io.github.core55.joinup.Service;
 
 import android.app.Service;
 import android.content.Intent;
@@ -18,8 +18,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.github.core55.joinup.entities.Meetup;
-import io.github.core55.joinup.helpers.VolleyController;
+import io.github.core55.joinup.Entity.Meetup;
+import io.github.core55.joinup.Helper.VolleyController;
 
 public class NetworkService extends Service {
 
@@ -72,7 +72,9 @@ public class NetworkService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash);
+            if (meetupHash != null) {
+                requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash);
+            }
 
             if (started) {
                 handlerStart();
@@ -154,73 +156,6 @@ public class NetworkService extends Service {
         VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    /*
-    public void requestUser(String url) {
-
-        Log.d(TAG, "requestMeetup");
-        int method = Request.Method.GET;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        String url = "";
-
-                        try {
-                            url = response.getJSONObject("_links").getJSONObject("meetups").getString("href");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        requestUserList(response, url);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-
-    }
-
-    private void requestMeetupList(final JSONObject user, String url) {
-
-        int method = Request.Method.GET;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        JSONArray jsonMeetupArray = new JSONArray();
-
-                        try {
-                            jsonMeetupArray = response.getJSONObject("_embedded").getJSONArray("meetups");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Intent i = new Intent(ACTION);
-                        i.putExtra("user", Meetup.fromJson(user, jsonMeetupArray));
-                        mLocalBroadcastManager.sendBroadcast(i);
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-    }
-    */
-
     public void sendLocation(Location location, String url) {
 
         JSONObject newLocation = new JSONObject();
@@ -249,7 +184,5 @@ public class NetworkService extends Service {
 
         // Add a request to your RequestQueue.
         VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-
     }
-
 }

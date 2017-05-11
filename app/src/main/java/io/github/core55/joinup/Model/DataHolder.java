@@ -4,8 +4,8 @@
 
 package io.github.core55.joinup.Model;
 
-import io.github.core55.joinup.entities.Meetup;
-import io.github.core55.joinup.entities.User;
+import io.github.core55.joinup.Entity.Meetup;
+import io.github.core55.joinup.Entity.User;
 
 public class DataHolder {
 

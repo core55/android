@@ -1,4 +1,4 @@
-package io.github.core55.joinup.entities;
+package io.github.core55.joinup.Entity;
 
 
 import android.os.Parcelable;

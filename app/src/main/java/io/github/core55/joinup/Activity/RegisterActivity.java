@@ -1,4 +1,4 @@
-package io.github.core55.joinup.activities;
+package io.github.core55.joinup.Activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
