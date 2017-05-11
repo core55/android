@@ -41,6 +41,9 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -59,6 +62,7 @@ import io.github.core55.joinup.Service.NetworkService;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.UserAdapter;
+
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -295,6 +299,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
 
         launchNetworkService();
+
+        // TODO: fix user list
+//        importUsers();
     }
 
     @Override
@@ -490,7 +497,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
-                importUsers();
                 UserAdapter adapter = new UserAdapter(getApplicationContext(), 0, userList);
                 mBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
                     @Override
@@ -506,44 +512,90 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    void importUsers() {
-        String[] nicknames = {"Hussam", "Patrick", "Marcel", "Phillip", "Simone", "Dean", "Juan Luis", "Jiho", "Pepe", "Pablo"};
-        String[] status = {"Hello, its me", "Maple syrup", "applestrudel", "biscuits please, not cookies", "Planet-tricky", "Baras", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies", "biscuits please, not cookies"};
-        int[] profilePictures = {R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_3, R.drawable.emoji_4, R.drawable.emoji_1, R.drawable.emoji_2, R.drawable.emoji_2, R.drawable.emoji_1, R.drawable.emoji_3, R.drawable.emoji_4};
-        for (int i = 0; i < nicknames.length; i++) {
-            User u = new User(nicknames[i], status[i], profilePictures[i]);
-            userList.add(u);
-        }
-    }
+//    void importUsers() {
+//        int method = Request.Method.GET;
+//        String hash = DataHolder.getInstance().getMeetup().getHash();
+//        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users";
+//        Log.e("url", url);
+//        HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
+//                (method, url, null, new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        Log.e("response", response.toString());
+//                        try {
+//                            JSONArray usersJson = response.getJSONObject("data").getJSONObject("_embedded").getJSONArray("users");
+//                            Log.e("usersJson", usersJson.toString());
+//                            JSONObject userJson; //one user
+//                            for (int i = 0; i < usersJson.length(); i++) {
+//                                userJson = (JSONObject) usersJson.get(i);
+//                                String nickname = userJson.getString("nickname");
+//                                String status = userJson.getString("status");
+//                                //retrieve link for picture: first google, if it doesn't exist -> gravatar, if it doesn't exist -> emoji
+//                                String profileURL = userJson.getString("googlePictureURI"); //googlePictureURI gravatarURI
+//                                if (profileURL == "null") {
+//                                    profileURL = userJson.getString("gravatarURI");
+//                                    if (profileURL == "null") {
+//                                        profileURL = "emoji";
+//                                    }
+//                                }
+//
+//
+//                                User u = new User(nickname, status, profileURL);
+//                                userList.add(u);
+//                            }
+//                            Log.e("user_list", response.toString());
+//                        } catch (Exception je) {
+//                            je.printStackTrace();
+//                        }
+//
+//                    }
+//
+//                }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        error.printStackTrace();
+//                        Log.e("errorResponse", "dihvsvdh");
+//                    }
+//                }) {
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> params = new HashMap<String, String>();
+//                params.put("Content-Type", "application/json");
+//                params.put("Accept", "application/json, application/hal+json");
+//                return params;
+//            }
+//        };
+//        VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
+//    }
 
     private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
+            RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+            final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
-        Meetup meetup = new Meetup();
-        meetup.setPinLongitude(pinLongitude);
-        meetup.setPinLatitude(pinLatitude);
+            Meetup meetup = new Meetup();
+            meetup.setPinLongitude(pinLongitude);
+            meetup.setPinLatitude(pinLatitude);
 
-        GsonRequest<Meetup> request = new GsonRequest<>(
-                Request.Method.PATCH, url, meetup, Meetup.class,
+            GsonRequest<Meetup> request = new GsonRequest<>(
+                    Request.Method.PATCH, url, meetup, Meetup.class,
 
-                new Response.Listener<Meetup>() {
+                    new Response.Listener<Meetup>() {
 
-                    @Override
-                    public void onResponse(Meetup meetup) {
-                        DataHolder.getInstance().setMeetup(meetup);
-                    }
-                },
+                        @Override
+                        public void onResponse(Meetup meetup) {
+                            DataHolder.getInstance().setMeetup(meetup);
+                        }
+                    },
 
-                new Response.ErrorListener() {
+                    new Response.ErrorListener() {
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                        }
+                    });
+            queue.add(request);
+        }
 
     private void linkUserToMeetup(User user) {
         RequestQueue queue = Volley.newRequestQueue(this);
