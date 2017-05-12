@@ -322,6 +322,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 //        importUsers();
 
 
+        // User out of bounds indicators
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {

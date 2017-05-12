@@ -23,12 +23,18 @@ import io.github.core55.joinup.R;
  */
 
 public class OutOfBoundsHelper {
+    /*
+     *  Calculates polar coorindates
+     * */
     public static double calculatePolarCoordinateTheta(LatLngBounds bounds, MarkerOptions marker) {
         LatLng center = bounds.getCenter();
         LatLng location = marker.getPosition();
         return Math.atan2(location.latitude - center.latitude, location.longitude - center.longitude);
     }
 
+    /*
+     *  Linear mapping between two interwals
+     * */
     public static double linearMapping(double x, double a, double b, double c, double d) {
         return (x - a) / (b - a) * (d - c) + c;
     }
@@ -52,15 +58,12 @@ public class OutOfBoundsHelper {
         int width = displayMetrics.widthPixels;
         int height = displayMetrics.heightPixels;
 
-        double degrees = Math.toDegrees(theta);
-
-        // degrees
-        double bearing = (double) camera.bearing;
-
-        Log.d("MapActivity", " > Map position info (rad,deg,bearing): " + theta + " / " + degrees + " / " + bearing);
+        // todo: adjust for bearing
+//        double degrees = Math.toDegrees(theta);
+//        double bearing = (double) camera.bearing;
+//        Log.d("MapActivity", " > Map position info (rad,deg,bearing): " + theta + " / " + degrees + " / " + bearing);
 
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) indicator.getLayoutParams();
-
         params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
