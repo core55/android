@@ -201,7 +201,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if (meetupMarker == null && meetupMarkerView == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
-                    meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+                    meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
                     meetupMarkerView = mMap.addMarker(meetupMarker);
                 } else if (meetupMarker != null && meetupMarkerView != null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
@@ -218,9 +218,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                         newMarker.title(u.getNickname());
                         if (newMarker.getTitle() == null) {
-                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
                         } else {
-                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
                         }
                         markersOnMap.put(u.getId(), newMarker);
                         mMap.addMarker(newMarker);
@@ -250,7 +250,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         if (meetupMarker == null && meetupMarkerView == null && meetup.getPinLatitude() != -1 && meetup.getPinLongitude() != -1) {
             meetupMarker = new MarkerOptions().draggable(true);
             meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
-            meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+            meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
             meetupMarkerView = mMap.addMarker(meetupMarker);
         }
 
