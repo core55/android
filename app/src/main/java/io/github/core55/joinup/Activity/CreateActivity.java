@@ -166,7 +166,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
                 if (meetupMarker == null) {
                     meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(latLng);
-                    meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.meetup));
+                    meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
                     mMap.addMarker(meetupMarker);
                     pinLocation = meetupMarker.getPosition();
                 }
