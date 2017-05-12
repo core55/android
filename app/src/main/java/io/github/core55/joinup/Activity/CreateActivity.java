@@ -1,3 +1,7 @@
+/*
+  Authors: S. Stefani, Patrick Richer St-Onge
+ */
+
 package io.github.core55.joinup.Activity;
 
 import android.Manifest;
@@ -44,7 +48,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
 import java.util.List;
 
-import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
@@ -52,6 +55,7 @@ import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.NavigationDrawer;
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
 
 public class CreateActivity extends AppCompatActivity implements
@@ -131,12 +135,22 @@ public class CreateActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         AuthenticationHelper.syncDataHolder(this);
+
+        // Resume receiving location updates
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         AuthenticationHelper.syncSharedPreferences(this);
+
+        // Stop location updates to save battery, but don't disconnect the GoogleApiClient object
+        if (mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
     }
 
     @Override
@@ -245,12 +259,18 @@ public class CreateActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
         // Determine user current location as soon as connected with Google API
+        startLocationUpdates();
+    }
+
+    private void startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
+    }
 
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     @Override
