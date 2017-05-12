@@ -569,33 +569,33 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 //    }
 
     private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
-            RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-            final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
-            Meetup meetup = new Meetup();
-            meetup.setPinLongitude(pinLongitude);
-            meetup.setPinLatitude(pinLatitude);
+        Meetup meetup = new Meetup();
+        meetup.setPinLongitude(pinLongitude);
+        meetup.setPinLatitude(pinLatitude);
 
-            GsonRequest<Meetup> request = new GsonRequest<>(
-                    Request.Method.PATCH, url, meetup, Meetup.class,
+        GsonRequest<Meetup> request = new GsonRequest<>(
+                Request.Method.PATCH, url, meetup, Meetup.class,
 
-                    new Response.Listener<Meetup>() {
+                new Response.Listener<Meetup>() {
 
-                        @Override
-                        public void onResponse(Meetup meetup) {
-                            DataHolder.getInstance().setMeetup(meetup);
-                        }
-                    },
+                    @Override
+                    public void onResponse(Meetup meetup) {
+                        DataHolder.getInstance().setMeetup(meetup);
+                    }
+                },
 
-                    new Response.ErrorListener() {
+                new Response.ErrorListener() {
 
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                        }
-                    });
-            queue.add(request);
-        }
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
 
     private void linkUserToMeetup(User user) {
         RequestQueue queue = Volley.newRequestQueue(this);
