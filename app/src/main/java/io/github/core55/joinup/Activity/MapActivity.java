@@ -22,15 +22,19 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -86,6 +90,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private ArrayList userList = new ArrayList();
 
+    private Context context;
+    private User [] listOfUsers;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +103,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
-
+        
         // Retrieve map hash from applink
         handleAppLink();
 
@@ -110,6 +118,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         createShareButtonListener();
         createPeopleButtonListener();
+        createToggleButtonListener();
 
         if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
@@ -451,6 +460,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
+        });
+    }
+    private void createToggleButtonListener(){
+        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+//// TODO: disable location for users
+                } else {
+//// TODO: enable location for users
+                }
             }
         });
     }
