@@ -27,8 +27,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -57,8 +61,13 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
     public static final String TAG = "CreateActivity";
 
+    private static final long SMALLEST_DISPLACEMENT = 2; // 2 meters
+    private static final long UPDATE_INTERVAL = 10 * 1000;  // 10 secs
+    private static final long FASTEST_INTERVAL = 2 * 1000; // 2 secs
+
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
     private Location mLastLocation;
     private MarkerOptions meetupMarker;
     private LatLng pinLocation;
@@ -81,6 +90,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
         LocationHelper.askLocationPermission(this);
         buildGoogleApiClient();
+        createLocationRequest();
 
         // Register search button listener
         Button search_button = (Button) findViewById(R.id.search_button);
@@ -245,6 +255,18 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     @Override
     public void onLocationChanged(Location location) {
 
+    }
+
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     private void createMeetup() {
