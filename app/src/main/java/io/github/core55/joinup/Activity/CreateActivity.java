@@ -201,11 +201,6 @@ public class CreateActivity extends AppCompatActivity implements
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        // Show blue dot on map
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        }
-
         // Create meetup draggable marker
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -278,6 +273,11 @@ public class CreateActivity extends AppCompatActivity implements
 
         // If first time getting location, then move the camera to center it
         if (mLastLocation == null) {
+            // Show blue dot on map
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            }
+
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_LEVEL);
             mMap.animateCamera(cameraUpdate);
         }
