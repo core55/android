@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,6 +55,7 @@ import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
+import io.github.core55.joinup.Model.UserList;
 import io.github.core55.joinup.Service.LocationManager;
 import io.github.core55.joinup.Service.LocationService;
 import io.github.core55.joinup.Entity.Meetup;
@@ -334,6 +336,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             if (matcher.find()) {
                 String applinkHash = matcher.group(1);
                 fetchMeetup(applinkHash);
+                fetchUserList(applinkHash);
                 Log.d(TAG, "hash = " + DataHolder.getInstance().getMeetup().getHash());
 
                 User user;
@@ -478,6 +481,31 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
+                    }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
+
+    private void fetchUserList(String hash) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users";
+
+        GsonRequest<UserList> request = new GsonRequest<>(
+                Request.Method.GET, url, UserList.class,
+
+                new Response.Listener<UserList>() {
+
+                    @Override
+                    public void onResponse(UserList userList) {
+                        DataHolder.getInstance().setUserList(userList.getUsers());
                     }
                 },
 

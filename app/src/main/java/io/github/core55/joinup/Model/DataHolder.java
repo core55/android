@@ -4,6 +4,8 @@
 
 package io.github.core55.joinup.Model;
 
+import java.util.List;
+
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 
@@ -16,6 +18,7 @@ public class DataHolder {
     private boolean isAuthenticated;
     private boolean isAnonymous;
     private Meetup meetup;
+    private List<User> userList;
 
     public static DataHolder getInstance() {
         return holder;
@@ -59,6 +62,14 @@ public class DataHolder {
 
     public void setMeetup(Meetup meetup) {
         this.meetup = meetup;
+    }
+
+    public List<User> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
     }
 }
 
