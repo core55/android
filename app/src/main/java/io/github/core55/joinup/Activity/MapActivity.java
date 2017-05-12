@@ -261,7 +261,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
                 meetup.getZoomLevel()));
 
-        if (meetupMarker == null && meetupMarkerView == null && meetup.getPinLatitude() != -1 && meetup.getPinLongitude() != -1) {
+        if (meetupMarker == null && meetupMarkerView == null
+                && meetup.getPinLatitude() != null && meetup.getPinLongitude() != null) {
             meetupMarker = new MarkerOptions().draggable(true);
             meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
             meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));

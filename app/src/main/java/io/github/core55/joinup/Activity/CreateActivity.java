@@ -115,6 +115,7 @@ public class CreateActivity extends AppCompatActivity implements
                 createMeetup();
             }
         });
+
     }
 
     @Override
@@ -280,6 +281,9 @@ public class CreateActivity extends AppCompatActivity implements
 
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_LEVEL);
             mMap.animateCamera(cameraUpdate);
+
+            // Display helpful text
+            Toast.makeText(this, "Click on the map to place a meetup pin", Toast.LENGTH_LONG).show();
         }
 
         // Update location
