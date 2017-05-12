@@ -9,6 +9,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -64,6 +65,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     private static final long SMALLEST_DISPLACEMENT = 2; // 2 meters
     private static final long UPDATE_INTERVAL = 10 * 1000;  // 10 secs
     private static final long FASTEST_INTERVAL = 2 * 1000; // 2 secs
+    private static final int ZOOM_LEVEL = 15;
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -215,13 +217,11 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     public void onConnected(@Nullable Bundle bundle) {
 
         // Determine user current location as soon as connected with Google API
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        }
+        startLocationUpdates();
 
         // If we have a current location, then move the camera to center it
         if (mLastLocation != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), ZOOM_LEVEL));
         }
 
     }
@@ -254,7 +254,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public void onLocationChanged(Location location) {
-
+        mLastLocation = location;
     }
 
     private void createLocationRequest() {
@@ -266,7 +266,9 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void startLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
     }
 
     private void createMeetup() {
