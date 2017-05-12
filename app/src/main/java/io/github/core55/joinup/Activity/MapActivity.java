@@ -284,9 +284,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        // Show blue dot on map
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        // disable rotation gestures, because they are not reflected in the bounds
+        // of the visible area. avoids false out of bound indicators.
+        mMap.getUiSettings().setRotateGesturesEnabled(false);
+
+        // show blue dot on map
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
 
@@ -321,7 +324,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // TODO: fix user list
 //        importUsers();
 
-
         // User out of bounds indicators
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -347,9 +349,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
 
                     // if marker visible, remove indicator if present
-                    if (bounds.contains(marker.getPosition()) && outOfBoundsIndicators.containsKey(item.getKey())) {
-                        TextView indicator = outOfBoundsIndicators.get(item.getKey());
-                        indicator.setVisibility(View.GONE);
+                    if (bounds.contains(marker.getPosition())) {
+                        if (outOfBoundsIndicators.containsKey(item.getKey())) {
+                            TextView indicator = outOfBoundsIndicators.get(item.getKey());
+                            indicator.setVisibility(View.GONE);
+                        }
+
                         continue;
                     }
                     ;

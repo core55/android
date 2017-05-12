@@ -59,9 +59,12 @@ public class OutOfBoundsHelper {
         int height = displayMetrics.heightPixels;
 
         // todo: adjust for bearing
-//        double degrees = Math.toDegrees(theta);
-//        double bearing = (double) camera.bearing;
-//        Log.d("MapActivity", " > Map position info (rad,deg,bearing): " + theta + " / " + degrees + " / " + bearing);
+        /*double degrees = Math.toDegrees(theta);
+        double bearing = (double) camera.bearing;
+
+        // experimental
+        double bearingAngleToNorth = Math.abs(bearing - 360) % 360;
+        theta += Math.toRadians(bearingAngleToNorth);*/
 
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) indicator.getLayoutParams();
         params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
