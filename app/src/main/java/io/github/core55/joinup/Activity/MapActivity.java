@@ -1,3 +1,6 @@
+/*
+  Authors:Juan, Patrick, S.Stefani and Hussam
+ */
 package io.github.core55.joinup.Activity;
 
 import android.Manifest;
@@ -14,6 +17,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -22,15 +26,20 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -110,6 +119,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         createShareButtonListener();
         createPeopleButtonListener();
+        createSwitchListener();
 
         if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
@@ -361,7 +371,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-
+    /**
+     *A name prompt is displayed to the non-registered users
+     */
     private void namePrompt() {
 
         // Build modal to fill in user nickname
@@ -407,6 +419,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
+    /**
+     * The nicknames are updated in the database
+     * @param nickname is the inputed nickname
+     */
     public void patchNickname(String nickname) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
@@ -435,6 +451,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         queue.add(request);
     }
 
+    /**
+     * when clicking on the share button, a dialog is built
+     * the dialog shows the
+     */
     private void createShareButtonListener() {
         ImageButton mShowDialog = (ImageButton) findViewById(R.id.imageButton);
         mShowDialog.setOnClickListener(new View.OnClickListener() {
@@ -455,6 +475,30 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
+    /**
+     * The switch is responsible for controlling the location update
+     * The switch is colored-green by default which indicates that the updates are on.
+     */
+    private void createSwitchListener() {
+        Switch toggle = (Switch) findViewById(R.id.toggleSwitch);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    //enable location for users
+                    locationManager.restart();
+                } else {
+                    //disable location for users
+                    locationManager.stop();
+                }
+            }
+        });
+    }
+
+    /**
+     * The method is used to copy the provided link to the clipboard when clicking on the copy button
+     *
+     * @param v is the current view
+     */
     public void copyToCliboard(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         String meetupLink = WEBAPP_URL + WEBAPP_URL_PREFIX + DataHolder.getInstance().getMeetup().getHash();
@@ -601,33 +645,33 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 //    }
 
     private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
-            RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-            final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
-            Meetup meetup = new Meetup();
-            meetup.setPinLongitude(pinLongitude);
-            meetup.setPinLatitude(pinLatitude);
+        Meetup meetup = new Meetup();
+        meetup.setPinLongitude(pinLongitude);
+        meetup.setPinLatitude(pinLatitude);
 
-            GsonRequest<Meetup> request = new GsonRequest<>(
-                    Request.Method.PATCH, url, meetup, Meetup.class,
+        GsonRequest<Meetup> request = new GsonRequest<>(
+                Request.Method.PATCH, url, meetup, Meetup.class,
 
-                    new Response.Listener<Meetup>() {
+                new Response.Listener<Meetup>() {
 
-                        @Override
-                        public void onResponse(Meetup meetup) {
-                            DataHolder.getInstance().setMeetup(meetup);
-                        }
-                    },
+                    @Override
+                    public void onResponse(Meetup meetup) {
+                        DataHolder.getInstance().setMeetup(meetup);
+                    }
+                },
 
-                    new Response.ErrorListener() {
+                new Response.ErrorListener() {
 
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                        }
-                    });
-            queue.add(request);
-        }
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
 
     private void linkUserToMeetup(User user) {
         RequestQueue queue = Volley.newRequestQueue(this);
