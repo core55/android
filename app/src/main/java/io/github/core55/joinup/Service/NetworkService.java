@@ -35,7 +35,6 @@ public class NetworkService extends Service {
     private boolean started = true;
     private Handler handler = new Handler();
 
-    //private String meetupHash;
 
     @Override
     public void onCreate() {
