@@ -6,6 +6,7 @@ package io.github.core55.joinup.Model;
 
 public class AccountCredentials {
 
+    private String nickname;
     private String username;
     private String password;
     private String oldUsername;
@@ -24,6 +25,14 @@ public class AccountCredentials {
         this.username = username;
         this.password = password;
         this.oldUsername = oldUsername;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getUsername() {

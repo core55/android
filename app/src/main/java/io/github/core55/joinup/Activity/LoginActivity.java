@@ -25,7 +25,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.gson.Gson;
 
 import io.github.core55.joinup.Model.AccountCredentials;
 import io.github.core55.joinup.Model.AuthenticationResponse;
@@ -39,11 +38,8 @@ import io.github.core55.joinup.Helper.HttpRequestHelper;
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = "LoginActivity";
-
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_GET_TOKEN = 9002;
-
-    private final Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

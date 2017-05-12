@@ -33,30 +33,47 @@ public class WelcomeActivity extends Activity {
     }
 
     private void registerOnClickListener() {
-        Button btn_login = (Button) findViewById(R.id.btn_login);
-        btn_login.setOnClickListener(new View.OnClickListener() {
+
+        // Create meetup button
+        Button mCreateButton = (Button) findViewById(R.id.welcome_create_meetup_button);
+        mCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createMeetup(v);
+                createMeetup();
             }
         });
 
-        Button btn_login_welcome = (Button) findViewById(R.id.btn_login_welcome);
-        btn_login_welcome.setOnClickListener(new View.OnClickListener() {
+        // Login button
+        Button mLoginButton = (Button) findViewById(R.id.welcome_login_button);
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginActivity(v);
+                loginActivity();
+            }
+        });
+
+        // Register button
+        Button mRegisterButton = (Button) findViewById(R.id.welcome_register_button);
+        mRegisterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                registerActivity();
             }
         });
     }
 
-    protected void createMeetup(View v) {
+    protected void createMeetup() {
         Intent i = new Intent(this, CreateActivity.class);
         startActivity(i);
     }
 
-    protected void loginActivity(View v) {
+    protected void loginActivity() {
         Intent i = new Intent(this, LoginActivity.class);
+        startActivity(i);
+    }
+
+    protected void registerActivity() {
+        Intent i = new Intent(this, RegisterActivity.class);
         startActivity(i);
     }
 }

@@ -50,6 +50,7 @@
     <string name="email_confirm_redirect_welcome">Back to the Welcome Page</string>
     <string name="login_main_button">Login</string>
     <string name="login_redirect_register">Not yet a user? Register here</string>
+    <string name="welcome_create_meetup_button">Create Meetup</string>
 
 
 </resources>

@@ -36,6 +36,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerOnClickListener() {
+
         // Register button
         Button mRegisterButton = (Button) findViewById(R.id.register_main_button);
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
@@ -47,6 +48,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerOnTouchListener() {
+
         // Redirect to login page
         TextView mRedirectToWelcome = (TextView) findViewById(R.id.register_redirect_login);
         mRedirectToWelcome.setOnTouchListener(new View.OnTouchListener() {
@@ -74,6 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
         String password = mRegisterPasswordField.getText().toString();
 
         AccountCredentials credentials = new AccountCredentials(email, password);
+        credentials.setNickname(nickname);
 
         if (DataHolder.getInstance().isAnonymous()) {
             credentials.setOldUsername(DataHolder.getInstance().getUser().getUsername());
