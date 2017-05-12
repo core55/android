@@ -49,10 +49,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -464,7 +460,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 View mView = getLayoutInflater().inflate(R.layout.dialog_share, null);
                 mBuilder.setView(mView);
 
-                EditText url = (EditText) mView.findViewById(R.id.editText);
+                EditText url = (EditText) mView.findViewById(R.id.location_search_field);
                 String meetupLink = WEBAPP_URL + WEBAPP_URL_PREFIX + DataHolder.getInstance().getMeetup().getHash();
                 url.setText(meetupLink);
 

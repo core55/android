@@ -29,10 +29,10 @@ public class WelcomeActivity extends Activity {
             startActivity(i);
         }
 
-        registerOnClickListener();
+        registerOnClickListeners();
     }
 
-    private void registerOnClickListener() {
+    private void registerOnClickListeners() {
 
         // Create meetup button
         Button mCreateButton = (Button) findViewById(R.id.welcome_create_meetup_button);

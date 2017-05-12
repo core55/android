@@ -37,7 +37,7 @@ import io.github.core55.joinup.Helper.HttpRequestHelper;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    public static final String TAG = "LoginActivity";
+    private final String API_BASE_URL = "https://dry-cherry.herokuapp.com/api/";
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_GET_TOKEN = 9002;
 
@@ -66,18 +66,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         // Register Login and Google SignIn buttons listeners
-        registerOnClickListener();
+        registerOnClickListeners();
         registerOnTouchListener();
     }
 
-    private void registerOnClickListener() {
+    private void registerOnClickListeners() {
 
         // Basic login button
         Button btn_login = (Button) findViewById(R.id.login_main_button);
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                basicLogin(v);
+                basicLogin();
             }
         });
 
@@ -105,7 +105,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
     }
 
-    protected void basicLogin(View v) {
+    protected void basicLogin() {
 
         // Get basic login email
         EditText emailEditText = (EditText) findViewById(R.id.login_email_field);
@@ -146,7 +146,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void loginBackend(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "https://dry-cherry.herokuapp.com/api/login";
+        final String url = API_BASE_URL + "login";
 
         AccountCredentials credentials = new AccountCredentials(username, password);
 
@@ -181,7 +181,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void loginGoogleBackend(String idToken) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "https://dry-cherry.herokuapp.com/api/login/token";
+        final String url = API_BASE_URL + "login/token";
 
         GoogleToken googleToken = new GoogleToken(idToken);
 

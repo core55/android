@@ -7,7 +7,7 @@
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/mapCreation"
+        android:id="@+id/create_map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,42 +16,39 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        android:orientation="horizontal"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="11dp"
-        android:layout_marginStart="4dp"
         android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/circle_center">
+        android:layout_alignStart="@+id/circle_center"
+        android:layout_marginRight="5dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="11dp"
+        android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/location_search_field"
             android:layout_width="290dp"
-
             android:layout_height="40dp"
-            android:paddingBottom="8dp"
-
+            android:layout_alignParentTop="true"
             android:background="@drawable/custom_text"
-            android:hint="Search a location...."
+            android:hint="@string/search_location_placeholder"
             android:inputType="text"
             android:maxLines="1"
-            android:paddingLeft="10dp"
-            android:layout_alignParentTop="true" />
+            android:paddingBottom="8dp"
+            android:paddingLeft="10dp" />
 
         <Button
-            android:id="@+id/search_button"
+            android:id="@+id/location_search_button"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:background="@drawable/custom_button"
-            android:text="Search"
+            android:layout_alignEnd="@+id/location_search_field"
             android:layout_alignParentTop="true"
-            android:layout_alignEnd="@+id/editText" />
+            android:background="@drawable/custom_button"
+            android:text="@string/location_search_button" />
 
 
     </RelativeLayout>
 
     <ImageButton
-        android:id="@+id/createMapButton"
+        android:id="@+id/create_meetup_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -59,7 +56,6 @@
         android:layout_marginBottom="9dp"
         android:layout_marginEnd="9dp"
         android:background="#00000000"
-        android:onClick="onClick"
         android:src="@drawable/btn_create_meetup"
         tools:layout_editor_absoluteX="286dp"
         tools:layout_editor_absoluteY="490dp" />
@@ -68,11 +64,11 @@
         android:id="@+id/circle_center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:background="#00000000"
         android:src="@drawable/center"
         tools:layout_editor_absoluteX="286dp"
-        tools:layout_editor_absoluteY="490dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        tools:layout_editor_absoluteY="490dp" />
 
 </RelativeLayout>

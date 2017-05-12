@@ -9,16 +9,16 @@
         android:id="@+id/copy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/editText"
-        android:layout_alignEnd="@+id/editText"
-        android:layout_alignTop="@+id/editText"
+        android:layout_alignBottom="@+id/location_search_field"
+        android:layout_alignEnd="@+id/location_search_field"
+        android:layout_alignTop="@+id/location_search_field"
         android:background="@drawable/custom_button"
         android:onClick="copyToCliboard"
         android:text="@android:string/copy"
         android:textColor="#ffffff" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/location_search_field"
         android:layout_width="370dp"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"

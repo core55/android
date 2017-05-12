@@ -65,6 +65,7 @@ public class CreateActivity extends AppCompatActivity implements
         LocationListener {
 
     public static final String TAG = "CreateActivity";
+    private final String API_BASE_URL = "https://dry-cherry.herokuapp.com/api/";
 
     private static final long SMALLEST_DISPLACEMENT = 2; // 2 meters
     private static final long UPDATE_INTERVAL = 10 * 1000;  // 10 secs
@@ -73,12 +74,11 @@ public class CreateActivity extends AppCompatActivity implements
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+    private MarkerOptions meetupMarker;
+
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
-    private MarkerOptions meetupMarker;
     private LatLng pinLocation;
-    private LatLng centerLocation;
-    private int zoomLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,34 +87,18 @@ public class CreateActivity extends AppCompatActivity implements
         AuthenticationHelper.syncDataHolder(this);
         AuthenticationHelper.authenticationLogger(this);
 
-        // Inject the navigation drawer
+        // Inject the navigation drawer and setup click listeners
         NavigationDrawer.buildDrawer(this);
+        registerOnClickListeners();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapCreation);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.create_map_fragment);
         mapFragment.getMapAsync(this);
 
         LocationHelper.askLocationPermission(this);
         buildGoogleApiClient();
+
         createLocationRequest();
-
-        // Register search button listener
-        Button search_button = (Button) findViewById(R.id.search_button);
-        search_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onMapSearch(v);
-            }
-        });
-
-        // Register map creation button listener
-        ImageButton createMapButton = (ImageButton) findViewById(R.id.createMapButton);
-        createMapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createMeetup();
-            }
-        });
     }
 
     @Override
@@ -122,13 +106,6 @@ public class CreateActivity extends AppCompatActivity implements
         super.onStart();
         mGoogleApiClient.connect();
         AuthenticationHelper.syncDataHolder(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mGoogleApiClient.disconnect();
-        AuthenticationHelper.syncSharedPreferences(this);
     }
 
     @Override
@@ -154,38 +131,53 @@ public class CreateActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
+        AuthenticationHelper.syncSharedPreferences(this);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
-    // TODO: to check
-    public void onMapSearch(View view) {
-        EditText locationSearch = (EditText) findViewById(R.id.editText);
-        String location = locationSearch.getText().toString();
-        List<Address> addressList = null;
+    private void registerOnClickListeners() {
 
-        if (location != null || !location.equals("")) {
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                addressList = geocoder.getFromLocationName(location, 1);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+        // Register search button listener
+        Button mSearchButton = (Button) findViewById(R.id.location_search_button);
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchLocation();
             }
-            if (!addressList.isEmpty()) {
-                Address address = addressList.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            } else {
-                Toast.makeText(this, "Could not find location", Toast.LENGTH_SHORT).show();
+        });
+
+        // Register map creation button listener
+        ImageButton mCreateMapButton = (ImageButton) findViewById(R.id.create_meetup_button);
+        mCreateMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mLastLocation != null) {
+                    createMeetup();
+                } else {
+                    Toast.makeText(CreateActivity.this, "Failed to create meetup. User location unavailable", Toast.LENGTH_LONG).show();
+                }
             }
+        });
+    }
 
-
+    private synchronized void buildGoogleApiClient() {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
         }
     }
 
-    // TODO: to check
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -199,6 +191,12 @@ public class CreateActivity extends AppCompatActivity implements
             }
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style. Error: ", e);
+        }
+
+        // Show blue dot on map
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
         }
 
         // Create meetup draggable marker
@@ -230,18 +228,6 @@ public class CreateActivity extends AppCompatActivity implements
                 pinLocation = marker.getPosition();
             }
         });
-
-    }
-
-    // TODO: move into a helper but before check "synchronized"
-    private synchronized void buildGoogleApiClient() {
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
     }
 
     private void createLocationRequest() {
@@ -284,17 +270,16 @@ public class CreateActivity extends AppCompatActivity implements
 
         // Update location
         mLastLocation = location;
-
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
-            Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "Disconnected. Please re-connect.");
+            Toast.makeText(this, "Disconnected. Please re-connect", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Disconnected. Please re-connect.");
         } else if (i == CAUSE_NETWORK_LOST) {
-            Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "Network lost. Please re-connect.");
+            Toast.makeText(this, "Network lost. Please re-connect", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Network lost. Please re-connect.");
         }
     }
 
@@ -309,17 +294,50 @@ public class CreateActivity extends AppCompatActivity implements
             }
         } else {
             // Google Play services has no idea how to fix the issue
-            // TODO: Notify user of the problem
+            Toast.makeText(this, "Failed to connect", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Failed to connect to Google Map API.");
+        }
+    }
+
+    public void searchLocation() {
+
+        // Get location from user input
+        EditText locationSearch = (EditText) findViewById(R.id.location_search_field);
+        String location = locationSearch.getText().toString();
+        List<Address> addressList = null;
+
+        if (!location.equals("")) {
+
+            Geocoder geocoder = new Geocoder(this);
+
+            // Use Google Map Geocoder to determine list of locations from input
+            try {
+                addressList = geocoder.getFromLocationName(location, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Cannot find location!", Toast.LENGTH_LONG).show();
+            }
+
+            // If a valid location is found then move the map focus
+            if (addressList != null && !addressList.isEmpty()) {
+                Address address = addressList.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            } else {
+                Toast.makeText(this, "Cannot find location!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
     private void createMeetup() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups";
+        final String url = API_BASE_URL + "meetups";
 
-        centerLocation = mMap.getCameraPosition().target;
-        zoomLevel = (int) mMap.getCameraPosition().zoom;
+        // Infer meetup coordinates and zoom from camera
+        LatLng centerLocation = mMap.getCameraPosition().target;
+        int zoomLevel = (int) mMap.getCameraPosition().zoom;
 
+        // Create meetup object, possibly also with pin coordinates
         Meetup meetup = new Meetup(centerLocation.longitude, centerLocation.latitude, zoomLevel);
         if (pinLocation != null) {
             meetup.setPinLongitude(pinLocation.longitude);
@@ -335,14 +353,15 @@ public class CreateActivity extends AppCompatActivity implements
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
 
+                        // If first-time visitor create anonymous user otherwise retrieve from DataHolder
                         User user;
                         if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
                             user = DataHolder.getInstance().getUser();
                         } else {
-                            // TODO: Handle error if coordinates are not available
                             user = new User(mLastLocation.getLongitude(), mLastLocation.getLatitude());
                         }
 
+                        // Persist relationship between user and newly created meetup
                         linkUserToMeetup(user);
                     }
                 },
@@ -360,7 +379,7 @@ public class CreateActivity extends AppCompatActivity implements
     private void linkUserToMeetup(User user) {
         RequestQueue queue = Volley.newRequestQueue(this);
         String hash = DataHolder.getInstance().getMeetup().getHash();
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
+        final String url = API_BASE_URL + "meetups/" + hash + "/users/save";
 
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, user, User.class,
@@ -390,5 +409,4 @@ public class CreateActivity extends AppCompatActivity implements
                 });
         queue.add(request);
     }
-
 }
