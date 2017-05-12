@@ -29,6 +29,8 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -41,25 +43,30 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.Helper.OutOfBoundsHelper;
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.NavigationDrawer;
 import io.github.core55.joinup.Helper.UserAdapter;
-import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Model.UserList;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.Service.LocationManager;
@@ -85,6 +92,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private Double lon;
 
     private ArrayList userList = new ArrayList();
+    private HashMap<Long, TextView> outOfBoundsIndicators = new HashMap<>();
+
+    private RelativeLayout outOfBoundsViewGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +104,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
-       // NavigationDrawer.buildDrawer(this);
+        NavigationDrawer.buildDrawer(this);
+
+        // get the view wrapper
+        this.outOfBoundsViewGroup = (RelativeLayout) findViewById(R.id.outOfBoundsIndicators);
+
+        // Retrieve map hash from applink
+        handleAppLink();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -304,6 +320,56 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         // TODO: fix user list
 //        importUsers();
+
+
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                DataHolder data = DataHolder.getInstance();
+                CameraPosition camera = mMap.getCameraPosition();
+
+                // skip if no data available
+                if (data.getMeetup() == null) {
+                    return;
+                }
+                List<User> userList = data.getMeetup().getUsersList();
+
+                // update indicator for each user
+                for (Map.Entry<Long, MarkerOptions> item : markersOnMap.entrySet()) {
+                    MarkerOptions marker = item.getValue();
+                    User user = null;
+                    for (User temp : userList) {
+                        if (temp.getId() == item.getKey()) {
+                            user = temp;
+                        }
+                    }
+
+                    // if marker visible, remove indicator if present
+                    if (bounds.contains(marker.getPosition()) && outOfBoundsIndicators.containsKey(item.getKey())) {
+                        TextView indicator = outOfBoundsIndicators.get(item.getKey());
+                        indicator.setVisibility(View.GONE);
+                        continue;
+                    }
+                    ;
+
+                    String nickname = user != null ? user.getNickname() : "Anonymous";
+
+                    // create indicator if not already present
+                    if (!outOfBoundsIndicators.containsKey(item.getKey())) {
+                        TextView indicator = OutOfBoundsHelper.generatePositionIdicator(nickname, View.generateViewId(), getBaseContext());
+                        outOfBoundsIndicators.put(item.getKey(), indicator);
+                        outOfBoundsViewGroup.addView(indicator);
+                    }
+
+                    // reposition and update indicator
+                    TextView indicator = outOfBoundsIndicators.get(item.getKey());
+                    indicator.setText(nickname);
+                    OutOfBoundsHelper.setIndicatorPosition(bounds, marker, indicator, camera);
+                    indicator.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
     private void handleAppLink() {

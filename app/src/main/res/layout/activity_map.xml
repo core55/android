@@ -15,6 +15,11 @@
         android:layout_alignParentTop="true"
         tools:context="io.github.core55.joinup.Activity.MapActivity" />
 
+    <RelativeLayout
+        android:id="@+id/outOfBoundsIndicators"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></RelativeLayout>
+
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="wrap_content"
