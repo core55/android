@@ -48,9 +48,6 @@ public class NetworkService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Fires when a service is started up, do work here!
-        /*if (intent != null) {
-            meetupHash = intent.getStringExtra("hash");
-        }*/
         handlerStart();
 
         // Return "sticky" for services that are explicitly started and stopped as needed by the app.
@@ -179,105 +176,5 @@ public class NetworkService extends Service {
         // Add a request to your RequestQueue.
         VolleyController.getInstance(this).addToRequestQueue(request);
     }
-
-   /* public void requestUser(String url) {
-
-        Log.d(TAG, "requestMeetup");
-        int method = Request.Method.GET;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        String url = "";
-
-                        try {
-                            url = response.getJSONObject("_links").getJSONObject("meetups").getString("href");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        requestUserList(response, url);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-
-    }*/
-
-   /* private void requestMeetupList(final JSONObject user, String url) {
-
-        int method = Request.Method.GET;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        JSONArray jsonMeetupArray = new JSONArray();
-
-                        try {
-                            jsonMeetupArray = response.getJSONObject("_embedded").getJSONArray("meetups");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Intent i = new Intent(ACTION);
-                        i.putExtra("user", Meetup.fromJson(user, jsonMeetupArray));
-                        mLocalBroadcastManager.sendBroadcast(i);
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-    }
-    */
-
-    /*public void sendLocation(Location location, String url) {
-
-        JSONObject newLocation = new JSONObject();
-
-        try {
-            newLocation.put("lastLongitude", location.getLongitude());
-            newLocation.put("lastLatitude", location.getLatitude());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        int method = Request.Method.PATCH;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
-<<<<<<< HEAD:app/src/main/java/io/github/core55/joinup/Service/NetworkService.java
-    }
-=======
-
-    }*/
 
 }
