@@ -9,7 +9,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -28,12 +27,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -57,8 +54,11 @@ import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.NavigationDrawer;
 import io.github.core55.joinup.R;
 
-public class CreateActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class CreateActivity extends AppCompatActivity implements
+        OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
     public static final String TAG = "CreateActivity";
 
@@ -113,15 +113,35 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         });
     }
 
+    @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
         super.onStart();
+        mGoogleApiClient.connect();
         AuthenticationHelper.syncDataHolder(this);
     }
 
+    @Override
     protected void onStop() {
-        mGoogleApiClient.disconnect();
         super.onStop();
+        mGoogleApiClient.disconnect();
+        AuthenticationHelper.syncSharedPreferences(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AuthenticationHelper.syncDataHolder(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AuthenticationHelper.syncSharedPreferences(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
@@ -151,6 +171,7 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         }
     }
 
+    // TODO: to check
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -188,10 +209,12 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         // Drag marker and retrieve final position
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
-            public void onMarkerDragStart(Marker marker) { }
+            public void onMarkerDragStart(Marker marker) {
+            }
 
             @Override
-            public void onMarkerDrag(Marker marker) { }
+            public void onMarkerDrag(Marker marker) {
+            }
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
@@ -212,17 +235,35 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         }
     }
 
-    // TODO: to check
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
         // Determine user current location as soon as connected with Google API
-        startLocationUpdates();
-
-        // If we have a current location, then move the camera to center it
-        if (mLastLocation != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), ZOOM_LEVEL));
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+        // If first time getting location, then move the camera to center it
+        if (mLastLocation == null) {
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_LEVEL);
+            mMap.animateCamera(cameraUpdate);
+        }
+
+        // Update location
+        mLastLocation = location;
 
     }
 
@@ -230,10 +271,10 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
             Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Disconnected. Please re-connect.");
+            Log.i(TAG, "Disconnected. Please re-connect.");
         } else if (i == CAUSE_NETWORK_LOST) {
             Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Network lost. Please re-connect.");
+            Log.i(TAG, "Network lost. Please re-connect.");
         }
     }
 
@@ -249,25 +290,6 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         } else {
             // Google Play services has no idea how to fix the issue
             // TODO: Notify user of the problem
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
-    }
-
-    private void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private void startLocationUpdates() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
 
@@ -349,21 +371,4 @@ public class CreateActivity extends AppCompatActivity implements OnMapReadyCallb
         queue.add(request);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        AuthenticationHelper.syncDataHolder(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        AuthenticationHelper.syncSharedPreferences(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        AuthenticationHelper.syncSharedPreferences(this);
-    }
 }
