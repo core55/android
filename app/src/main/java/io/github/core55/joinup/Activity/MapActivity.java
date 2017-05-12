@@ -17,7 +17,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -31,15 +30,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,30 +45,26 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.github.core55.joinup.Model.DataHolder;
+import io.github.core55.joinup.Entity.Meetup;
+import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
+import io.github.core55.joinup.Helper.NavigationDrawer;
+import io.github.core55.joinup.Helper.UserAdapter;
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Model.UserList;
+import io.github.core55.joinup.R;
 import io.github.core55.joinup.Service.LocationManager;
 import io.github.core55.joinup.Service.LocationService;
-import io.github.core55.joinup.Entity.Meetup;
-import io.github.core55.joinup.Helper.NavigationDrawer;
 import io.github.core55.joinup.Service.NetworkService;
-import io.github.core55.joinup.R;
-import io.github.core55.joinup.Entity.User;
-import io.github.core55.joinup.Helper.UserAdapter;
 
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -373,7 +365,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     /**
-     *A name prompt is displayed to the non-registered users
+     * A name prompt is displayed to the non-registered users
      */
     private void namePrompt() {
 
@@ -422,6 +414,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     /**
      * The nicknames are updated in the database
+     *
      * @param nickname is the inputed nickname
      */
     public void patchNickname(String nickname) {
