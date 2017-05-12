@@ -23,25 +23,42 @@ import io.github.core55.joinup.R;
  */
 
 public class OutOfBoundsHelper {
-    /*
-     *  Calculates polar coorindates
-     * */
+    /**
+     * Calculates the angle component of polar coordinates belonging to a marker
+     * with respect to the center of the map bounds.
+     *
+     * @param bounds
+     * @param marker
+     * @return
+     */
     public static double calculatePolarCoordinateTheta(LatLngBounds bounds, MarkerOptions marker) {
         LatLng center = bounds.getCenter();
         LatLng location = marker.getPosition();
         return Math.atan2(location.latitude - center.latitude, location.longitude - center.longitude);
     }
 
-    /*
-     *  Linear mapping between two interwals
-     * */
+    /**
+     * Linear mapping between two intervals
+     *
+     * @param x
+     * @param a
+     * @param b
+     * @param c
+     * @param d
+     * @return
+     */
     public static double linearMapping(double x, double a, double b, double c, double d) {
         return (x - a) / (b - a) * (d - c) + c;
     }
 
-    /*
-     *  Generate a new position indicator.
-     * */
+    /**
+     * Generate a new position indicator.
+     *
+     * @param label
+     * @param id
+     * @param context
+     * @return TextView
+     */
     public static TextView generatePositionIdicator(String label, int id, Context context) {
         TextView indicator = new TextView(context);
         indicator.setBackgroundResource(R.drawable.out_of_bounds_indicator);
@@ -51,6 +68,15 @@ public class OutOfBoundsHelper {
         return indicator;
     }
 
+    /**
+     * Updates the out of bounds indicator position according
+     * to the user marker position.
+     *
+     * @param bounds
+     * @param marker
+     * @param indicator
+     * @param camera
+     */
     public static void setIndicatorPosition(LatLngBounds bounds, MarkerOptions marker, TextView indicator, CameraPosition camera) {
         double theta = calculatePolarCoordinateTheta(bounds, marker);
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
@@ -74,39 +100,36 @@ public class OutOfBoundsHelper {
 
         double fourthPi = Math.PI / 4;
         double threeFourthPi = 3 * fourthPi;
-        double offset = new Double(0);
 
-        // align to correct side
+        double offsetTop = new Double(0);
+        double offsetLeft = new Double(0);
+
+        // align and offset to correct side
         if (theta <= threeFourthPi && theta >= fourthPi) {
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            offset = linearMapping(theta, fourthPi, threeFourthPi, width - indicator.getWidth(), 0);
-            params.setMargins((int) offset, 0, 0, 0);
-            Log.d("MapActivity", " -> TOP ");
+            offsetLeft = linearMapping(theta, fourthPi, threeFourthPi, width - indicator.getWidth(), 0);
 
         }else if (theta > -1 * fourthPi && theta < fourthPi) {
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            offset = linearMapping(theta, -1 * fourthPi, fourthPi, height - indicator.getHeight(), 0);
-            params.setMargins(0, (int) offset, 0, 0);
-            Log.d("MapActivity", " -> RIGHT ");
+            offsetTop = linearMapping(theta, -1 * fourthPi, fourthPi, height - indicator.getHeight(), 0);
 
         }else if (theta >= -1 * threeFourthPi && theta <= -1 * fourthPi) {
             params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            offset = linearMapping(theta, -1 * threeFourthPi, -1 * fourthPi, 0, width - indicator.getWidth());
-            params.setMargins((int) offset, 0, 0, 0);
-            Log.d("MapActivity", " -> BOTTOM ");
+            offsetLeft = linearMapping(theta, -1 * threeFourthPi, -1 * fourthPi, 0, width - indicator.getWidth());
 
         }else if ((theta <= Math.PI && theta >= threeFourthPi) || (theta <= -1 * threeFourthPi && theta >= -1 * Math.PI)) {
             params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             if (theta <= Math.PI && theta >= threeFourthPi) {
-                offset = linearMapping(theta, threeFourthPi, Math.PI, 0, height / 2);
+                offsetTop = linearMapping(theta, threeFourthPi, Math.PI, 0, height / 2);
             }else {
-                offset = linearMapping(theta, -1 * Math.PI, -1 * threeFourthPi, height / 2, height - indicator.getHeight());
+                offsetTop = linearMapping(theta, -1 * Math.PI, -1 * threeFourthPi, height / 2, height - indicator.getHeight());
             }
-
-            params.setMargins(0, (int) offset, 0, 0);
-            Log.d("MapActivity", " -> LEFT ");
         }
 
+        double offsetTopAdjusted = offsetTop - (indicator.getMeasuredHeight() / 2);
+        offsetTop = offsetTopAdjusted < 0 ? 0 : offsetTopAdjusted;
+
+        params.setMargins((int) offsetLeft, (int) offsetTop, 0, 0);
         indicator.setLayoutParams(params);
     }
 }
