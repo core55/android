@@ -24,6 +24,7 @@ import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.DataHolder;
 
 import io.github.core55.joinup.Helper.GsonRequest;
+import io.github.core55.joinup.Model.UserList;
 
 public class NetworkService extends Service {
 
@@ -40,7 +41,7 @@ public class NetworkService extends Service {
     public void onCreate() {
         super.onCreate();
         // Fires when a service is first initialized
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this); //TODO: is this necessary anymore? What does it do? JLRTO
 
     }
 
@@ -70,10 +71,9 @@ public class NetworkService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            requestMeetup(DataHolder.getInstance().getMeetup().getHash());
-            sendLocation("https://dry-cherry.herokuapp.com/api/users" + DataHolder.getInstance().getUser().getId());
-            //requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash);
-
+            requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash());
+            sendLocation("https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId());
+            requestUserList("https://dry-cherry.herokuapp.com/api/meetups/"+ DataHolder.getInstance().getMeetup().getHash() + "/users");
             if (started) {
                 handlerStart();
             }
@@ -114,7 +114,7 @@ public class NetworkService extends Service {
 
         int method = Request.Method.GET;
         GsonRequest<User> request = new GsonRequest<User>
-                (method, url, User.class, null, new Response.Listener<User>() {
+                (method, url, User.class, new Response.Listener<User>() {
                     @Override
                     public void onResponse(User response) {
 
@@ -133,22 +133,19 @@ public class NetworkService extends Service {
 
     public void sendLocation(String url) {
 
-        JSONObject newLocation = new JSONObject();
+        User locationPatch = new User();
 
-        try {
-            newLocation.put("lastLongitude", DataHolder.getInstance().getUser().getLastLongitude());
-            newLocation.put("lastLatitude", DataHolder.getInstance().getUser().getLastLatitude());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            locationPatch.setLastLongitude(DataHolder.getInstance().getUser().getLastLongitude());
+            locationPatch.setLastLatitude(DataHolder.getInstance().getUser().getLastLatitude());
+
 
         int method = Request.Method.PATCH;
 
-        GsonRequest<JSONObject> request = new GsonRequest<JSONObject>
-                (method, url, JSONObject.class, null, new Response.Listener<JSONObject>() {
+        GsonRequest<User> request = new GsonRequest<>
+                (method, url, locationPatch ,User.class, new Response.Listener<User>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-
+                    public void onResponse(User response) {
+                        Log.e("loc upd",response.getNickname());
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -160,6 +157,27 @@ public class NetworkService extends Service {
         // Add a request to your RequestQueue.
         VolleyController.getInstance(this).addToRequestQueue(request);
 
+    }
+
+    public void requestUserList(String url) {
+
+        int method = Request.Method.GET;
+
+        GsonRequest<UserList> request = new GsonRequest<UserList>
+                (method, url,UserList.class, new Response.Listener<UserList>() {
+                    @Override
+                    public void onResponse(UserList response) {
+                        DataHolder.getInstance().setUserList(response.getUsers());
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        // Add a request to your RequestQueue.
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
    /* public void requestUser(String url) {
