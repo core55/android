@@ -94,7 +94,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
-        NavigationDrawer.buildDrawer(this);
+       // NavigationDrawer.buildDrawer(this);
 
         // Retrieve map hash from applink
         handleAppLink();
