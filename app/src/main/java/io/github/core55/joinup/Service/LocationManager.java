@@ -44,10 +44,9 @@ public class LocationManager implements
 
     public void stop() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mRequestLocationUpdatesPendingIntent);
-       // mGoogleApiClient.disconnect();
     }
 
-    public void restart(){
+    public void restart() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, mRequestLocationUpdatesPendingIntent);
         }

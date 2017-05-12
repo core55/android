@@ -41,11 +41,15 @@
         android:layout_marginStart="11dp"
         android:layout_marginBottom="11dp"/>
 
-    <ToggleButton
-        android:id="@+id/toggleButton"
-        android:layout_width="50dp"
-        android:layout_height="20dp"
-        android:background="#ffff"
+    <Switch
+        android:id="@+id/toggleSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:theme="@style/SwitchTheme"
+        android:checked="true"
+        android:layout_marginBottom="18dp"
+        android:layout_marginStart="5dp"
+        android:background="@android:color/transparent"
         android:layout_above="@+id/imageButton"
         android:layout_alignStart="@+id/imageButton" />
 
