@@ -37,6 +37,15 @@
     <string name="drawer_close">Close navigation drawer</string>
     <string name="title_activity_nav_bar">NavBarActivity</string>
     <string name="title_activity_user_list">UserListActivity</string>
+    <string name="auth_header">Joinup</string>
+    <string name="register_name_label">Name</string>
+    <string name="register_name_placeholder">Type your name</string>
+    <string name="register_email_label">E-mail</string>
+    <string name="register_email_placeholder">Type your e-mail</string>
+    <string name="register_password_label">Password</string>
+    <string name="register_password_placeholder">Type your password</string>
+    <string name="register_main_button">Register</string>
+    <string name="register_redirect_login">Already a user? Login here</string>
 
 
 </resources>

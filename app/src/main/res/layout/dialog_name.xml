@@ -9,25 +9,25 @@
         android:id="@+id/enter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/enter_name"
+        android:layout_alignEnd="@+id/enter_name"
+        android:layout_alignParentTop="true"
         android:background="@drawable/custom_button"
         android:text="Enter"
-        android:textColor="#ffffff"
-        android:layout_alignParentTop="true"
-        android:layout_alignEnd="@+id/enter_name"
-        android:layout_alignBottom="@+id/enter_name" />
+        android:textColor="#ffffff" />
 
     <EditText
         android:id="@+id/enter_name"
         android:layout_width="370dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/custom_text"
         android:ems="10"
-        android:hint="Type your name"
-        android:inputType="text"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:maxLines="1"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:hint="Type your name"
+        android:inputType="text"
+        android:maxLines="1" />
 
 </RelativeLayout>
