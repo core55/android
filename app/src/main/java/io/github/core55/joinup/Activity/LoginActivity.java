@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -69,26 +71,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         // Register Login and Google SignIn buttons listeners
         registerOnClickListener();
+        registerOnTouchListener();
     }
 
     private void registerOnClickListener() {
 
         // Basic login button
-        Button btn_login = (Button) findViewById(R.id.btn_login);
+        Button btn_login = (Button) findViewById(R.id.login_main_button);
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 basicLogin(v);
-            }
-        });
-
-        // Basic login button
-        Button btn_register = (Button) findViewById(R.id.button2);
-        btn_register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
             }
         });
 
@@ -103,14 +96,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
     }
 
+    private void registerOnTouchListener() {
+        // Redirect to register page
+        TextView mRedirectToWelcome = (TextView) findViewById(R.id.login_redirect_register);
+        mRedirectToWelcome.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
+    }
+
     protected void basicLogin(View v) {
 
         // Get basic login email
-        EditText emailEditText = (EditText) findViewById(R.id.login_email);
+        EditText emailEditText = (EditText) findViewById(R.id.login_email_field);
         String email = emailEditText.getText().toString();
 
         // Get basic login password
-        EditText passwordEditText = (EditText) findViewById(R.id.login_password);
+        EditText passwordEditText = (EditText) findViewById(R.id.login_password_field);
         String password = passwordEditText.getText().toString();
 
         loginBackend(email, password);

@@ -46,6 +46,10 @@
     <string name="register_password_placeholder">Type your password</string>
     <string name="register_main_button">Register</string>
     <string name="register_redirect_login">Already a user? Login here</string>
+    <string name="email_confirm_message">Thank you for registering on Joinup! We have sent you an email to confirm your address.</string>
+    <string name="email_confirm_redirect_welcome">Back to the Welcome Page</string>
+    <string name="login_main_button">Login</string>
+    <string name="login_redirect_register">Not yet a user? Register here</string>
 
 
 </resources>

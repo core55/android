@@ -3,10 +3,11 @@ package io.github.core55.joinup.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -14,8 +15,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
-import io.github.core55.joinup.Entity.User;
-import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Model.AccountCredentials;
@@ -33,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         registerOnClickListener();
+        registerOnTouchListener();
     }
 
     private void registerOnClickListener() {
@@ -42,6 +42,19 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 registerUser();
+            }
+        });
+    }
+
+    private void registerOnTouchListener() {
+        // Redirect to login page
+        TextView mRedirectToWelcome = (TextView) findViewById(R.id.register_redirect_login);
+        mRedirectToWelcome.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                return true;
             }
         });
     }
@@ -80,14 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(AuthenticationResponse authenticationResponse) {
-                        User user = authenticationResponse.getUser();
-                        String jwt = authenticationResponse.getJwt();
-
-                        AuthenticationHelper.persistAuthenticatedUser(RegisterActivity.this, user, jwt);
-
-                        AuthenticationHelper.syncDataHolder(RegisterActivity.this);
-
-                        Intent intent = new Intent(RegisterActivity.this, CreateActivity.class);
+                        Intent intent = new Intent(RegisterActivity.this, EmailNotConfirmedActivity.class);
                         startActivity(intent);
                     }
                 },
