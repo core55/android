@@ -5,6 +5,7 @@
 package io.github.core55.joinup.Activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -12,6 +13,8 @@ import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -165,22 +168,26 @@ public class CreateActivity extends AppCompatActivity implements
         String location = locationSearch.getText().toString();
         List<Address> addressList = null;
 
-        if (location != null || !location.equals("")) {
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "No network", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (location != null && !location.equals("")) {
             Geocoder geocoder = new Geocoder(this);
             try {
                 addressList = geocoder.getFromLocationName(location, 1);
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (!addressList.isEmpty()) {
+
+            if (addressList != null && !addressList.isEmpty()) {
                 Address address = addressList.get(0);
                 LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             } else {
                 Toast.makeText(this, "Could not find location", Toast.LENGTH_SHORT).show();
             }
-
 
         }
     }
@@ -389,6 +396,13 @@ public class CreateActivity extends AppCompatActivity implements
                     }
                 });
         queue.add(request);
+    }
+
+    // TODO: move into a helper?
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }
