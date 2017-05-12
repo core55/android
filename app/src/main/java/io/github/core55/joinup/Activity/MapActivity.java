@@ -14,6 +14,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -103,7 +104,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
-        
+
         // Retrieve map hash from applink
         handleAppLink();
 
@@ -463,14 +464,20 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
-    private void createToggleButtonListener(){
+
+    private void createToggleButtonListener() {
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-//// TODO: disable location for users
+//// TODO: disable location for usersa
+                    Log.e(TAG, "stop location");
+                    locationManager.stop();
+
                 } else {
 //// TODO: enable location for users
+                    Log.e(TAG, "restart location");
+                    locationManager.restart();
                 }
             }
         });
