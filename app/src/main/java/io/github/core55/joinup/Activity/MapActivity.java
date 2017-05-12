@@ -68,6 +68,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     public static final String TAG = "MapActivity";
     public static final String API_URL = "https://dry-cherry.herokuapp.com/api/";
+    public static final String WEBAPP_URL = "https://culater.herokuapp.com/#/";
+    private static final String WEBAPP_URL_PREFIX = "m/";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;
 
@@ -329,7 +331,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             String uri = appLinkIntent.getDataString();
             Log.d(TAG, "url = " + uri);
 
-            Pattern pattern = Pattern.compile("/\\#/m/(.*)");
+            Pattern pattern = Pattern.compile("/\\#/" + WEBAPP_URL_PREFIX + "(.*)");
             Matcher matcher = pattern.matcher(uri);
             if (matcher.find()) {
                 String applinkHash = matcher.group(1);
@@ -440,7 +442,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mBuilder.setView(mView);
 
                 EditText url = (EditText) mView.findViewById(R.id.editText);
-                url.setText(DataHolder.getInstance().getMeetup().getHash());
+                String meetupLink = WEBAPP_URL + WEBAPP_URL_PREFIX + DataHolder.getInstance().getMeetup().getHash();
+                url.setText(meetupLink);
 
                 final AlertDialog dialog = mBuilder.create();
                 dialog.show();
@@ -451,7 +454,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     public void copyToCliboard(View v) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("label", DataHolder.getInstance().getMeetup().getHash());
+        String meetupLink = WEBAPP_URL + WEBAPP_URL_PREFIX + DataHolder.getInstance().getMeetup().getHash();
+        ClipData clip = ClipData.newPlainText("label", meetupLink);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
