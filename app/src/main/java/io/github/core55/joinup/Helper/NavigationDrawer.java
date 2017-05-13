@@ -71,7 +71,7 @@ public class NavigationDrawer {
 
         // If authenticated add profile item
         if (store.isAuthenticated() || store.isAnonymous()) {
-            result.addItem(new PrimaryDrawerItem().withIdentifier(2).withName(store.getUser().getNickname()));
+            result.addItem(new PrimaryDrawerItem().withIdentifier(2).withName(store.getUser().getNickname()).withIcon(GoogleMaterial.Icon.gmd_person));
         }
 
         // Add directions item
@@ -82,6 +82,7 @@ public class NavigationDrawer {
         // reserved for other items (logout, login, directions)
         if (withUsers && DataHolder.getInstance().getUserList() != null) {
             result.addItem(new DividerDrawerItem());
+            result.addItem(new SecondaryDrawerItem().withName("Participants:").withSelectable(false));
             List<User> users = DataHolder.getInstance().getUserList();
 
             for (int i = 0; i < users.size(); i++) {

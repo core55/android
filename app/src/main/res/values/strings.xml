@@ -54,6 +54,9 @@
     <string name="search_location_placeholder">Search a location...</string>
     <string name="location_search_button">Search</string>
     <string name="applink_message">Loading the meetup...</string>
+    <string name="title_activity_not_confirmed">EmailNotConfirmedActivity</string>
+    <string name="title_activity_applink">ApplinkActivity</string>
+    <string name="title_joinup">Joinup</string>
 
 
 </resources>
