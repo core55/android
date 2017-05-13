@@ -35,7 +35,7 @@ public class NetworkService extends Service {
     public void onCreate() {
         super.onCreate();
         // Fires when a service is first initialized
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this); //TODO: is this necessary anymore? What does it do? JLRTO
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     }
 
@@ -62,6 +62,7 @@ public class NetworkService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            if (DataHolder.getInstance().getMeetup() == null || DataHolder.getInstance().getUser() == null) { return; }
             requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash());
             sendLocation("https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId());
             requestUserList("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash() + "/users");
@@ -151,6 +152,8 @@ public class NetworkService extends Service {
                     @Override
                     public void onResponse(UserList response) {
                         DataHolder.getInstance().setUserList(response.getUsers());
+                        Intent i = new Intent(ACTION);
+                        mLocalBroadcastManager.sendBroadcast(i);
                     }
                 }, new Response.ErrorListener() {
             @Override

@@ -33,17 +33,6 @@
         tools:layout_editor_absoluteX="286dp"
         tools:layout_editor_absoluteY="490dp" />
 
-    <ImageButton
-        android:id="@+id/peopleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignTop="@+id/imageButton"
-        android:layout_marginBottom="11dp"
-        android:layout_marginStart="11dp"
-        android:background="#00000000"
-        android:src="@drawable/btn_user_list" />
-
     <Switch
         android:id="@+id/toggleSwitch"
         android:layout_width="wrap_content"

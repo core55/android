@@ -9,14 +9,12 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -54,8 +52,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
@@ -66,8 +62,6 @@ import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.NavigationDrawer;
-import io.github.core55.joinup.Helper.UserAdapter;
-import io.github.core55.joinup.Model.UserList;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.Service.LocationManager;
 import io.github.core55.joinup.Service.LocationService;
@@ -91,9 +85,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private Double lat;
     private Double lon;
 
-    private ArrayList userList = new ArrayList();
     private HashMap<Long, TextView> outOfBoundsIndicators = new HashMap<>();
-
     private RelativeLayout outOfBoundsViewGroup;
 
     @Override
@@ -104,33 +96,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
-        NavigationDrawer.buildDrawer(this);
+        NavigationDrawer.buildDrawer(this, true);
+        LocationHelper.askLocationPermission(this);
 
         // get the view wrapper
         this.outOfBoundsViewGroup = (RelativeLayout) findViewById(R.id.outOfBoundsIndicators);
-
-        // Retrieve map hash from applink
-        handleAppLink();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        LocationHelper.askLocationPermission(this);
-
         locationManager = new LocationManager(this);
         locationManager.start();
 
         createShareButtonListener();
-        createPeopleButtonListener();
         createSwitchListener();
 
-        if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
+        if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
-
-        // Retrieve map hash from applink
-        handleAppLink();
     }
 
     @Override
@@ -148,7 +132,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
-    // TODO: What these methods do?
     @Override
     protected void onResume() {
         super.onResume();
@@ -181,12 +164,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             lat = intent.getDoubleExtra("lat", -1);
             lon = intent.getDoubleExtra("lon", -1);
 
-            if (lat != null && lat != -1 && lon != null && lon != -1 && (DataHolder.getInstance().isAnonymous() || DataHolder.getInstance().isAnonymous())) {
+            if (lat != -1 && lon != -1 && (DataHolder.getInstance().getUser() != null)) {
 
                 RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-                final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
+                final String url = API_URL +  "users/" + DataHolder.getInstance().getUser().getId();
 
                 User user = new User(lon, lat);
+                user.setNickname(DataHolder.getInstance().getUser().getNickname());
 
                 GsonRequest<User> request = new GsonRequest<>(
                         Request.Method.PATCH, url, user, User.class,
@@ -217,9 +201,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Meetup m = intent.getParcelableExtra("meetup");
+            Meetup m = DataHolder.getInstance().getMeetup();
             if (m != null) {
-
                 if (meetupMarker == null && meetupMarkerView == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
@@ -229,26 +212,31 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarkerView.setPosition(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                 }
+            }
 
-                for (User u : m.getUsersList()) {
-                    if (markersOnMap.containsKey(u.getId())) {
-                        MarkerOptions marker = markersOnMap.get(u.getId());
-                        marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
-                        marker.title(u.getNickname());
+            List<User> users = DataHolder.getInstance().getUserList();
+
+            for (User u : users) {
+                if (u == null) { return; }
+
+                if (markersOnMap.containsKey(u.getId())) {
+                    MarkerOptions marker = markersOnMap.get(u.getId());
+                    marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                    marker.title(u.getNickname());
+                } else {
+                    MarkerOptions newMarker = new MarkerOptions();
+                    newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                    newMarker.title(u.getNickname());
+                    if (newMarker.getTitle() == null) {
+                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
                     } else {
-                        MarkerOptions newMarker = new MarkerOptions();
-                        newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
-                        newMarker.title(u.getNickname());
-                        if (newMarker.getTitle() == null) {
-                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                        } else {
-                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                        }
-                        markersOnMap.put(u.getId(), newMarker);
-                        mMap.addMarker(newMarker);
+                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
                     }
+                    markersOnMap.put(u.getId(), newMarker);
+                    mMap.addMarker(newMarker);
                 }
             }
+            NavigationDrawer.buildDrawer(MapActivity.this, true);
         }
     };
 
@@ -261,6 +249,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Meetup meetup = DataHolder.getInstance().getMeetup();
+
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
                 meetup.getZoomLevel()));
@@ -293,14 +282,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
 
-        if (DataHolder.getInstance().getUser().getNickname() != null) {
-            Context context = getApplicationContext();
-            CharSequence text = "Welcome " + DataHolder.getInstance().getUser().getNickname() + "!";
-            int duration = Toast.LENGTH_LONG;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-        }
-
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {
@@ -315,14 +296,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onMarkerDragEnd(Marker marker) {
                 Log.d(TAG, "marker drag end");
-                sendMeetupPinLocation(marker.getPosition().longitude, marker.getPosition().latitude);
+                updateMeetupPinLocation(marker.getPosition().longitude, marker.getPosition().latitude);
             }
         });
 
         launchNetworkService();
-
-        // TODO: fix user list
-//        importUsers();
 
         // User out of bounds indicators
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -336,7 +314,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if (data.getMeetup() == null) {
                     return;
                 }
-                List<User> userList = data.getMeetup().getUsersList();
+                List<User> userList = data.getUserList();
 
                 // update indicator for each user
                 for (Map.Entry<Long, MarkerOptions> item : markersOnMap.entrySet()) {
@@ -357,7 +335,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                         continue;
                     }
-                    ;
 
                     String nickname = user != null ? user.getNickname() : "Anonymous";
 
@@ -378,40 +355,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    private void handleAppLink() {
-        Intent appLinkIntent = getIntent();
-        Uri appLinkData = appLinkIntent.getData();
+    public void launchNetworkService() {
+        // Construct our Intent specifying the Service
+        Intent i = new Intent(this, NetworkService.class);
 
-        if (appLinkData != null && appLinkData.isHierarchical()) {
-            String uri = appLinkIntent.getDataString();
-            Log.d(TAG, "url = " + uri);
-
-            Pattern pattern = Pattern.compile("/\\#/" + WEBAPP_URL_PREFIX + "(.*)");
-            Matcher matcher = pattern.matcher(uri);
-            if (matcher.find()) {
-                String applinkHash = matcher.group(1);
-                fetchMeetup(applinkHash);
-                fetchUserList(applinkHash);
-                Log.d(TAG, "hash = " + applinkHash);
-
-                User user;
-                if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
-                    user = DataHolder.getInstance().getUser();
-                } else {
-                    // TODO: Handle error if coordinates are not available
-                    user = new User(lon, lat);
-                    DataHolder.getInstance().setAnonymous(true);
-                }
-
-                linkUserToMeetup(user, applinkHash);
-
-                if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
-                    namePrompt();
-                } else if (!DataHolder.getInstance().isAuthenticated() && !DataHolder.getInstance().isAnonymous()) {
-                    namePrompt();
-                }
-            }
-        }
+        // Start the service
+        startService(i);
     }
 
     /**
@@ -429,7 +378,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Prompt modal
         final AlertDialog dialog = mBuilder.create();
 
-        // TODO: Introduce validation
         if (name.getText().toString().matches("")) {
             dialog.show();
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -444,7 +392,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     String nickname = name.getText().toString();
                     Log.d(TAG, nickname);
 
-                    patchNickname(nickname);
+                    updateNickname(nickname);
                     dialog.dismiss();
                 }
 
@@ -465,9 +413,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     /**
      * The nicknames are updated in the database
      *
-     * @param nickname is the inputed nickname
+     * @param nickname is the input nickname
      */
-    public void patchNickname(String nickname) {
+    public void updateNickname(String nickname) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
@@ -482,6 +430,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(User user) {
                         DataHolder.getInstance().setUser(user);
+                        AuthenticationHelper.syncSharedPreferences(MapActivity.this);
                     }
                 },
 
@@ -551,144 +500,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
 
-    public void launchNetworkService() {
-        // Construct our Intent specifying the Service
-        Intent i = new Intent(this, NetworkService.class);
 
-        i.putExtra("hash", DataHolder.getInstance().getMeetup().getHash());
 
-        // Start the service
-        startService(i);
-    }
-
-    private void fetchMeetup(String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = API_URL + "meetups/" + hash;
-
-        GsonRequest<Meetup> request = new GsonRequest<>(
-                Request.Method.GET, url, Meetup.class,
-
-                new Response.Listener<Meetup>() {
-
-                    @Override
-                    public void onResponse(Meetup meetup) {
-                        DataHolder.getInstance().setMeetup(meetup);
-                    }
-                },
-
-                new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
-    private void fetchUserList(String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = API_URL + "meetups/" + hash + "/users";
-
-        GsonRequest<UserList> request = new GsonRequest<>(
-                Request.Method.GET, url, UserList.class,
-
-                new Response.Listener<UserList>() {
-
-                    @Override
-                    public void onResponse(UserList userList) {
-                        DataHolder.getInstance().setUserList(userList.getUsers());
-                    }
-                },
-
-                new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
-    private void createPeopleButtonListener() {
-        final ImageButton mShowDialog = (ImageButton) findViewById(R.id.peopleButton);
-        mShowDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
-                UserAdapter adapter = new UserAdapter(getApplicationContext(), 0, userList);
-                mBuilder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                View mView = getLayoutInflater().inflate(R.layout.content_user_list, null);
-                mBuilder.setView(mView);
-                final AlertDialog dialog = mBuilder.create();
-                dialog.show();
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            }
-        });
-    }
-
-//    void importUsers() {
-//        int method = Request.Method.GET;
-//        String hash = DataHolder.getInstance().getMeetup().getHash();
-//        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users";
-//        Log.e("url", url);
-//        HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
-//                (method, url, null, new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        Log.e("response", response.toString());
-//                        try {
-//                            JSONArray usersJson = response.getJSONObject("data").getJSONObject("_embedded").getJSONArray("users");
-//                            Log.e("usersJson", usersJson.toString());
-//                            JSONObject userJson; //one user
-//                            for (int i = 0; i < usersJson.length(); i++) {
-//                                userJson = (JSONObject) usersJson.get(i);
-//                                String nickname = userJson.getString("nickname");
-//                                String status = userJson.getString("status");
-//                                //retrieve link for picture: first google, if it doesn't exist -> gravatar, if it doesn't exist -> emoji
-//                                String profileURL = userJson.getString("googlePictureURI"); //googlePictureURI gravatarURI
-//                                if (profileURL == "null") {
-//                                    profileURL = userJson.getString("gravatarURI");
-//                                    if (profileURL == "null") {
-//                                        profileURL = "emoji";
-//                                    }
-//                                }
-//
-//
-//                                User u = new User(nickname, status, profileURL);
-//                                userList.add(u);
-//                            }
-//                            Log.e("user_list", response.toString());
-//                        } catch (Exception je) {
-//                            je.printStackTrace();
-//                        }
-//
-//                    }
-//
-//                }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        error.printStackTrace();
-//                        Log.e("errorResponse", "dihvsvdh");
-//                    }
-//                }) {
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                Map<String, String> params = new HashMap<String, String>();
-//                params.put("Content-Type", "application/json");
-//                params.put("Accept", "application/json, application/hal+json");
-//                return params;
-//            }
-//        };
-//        VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
-//    }
-
-    private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
+    private void updateMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
@@ -698,43 +512,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         GsonRequest<Meetup> request = new GsonRequest<>(
                 Request.Method.PATCH, url, meetup, Meetup.class,
-
                 new Response.Listener<Meetup>() {
-
                     @Override
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
                     }
                 },
-
                 new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
-    private void linkUserToMeetup(User user, String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = API_URL + "meetups/" + hash + "/users/save";
-
-        GsonRequest<User> request = new GsonRequest<>(
-                Request.Method.POST, url, user, User.class,
-
-                new Response.Listener<User>() {
-
-                    @Override
-                    public void onResponse(User user) {
-                        DataHolder.getInstance().setUser(user);
-                        AuthenticationHelper.syncSharedPreferences(MapActivity.this);
-                    }
-                },
-
-                new Response.ErrorListener() {
-
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
