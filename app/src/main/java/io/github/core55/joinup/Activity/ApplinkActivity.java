@@ -25,6 +25,7 @@ import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Model.DataHolder;
+import io.github.core55.joinup.Model.UserList;
 import io.github.core55.joinup.R;
 
 public class ApplinkActivity extends AppCompatActivity {
@@ -99,7 +100,7 @@ public class ApplinkActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a relationship between a user and a meetup; then starts MapActivity.
+     * Creates a relationship between a user and a meetup.
      *
      * @param user is a user entity
      * @param hash is the string that identifies the meetup
@@ -114,6 +115,33 @@ public class ApplinkActivity extends AppCompatActivity {
                     public void onResponse(User user) {
                         DataHolder.getInstance().setUser(user);
                         AuthenticationHelper.syncSharedPreferences(ApplinkActivity.this);
+
+                        fetchUserList(DataHolder.getInstance().getMeetup().getHash());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, ApplinkActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
+
+    /**
+     * Retrieves the list of users participating in the meetup; then starts MapActivity.
+     *
+     * @param hash is the string that identifies the meetup
+     */
+    private void fetchUserList(String hash) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = API_URL + "meetups/" + hash + "/users";
+
+        GsonRequest<UserList> request = new GsonRequest<>(Request.Method.GET, url, UserList.class,
+                new Response.Listener<UserList>() {
+                    @Override
+                    public void onResponse(UserList userList) {
+                        DataHolder.getInstance().setUserList(userList.getUsers());
 
                         Intent intent = new Intent(ApplinkActivity.this, MapActivity.class);
                         startActivity(intent);

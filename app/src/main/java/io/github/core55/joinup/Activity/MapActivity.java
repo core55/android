@@ -105,13 +105,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
-        NavigationDrawer.buildDrawer(this);
+        NavigationDrawer.buildDrawer(this, true);
 
         // get the view wrapper
         this.outOfBoundsViewGroup = (RelativeLayout) findViewById(R.id.outOfBoundsIndicators);
-
-        // Retrieve map hash from applink
-        handleAppLink();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -127,9 +124,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         createPeopleButtonListener();
         createSwitchListener();
 
-//        if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
-//            namePrompt();
-//        }
+        if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
+            namePrompt();
+        }
     }
 
     @Override
@@ -252,6 +249,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     mMap.addMarker(newMarker);
                 }
             }
+            NavigationDrawer.buildDrawer(MapActivity.this, true);
         }
     };
 
@@ -326,9 +324,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         launchNetworkService();
 
-        // TODO: fix user list
-//        importUsers();
-
         // User out of bounds indicators
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -381,36 +376,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             }
         });
-    }
-
-    private void handleAppLink() {
-        Intent appLinkIntent = getIntent();
-        Uri appLinkData = appLinkIntent.getData();
-
-        if (appLinkData != null && appLinkData.isHierarchical()) {
-            String uri = appLinkIntent.getDataString();
-            Log.d(TAG, "url = " + uri);
-
-            Pattern pattern = Pattern.compile("/\\#/" + WEBAPP_URL_PREFIX + "(.*)");
-            Matcher matcher = pattern.matcher(uri);
-            if (matcher.find()) {
-                String applinkHash = matcher.group(1);
-                fetchMeetup(applinkHash);
-                fetchUserList(applinkHash);
-                Log.d(TAG, "hash = " + applinkHash);
-
-                User user;
-                if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
-                    user = DataHolder.getInstance().getUser();
-                } else {
-                    // TODO: Handle error if coordinates are not available
-                    user = new User(lon, lat);
-                    DataHolder.getInstance().setAnonymous(true);
-                }
-
-                linkUserToMeetup(user, applinkHash);
-            }
-        }
     }
 
     /**
@@ -559,68 +524,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         startService(i);
     }
 
-    private void fetchMeetup(String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = API_URL + "meetups/" + hash;
-
-        GsonRequest<Meetup> request = new GsonRequest<>(
-                Request.Method.GET, url, Meetup.class,
-
-                new Response.Listener<Meetup>() {
-
-                    @Override
-                    public void onResponse(Meetup meetup) {
-                        DataHolder.getInstance().setMeetup(meetup);
-
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
-                                meetup.getZoomLevel()));
-
-                        if (meetupMarker == null && meetupMarkerView == null
-                                && meetup.getPinLatitude() != null && meetup.getPinLongitude() != null) {
-                            meetupMarker = new MarkerOptions().draggable(true);
-                            meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
-                            meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
-                            meetupMarkerView = mMap.addMarker(meetupMarker);
-                        }
-                    }
-                },
-
-                new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
-    private void fetchUserList(String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = API_URL + "meetups/" + hash + "/users";
-
-        GsonRequest<UserList> request = new GsonRequest<>(
-                Request.Method.GET, url, UserList.class,
-
-                new Response.Listener<UserList>() {
-
-                    @Override
-                    public void onResponse(UserList userList) {
-                        DataHolder.getInstance().setUserList(userList.getUsers());
-                    }
-                },
-
-                new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
     private void createPeopleButtonListener() {
         final ImageButton mShowDialog = (ImageButton) findViewById(R.id.peopleButton);
         mShowDialog.setOnClickListener(new View.OnClickListener() {
@@ -642,62 +545,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-//    void importUsers() {
-//        int method = Request.Method.GET;
-//        String hash = DataHolder.getInstance().getMeetup().getHash();
-//        String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users";
-//        Log.e("url", url);
-//        HeaderRequest retrieveUsersOnMeetupRequest = new HeaderRequest
-//                (method, url, null, new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        Log.e("response", response.toString());
-//                        try {
-//                            JSONArray usersJson = response.getJSONObject("data").getJSONObject("_embedded").getJSONArray("users");
-//                            Log.e("usersJson", usersJson.toString());
-//                            JSONObject userJson; //one user
-//                            for (int i = 0; i < usersJson.length(); i++) {
-//                                userJson = (JSONObject) usersJson.get(i);
-//                                String nickname = userJson.getString("nickname");
-//                                String status = userJson.getString("status");
-//                                //retrieve link for picture: first google, if it doesn't exist -> gravatar, if it doesn't exist -> emoji
-//                                String profileURL = userJson.getString("googlePictureURI"); //googlePictureURI gravatarURI
-//                                if (profileURL == "null") {
-//                                    profileURL = userJson.getString("gravatarURI");
-//                                    if (profileURL == "null") {
-//                                        profileURL = "emoji";
-//                                    }
-//                                }
-//
-//
-//                                User u = new User(nickname, status, profileURL);
-//                                userList.add(u);
-//                            }
-//                            Log.e("user_list", response.toString());
-//                        } catch (Exception je) {
-//                            je.printStackTrace();
-//                        }
-//
-//                    }
-//
-//                }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        error.printStackTrace();
-//                        Log.e("errorResponse", "dihvsvdh");
-//                    }
-//                }) {
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                Map<String, String> params = new HashMap<String, String>();
-//                params.put("Content-Type", "application/json");
-//                params.put("Accept", "application/json, application/hal+json");
-//                return params;
-//            }
-//        };
-//        VolleyController.getInstance(this).addToRequestQueue(retrieveUsersOnMeetupRequest);
-//    }
-
     private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash();
@@ -714,36 +561,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
-                    }
-                },
-
-                new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                    }
-                });
-        queue.add(request);
-    }
-
-
-    private void linkUserToMeetup(User user, String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = API_URL + "meetups/" + hash + "/users/save";
-
-        GsonRequest<User> request = new GsonRequest<>(
-                Request.Method.POST, url, user, User.class,
-
-                new Response.Listener<User>() {
-
-                    @Override
-                    public void onResponse(User user) {
-                        DataHolder.getInstance().setUser(user);
-                        if (DataHolder.getInstance().getUser().getNickname() == null) {
-                            namePrompt();
-                        }
-                        AuthenticationHelper.syncSharedPreferences(MapActivity.this);
                     }
                 },
 
