@@ -66,7 +66,6 @@ import io.github.core55.joinup.Service.LocationManager;
 import io.github.core55.joinup.Service.LocationService;
 import io.github.core55.joinup.Service.NetworkService;
 
-
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String TAG = "MapActivity";
@@ -97,9 +96,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Inject the navigation drawer
         NavigationDrawer.buildDrawer(this);
 
-        // Retrieve map hash from applink
-        handleAppLink();
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -116,12 +112,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
+
+        // Retrieve map hash from applink
+        handleAppLink();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         AuthenticationHelper.syncDataHolder(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister the listener when the application is paused
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(networkServiceReceiver);
+        // or `unregisterReceiver(networkServiceReceiver)` for a normal broadcast
+        AuthenticationHelper.syncSharedPreferences(this);
     }
 
     // TODO: What these methods do?
@@ -138,11 +146,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        // Unregister the listener when the application is paused
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(networkServiceReceiver);
-        // or `unregisterReceiver(networkServiceReceiver)` for a normal broadcast
+    protected void onStop() {
+        super.onStop();
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
@@ -152,12 +157,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        AuthenticationHelper.syncSharedPreferences(this);
-    }
-
+    // TODO: fix
     private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -231,12 +231,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         markersOnMap.put(u.getId(), newMarker);
                         mMap.addMarker(newMarker);
                     }
-
-
                 }
-
             }
-
         }
     };
 
@@ -263,9 +259,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         try {
             // Customise map styling via json
-            boolean success = googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                            this, R.raw.map_styles));
+            boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_styles));
 
             if (!success) {
                 Log.e(TAG, "Style parsing failed.");
@@ -274,8 +268,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        // show blue dot on map
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        // Show blue dot on map
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
 
@@ -311,25 +306,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 //        importUsers();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the task you need to do.
-                } else {
-                    // permission denied, boo! Disable the functionality that depends on this permission.
-                }
-                break;
-            }
-            // other 'case' lines to check for other permissions this app might request
-        }
-    }
-
     private void handleAppLink() {
         Intent appLinkIntent = getIntent();
-        String appLinkAction = appLinkIntent.getAction();
         Uri appLinkData = appLinkIntent.getData();
 
         if (appLinkData != null && appLinkData.isHierarchical()) {
@@ -342,7 +320,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 String applinkHash = matcher.group(1);
                 fetchMeetup(applinkHash);
                 fetchUserList(applinkHash);
-                Log.d(TAG, "hash = " + DataHolder.getInstance().getMeetup().getHash());
+                Log.d(TAG, "hash = " + applinkHash);
 
                 User user;
                 if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
@@ -353,7 +331,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     DataHolder.getInstance().setAnonymous(true);
                 }
 
-                linkUserToMeetup(user);
+                linkUserToMeetup(user, applinkHash);
 
                 if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
                     namePrompt();
@@ -419,7 +397,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
      */
     public void patchNickname(String nickname) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-        final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
+        final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
         User user = new User();
         user.setNickname(nickname);
@@ -513,7 +491,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void fetchMeetup(String hash) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash;
+        final String url = API_URL + "meetups/" + hash;
 
         GsonRequest<Meetup> request = new GsonRequest<>(
                 Request.Method.GET, url, Meetup.class,
@@ -538,7 +516,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void fetchUserList(String hash) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users";
+        final String url = API_URL + "meetups/" + hash + "/users";
 
         GsonRequest<UserList> request = new GsonRequest<>(
                 Request.Method.GET, url, UserList.class,
@@ -640,7 +618,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void sendMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash();
+        final String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
         Meetup meetup = new Meetup();
         meetup.setPinLongitude(pinLongitude);
@@ -667,10 +645,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         queue.add(request);
     }
 
-    private void linkUserToMeetup(User user) {
+    private void linkUserToMeetup(User user, String hash) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String hash = DataHolder.getInstance().getMeetup().getHash();
-        final String url = "http://dry-cherry.herokuapp.com/api/meetups/" + hash + "/users/save";
+        final String url = API_URL + "meetups/" + hash + "/users/save";
 
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, user, User.class,
