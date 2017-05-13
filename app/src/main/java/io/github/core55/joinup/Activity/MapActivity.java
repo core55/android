@@ -57,9 +57,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.github.core55.joinup.Api;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.OutOfBoundsHelper;
+import io.github.core55.joinup.Model.AuthenticationResponse;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
@@ -116,6 +118,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
         LocationHelper.askLocationPermission(this);
 
         locationManager = new LocationManager(this);
@@ -125,12 +128,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         createPeopleButtonListener();
         createSwitchListener();
 
-        if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
-            namePrompt();
-        }
-
-        // Retrieve map hash from applink
-        handleAppLink();
+//        if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
+//            namePrompt();
+//        }
     }
 
     @Override
@@ -181,12 +181,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             lat = intent.getDoubleExtra("lat", -1);
             lon = intent.getDoubleExtra("lon", -1);
 
-            if (lat != null && lat != -1 && lon != null && lon != -1 && (DataHolder.getInstance().isAnonymous() || DataHolder.getInstance().isAnonymous())) {
+            if (lat != -1 && lon != -1 && (DataHolder.getInstance().getUser() != null)) {
 
                 RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                 final String url = "https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId();
 
                 User user = new User(lon, lat);
+                user.setNickname(DataHolder.getInstance().getUser().getNickname());
 
                 GsonRequest<User> request = new GsonRequest<>(
                         Request.Method.PATCH, url, user, User.class,
@@ -217,9 +218,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Meetup m = intent.getParcelableExtra("meetup");
+            Meetup m = DataHolder.getInstance().getMeetup();
             if (m != null) {
-
                 if (meetupMarker == null && meetupMarkerView == null && m.getPinLatitude() != null && m.getPinLongitude() != null) {
                     meetupMarker = new MarkerOptions().draggable(true);
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
@@ -229,24 +229,27 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     meetupMarker.position(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                     meetupMarkerView.setPosition(new LatLng(m.getPinLatitude(), m.getPinLongitude()));
                 }
+            }
 
-                for (User u : m.getUsersList()) {
-                    if (markersOnMap.containsKey(u.getId())) {
-                        MarkerOptions marker = markersOnMap.get(u.getId());
-                        marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
-                        marker.title(u.getNickname());
+            List<User> users = DataHolder.getInstance().getUserList();
+            for (User u : users) {
+                if (u.getNickname() != null) {
+                }
+                if (markersOnMap.containsKey(u.getId())) {
+                    MarkerOptions marker = markersOnMap.get(u.getId());
+                    marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                    marker.title(u.getNickname());
+                } else {
+                    MarkerOptions newMarker = new MarkerOptions();
+                    newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
+                    newMarker.title(u.getNickname());
+                    if (newMarker.getTitle() == null) {
+                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
                     } else {
-                        MarkerOptions newMarker = new MarkerOptions();
-                        newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
-                        newMarker.title(u.getNickname());
-                        if (newMarker.getTitle() == null) {
-                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                        } else {
-                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                        }
-                        markersOnMap.put(u.getId(), newMarker);
-                        mMap.addMarker(newMarker);
+                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
                     }
+                    markersOnMap.put(u.getId(), newMarker);
+                    mMap.addMarker(newMarker);
                 }
             }
         }
@@ -261,16 +264,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Meetup meetup = DataHolder.getInstance().getMeetup();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
-                meetup.getZoomLevel()));
+        if (meetup != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
+                    meetup.getZoomLevel()));
 
-        if (meetupMarker == null && meetupMarkerView == null
-                && meetup.getPinLatitude() != null && meetup.getPinLongitude() != null) {
-            meetupMarker = new MarkerOptions().draggable(true);
-            meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
-            meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
-            meetupMarkerView = mMap.addMarker(meetupMarker);
+            if (meetupMarker == null && meetupMarkerView == null
+                    && meetup.getPinLatitude() != null && meetup.getPinLongitude() != null) {
+                meetupMarker = new MarkerOptions().draggable(true);
+                meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
+                meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
+                meetupMarkerView = mMap.addMarker(meetupMarker);
+            }
         }
 
         try {
@@ -293,7 +298,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
 
-        if (DataHolder.getInstance().getUser().getNickname() != null) {
+        if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() != null) {
             Context context = getApplicationContext();
             CharSequence text = "Welcome " + DataHolder.getInstance().getUser().getNickname() + "!";
             int duration = Toast.LENGTH_LONG;
@@ -336,7 +341,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if (data.getMeetup() == null) {
                     return;
                 }
-                List<User> userList = data.getMeetup().getUsersList();
+                List<User> userList = data.getUserList();
 
                 // update indicator for each user
                 for (Map.Entry<Long, MarkerOptions> item : markersOnMap.entrySet()) {
@@ -404,12 +409,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
 
                 linkUserToMeetup(user, applinkHash);
-
-                if (DataHolder.getInstance().isAnonymous() && DataHolder.getInstance().getUser().getNickname() == null) {
-                    namePrompt();
-                } else if (!DataHolder.getInstance().isAuthenticated() && !DataHolder.getInstance().isAnonymous()) {
-                    namePrompt();
-                }
             }
         }
     }
@@ -482,6 +481,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(User user) {
                         DataHolder.getInstance().setUser(user);
+                        AuthenticationHelper.syncSharedPreferences(MapActivity.this);
                     }
                 },
 
@@ -555,8 +555,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Construct our Intent specifying the Service
         Intent i = new Intent(this, NetworkService.class);
 
-        i.putExtra("hash", DataHolder.getInstance().getMeetup().getHash());
-
         // Start the service
         startService(i);
     }
@@ -573,6 +571,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
+
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
+                                meetup.getZoomLevel()));
+
+                        if (meetupMarker == null && meetupMarkerView == null
+                                && meetup.getPinLatitude() != null && meetup.getPinLongitude() != null) {
+                            meetupMarker = new MarkerOptions().draggable(true);
+                            meetupMarker.position(new LatLng(meetup.getPinLatitude(), meetup.getPinLongitude()));
+                            meetupMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_meetup));
+                            meetupMarkerView = mMap.addMarker(meetupMarker);
+                        }
                     }
                 },
 
@@ -717,6 +727,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         queue.add(request);
     }
 
+
     private void linkUserToMeetup(User user, String hash) {
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_URL + "meetups/" + hash + "/users/save";
@@ -729,6 +740,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(User user) {
                         DataHolder.getInstance().setUser(user);
+                        if (DataHolder.getInstance().getUser().getNickname() == null) {
+                            namePrompt();
+                        }
                         AuthenticationHelper.syncSharedPreferences(MapActivity.this);
                     }
                 },
