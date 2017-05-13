@@ -2,7 +2,6 @@ package io.github.core55.joinup.Service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -12,46 +11,37 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.android.volley.toolbox.Volley;
 
 import io.github.core55.joinup.Entity.Meetup;
-import io.github.core55.joinup.Helper.VolleyController;
+import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.Model.DataHolder;
+
+import io.github.core55.joinup.Helper.GsonRequest;
+import io.github.core55.joinup.Model.UserList;
 
 public class NetworkService extends Service {
 
     public static final String ACTION = "io.github.core55.joinup.services.NetworkService";
-    public static final String TAG = "NetworkService";
-
+    public static final int UPDATE_TIME = 7;  //in seconds, how often communication is settled with the database.
     private LocalBroadcastManager mLocalBroadcastManager;
+    public static final String TAG = "NetworkService";
 
     private boolean started = true;
     private Handler handler = new Handler();
 
-    private String meetupHash;
 
     @Override
     public void onCreate() {
         super.onCreate();
         // Fires when a service is first initialized
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this); //TODO: is this necessary anymore? What does it do? JLRTO
 
-        RequestQueue queue = VolleyController.getInstance(this.getApplicationContext()).getRequestQueue();
-
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Fires when a service is started up, do work here!
-
-        if (intent != null) {
-            meetupHash = intent.getStringExtra("hash");
-        }
-
-
         handlerStart();
 
         // Return "sticky" for services that are explicitly started and stopped as needed by the app.
@@ -65,17 +55,16 @@ public class NetworkService extends Service {
 
     @Override
     public void onDestroy() {
+        handlerStop();
         // Cleanup service before destruction
-
     }
 
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (meetupHash != null) {
-                requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + meetupHash);
-            }
-
+            requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash());
+            sendLocation("https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId());
+            requestUserList("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash() + "/users");
             if (started) {
                 handlerStart();
             }
@@ -84,7 +73,7 @@ public class NetworkService extends Service {
 
     public void handlerStart() {
         started = true;
-        handler.postDelayed(runnable, 7 * 1000);
+        handler.postDelayed(runnable, UPDATE_TIME * 1000);
     }
 
     public void handlerStop() {
@@ -93,96 +82,82 @@ public class NetworkService extends Service {
     }
 
     public void requestMeetup(String url) {
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        Log.d(TAG, "requestMeetup");
-        int method = Request.Method.GET;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
+        GsonRequest<Meetup> request = new GsonRequest<>(Request.Method.GET, url, Meetup.class,
+                new Response.Listener<Meetup>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-
-                        String url = "";
-
-                        try {
-                            url = response.getJSONObject("_links").getJSONObject("users").getString("href");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        requestUserList(response, url);
+                    public void onResponse(Meetup meetup) {
+                        DataHolder.getInstance().setMeetup(meetup);
                     }
-                }, new Response.ErrorListener() {
+                },
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        Log.d("error", "Meetup could not be retrieved");
                     }
                 });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+        queue.add(request);
     }
 
-    private void requestUserList(final JSONObject meetup, String url) {
+//    public void requestUser(String url) {
+//
+//        int method = Request.Method.GET;
+//        GsonRequest<User> request = new GsonRequest<User>
+//                (method, url, User.class, new Response.Listener<User>() {
+//                    @Override
+//                    public void onResponse(User response) {
+//
+//                        DataHolder.getInstance().setUser(response);
+//                    }
+//                }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                    }
+//                });
+//
+//        // Add a request to your RequestQueue.
+//        VolleyController.getInstance(this).addToRequestQueue(request);
+//
+//    }
 
-        int method = Request.Method.GET;
+    public void sendLocation(String url) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        User locationPatch = new User();
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+        locationPatch.setLastLongitude(DataHolder.getInstance().getUser().getLastLongitude());
+        locationPatch.setLastLatitude(DataHolder.getInstance().getUser().getLastLatitude());
 
-                        JSONArray jsonUserArray = new JSONArray();
+        GsonRequest<User> request = new GsonRequest<>(Request.Method.PATCH, url, locationPatch,
+                User.class, new Response.Listener<User>() {
+            @Override
+            public void onResponse(User response) {
+                Log.i(TAG, "Updated location of " + response.getUsername());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-                        try {
-                            jsonUserArray = response.getJSONObject("_embedded").getJSONArray("users");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Intent i = new Intent(ACTION);
-                        i.putExtra("meetup", Meetup.fromJson(meetup, jsonUserArray));
-                        mLocalBroadcastManager.sendBroadcast(i);
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+            }
+        });
+        queue.add(request);
     }
 
-    public void sendLocation(Location location, String url) {
+    public void requestUserList(String url) {
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        JSONObject newLocation = new JSONObject();
-
-        try {
-            newLocation.put("lastLongitude", location.getLongitude());
-            newLocation.put("lastLatitude", location.getLatitude());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        int method = Request.Method.PATCH;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (method, url, null, new Response.Listener<JSONObject>() {
+        GsonRequest<UserList> request = new GsonRequest<>(Request.Method.GET, url, UserList.class,
+                new Response.Listener<UserList>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-
+                    public void onResponse(UserList response) {
+                        DataHolder.getInstance().setUserList(response.getUsers());
                     }
                 }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-                    }
-                });
-
-        // Add a request to your RequestQueue.
-        VolleyController.getInstance(this).addToRequestQueue(jsonObjectRequest);
+            }
+        });
+        queue.add(request);
     }
 }
