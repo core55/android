@@ -81,7 +81,8 @@
             android:name="asset_statements"
             android:resource="@string/asset_statements" />
 
-        <activity android:name=".Activity.EmailNotConfirmedActivity"></activity>
+        <activity android:name=".Activity.EmailNotConfirmedActivity" />
+        <activity android:name=".Activity.ApplinkActivity"></activity>
     </application>
 
 </manifest>

@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.github.core55.joinup.Api;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.OutOfBoundsHelper;
@@ -232,9 +231,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
 
             List<User> users = DataHolder.getInstance().getUserList();
+
             for (User u : users) {
-                if (u.getNickname() != null) {
-                }
+                if (u == null) { return; }
+
                 if (markersOnMap.containsKey(u.getId())) {
                     MarkerOptions marker = markersOnMap.get(u.getId());
                     marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
