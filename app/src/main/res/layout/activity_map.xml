@@ -45,4 +45,9 @@
         android:checked="true"
         android:theme="@style/SwitchTheme" />
 
+    <FrameLayout
+        android:id="@+id/fragment_drawer_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </RelativeLayout>

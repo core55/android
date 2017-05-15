@@ -57,15 +57,21 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
+
+import io.github.core55.joinup.Helper.DrawerFragment;
+import io.github.core55.joinup.Helper.OutOfBoundsHelper;
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.CircleTransform;
 import io.github.core55.joinup.Helper.GsonRequest;
@@ -110,8 +116,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
-        NavigationDrawer.buildDrawer(this, true);
-        LocationHelper.askLocationPermission(this);
+        /*NavigationDrawer.buildDrawer(this, true);
+        LocationHelper.askLocationPermission(this);*/
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_drawer_container, DrawerFragment.Companion.newInstance("DrawerFragment"))
+                .commit();
 
         // get the view wrapper
         this.outOfBoundsViewGroup = (RelativeLayout) findViewById(R.id.outOfBoundsIndicators);
@@ -354,8 +363,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 }
 
-                NavigationDrawer.buildDrawer(MapActivity.this, true);
+
             }
+
         }
     };
 

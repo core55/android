@@ -91,7 +91,7 @@ public class CreateActivity extends AppCompatActivity implements
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer and setup click listeners
-        NavigationDrawer.buildDrawer(this, false);
+        //NavigationDrawer.buildDrawer(this, false);
         registerOnClickListeners();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
