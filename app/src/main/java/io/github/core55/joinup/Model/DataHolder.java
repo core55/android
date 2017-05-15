@@ -4,10 +4,15 @@
 
 package io.github.core55.joinup.Model;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.HashMap;
 import java.util.List;
 
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.Helper.DrawerFragment;
 
 public class DataHolder {
 
@@ -19,6 +24,29 @@ public class DataHolder {
     private boolean isAnonymous;
     private Meetup meetup;
     private List<User> userList;
+    private DrawerFragment drawer;
+    private HashMap<Long, MarkerOptions> markersOnMap;
+    private GoogleMap mMap;
+
+    public GoogleMap getmMap() {
+        return mMap;
+    }
+
+    public void setmMap(GoogleMap mMap) {
+        this.mMap = mMap;
+    }
+
+    public HashMap<Long, MarkerOptions> getMarkersOnMap() {
+        return markersOnMap;
+    }
+
+    public void setMarkersOnMap(HashMap<Long, MarkerOptions> markersOnMap) {
+        this.markersOnMap = markersOnMap;
+    }
+
+    public DrawerFragment getDrawer() {return drawer; }
+
+    public void setDrawer(DrawerFragment drawer) {this.drawer = drawer;}
 
     public static DataHolder getInstance() {
         return holder;

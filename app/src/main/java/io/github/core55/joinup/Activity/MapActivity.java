@@ -118,10 +118,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Inject the navigation drawer
         /*NavigationDrawer.buildDrawer(this, true);
         LocationHelper.askLocationPermission(this);*/
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_drawer_container, DrawerFragment.Companion.newInstance("DrawerFragment",DataHolder.getInstance()))
-                .commit();
 
+        //instantiates drawer, puts it in the dataholder and creates fragment with it
+        DrawerFragment drawer =  DrawerFragment.Companion.newInstance("DrawerFragment",DataHolder.getInstance(),this);
+        DataHolder.getInstance().setDrawer(drawer);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_drawer_container,DataHolder.getInstance().getDrawer())
+                .commit();
+        //Put markersOnMap in the dataholder
+        DataHolder.getInstance().setMarkersOnMap(markersOnMap);
         // get the view wrapper
         this.outOfBoundsViewGroup = (RelativeLayout) findViewById(R.id.outOfBoundsIndicators);
 
@@ -423,6 +428,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Meetup meetup = DataHolder.getInstance().getMeetup();
+        DataHolder.getInstance().setmMap(googleMap);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(meetup.getCenterLatitude(), meetup.getCenterLongitude()),
@@ -701,5 +707,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 });
         queue.add(request);
+    }
+    public void centerMapOnMarker(Long id){
+        if (markersOnMap.containsKey(id)){
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markersOnMap.get(id).getPosition(),14));
+        }
+
     }
 }
