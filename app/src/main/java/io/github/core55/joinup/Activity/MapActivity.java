@@ -94,6 +94,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private HashMap<Long, Bitmap> bmpPictureHashMap = new HashMap<>();
 
+    private Bitmap bmpPicture;
+
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
 
@@ -295,8 +297,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         } else {
                             // no google or gravatar picture, so display the default marker and return
                             newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                            markersOnMap.put(u.getId(), newMarker);
-                            mMap.addMarker(newMarker);
+                            Marker marker = mMap.addMarker(newMarker);
+                            markersHashMap.put(u.getId(), marker);
                             return;
                         }
 
@@ -319,6 +321,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                         queue.add(imageRequest);
 
+
                         if (bmpPictureHashMap.get(u.getId()) == null) {
                             return;
                         }
@@ -328,21 +331,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         Canvas canvas1 = new Canvas(bmpCanvas);
 
                         canvas1.drawBitmap(bmpPin, 0, 0, null);
-
                         Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPictureHashMap.get(u.getId()), bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
                         canvas1.drawBitmap(scaledPicture, 5, 5, null);
-
                         newMarker.icon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
 
                         Marker marker = mMap.addMarker(newMarker);
                         markersHashMap.put(u.getId(), marker);
 
                     }
-
                 }
-            }
 
-            NavigationDrawer.buildDrawer(MapActivity.this, true);
+                NavigationDrawer.buildDrawer(MapActivity.this, true);
+            }
         }
     };
 
