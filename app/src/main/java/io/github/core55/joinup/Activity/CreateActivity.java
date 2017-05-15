@@ -102,6 +102,7 @@ public class CreateActivity extends AppCompatActivity implements
         buildGoogleApiClient();
 
         createLocationRequest();
+
     }
 
     @Override

@@ -37,6 +37,8 @@ public class NavigationDrawer {
         // Retrieve current user from shared preferences with default
         DataHolder store = DataHolder.getInstance();
 
+
+
         // Create profile header
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(activity)

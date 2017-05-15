@@ -119,7 +119,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         /*NavigationDrawer.buildDrawer(this, true);
         LocationHelper.askLocationPermission(this);*/
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_drawer_container, DrawerFragment.Companion.newInstance("DrawerFragment"))
+                .replace(R.id.fragment_drawer_container, DrawerFragment.Companion.newInstance("DrawerFragment",DataHolder.getInstance()))
                 .commit();
 
         // get the view wrapper
