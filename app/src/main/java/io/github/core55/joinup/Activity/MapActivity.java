@@ -13,6 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
@@ -40,6 +43,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -63,6 +67,7 @@ import java.util.List;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
+import io.github.core55.joinup.Helper.CircleTransform;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
@@ -86,6 +91,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     //private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
     private HashMap<Long, Marker> markersHashMap = new HashMap<>();
+
+    private Bitmap bmpPicture;
 
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
@@ -239,7 +246,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     //smooth-marker movement
                     animateMarker(marker, lastLatLng, false);
 
-                    // update pin color
+                    /*********** Update pin color ***********/
                     long epoch = System.currentTimeMillis() / 1000; // in seconds
 
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -267,19 +274,56 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         Log.d(TAG, "red");
                     }
 
-
                 } else {
                     Log.d(TAG, "pin create");
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     newMarker.title(u.getNickname());
                     if (newMarker.getTitle() == null) {
-                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
+                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_anon));
+                        Marker marker = mMap.addMarker(newMarker);
+                        markersHashMap.put(u.getId(), marker);
                     } else {
-                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
+
+                        ImageRequest imageRequest = new ImageRequest("https://www.gravatar.com/avatar/576e391f3f68e7597fa7be5435ca5e73",
+                                new Response.Listener<Bitmap>() {
+                                    @Override
+                                    public void onResponse(Bitmap response) {
+                                        Log.d(TAG, "ImageRequest:onResponse");
+                                        CircleTransform circleTransform = new CircleTransform();
+                                        bmpPicture = circleTransform.transform(response);
+                                    }
+                                }, 0, 0, null, null,
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        error.printStackTrace();
+                                    }
+                                });
+
+                        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+                        queue.add(imageRequest);
+
+                        if (bmpPicture == null) {
+                            return;
+                        }
+
+                        Bitmap bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_default);
+                        Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas1 = new Canvas(bmpCanvas);
+
+                        canvas1.drawBitmap(bmpPin, 0, 0, null);
+
+                        Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPicture, bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
+                        canvas1.drawBitmap(scaledPicture, 5, 5, null);
+
+                        newMarker.icon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
+
+                        Marker marker = mMap.addMarker(newMarker);
+                        markersHashMap.put(u.getId(), marker);
+
                     }
-                    Marker marker = mMap.addMarker(newMarker);
-                    markersHashMap.put(u.getId(), marker);
+
                 }
             }
 
@@ -290,7 +334,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     /**
      * This method is in charge of animating the marker movement, when we move on the map,
      * the marker will update position and will move towards desired destination when we update the view.
-     * @param marker the marker we are animating
+     *
+     * @param marker     the marker we are animating
      * @param toPosition the position to move to
      * @param hideMarker marker visibility
      */
