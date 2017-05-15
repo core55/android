@@ -49,6 +49,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private HashMap<Long, TextView> outOfBoundsIndicators = new HashMap<>();
     private RelativeLayout outOfBoundsViewGroup;
+    private long previousOutOfBoundsUpdateTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -306,30 +308,33 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
+                long timestamp = new Date().getTime();
+                if (timestamp - previousOutOfBoundsUpdateTimestamp < 10) {
+                    return;
+                }
+
+                previousOutOfBoundsUpdateTimestamp = timestamp;
                 LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                 DataHolder data = DataHolder.getInstance();
                 CameraPosition camera = mMap.getCameraPosition();
 
                 // skip if no data available
-                if (data.getMeetup() == null) {
+                if (data.getMeetup() == null || data.getUserList() == null) {
                     return;
                 }
+
                 List<User> userList = data.getUserList();
 
-                // update indicator for each user
-                for (Map.Entry<Long, MarkerOptions> item : markersOnMap.entrySet()) {
-                    MarkerOptions marker = item.getValue();
-                    User user = null;
-                    for (User temp : userList) {
-                        if (temp.getId() == item.getKey()) {
-                            user = temp;
-                        }
-                    }
+                for (User user : userList) {
+                    MarkerOptions marker = markersOnMap.get(user.getId());
+
+                    // skip if marker was not put on map yet
+                    if (marker == null) continue;
 
                     // if marker visible, remove indicator if present
                     if (bounds.contains(marker.getPosition())) {
-                        if (outOfBoundsIndicators.containsKey(item.getKey())) {
-                            TextView indicator = outOfBoundsIndicators.get(item.getKey());
+                        if (outOfBoundsIndicators.containsKey(user.getId())) {
+                            TextView indicator = outOfBoundsIndicators.get(user.getId());
                             indicator.setVisibility(View.GONE);
                         }
 
@@ -339,14 +344,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     String nickname = user != null ? user.getNickname() : "Anonymous";
 
                     // create indicator if not already present
-                    if (!outOfBoundsIndicators.containsKey(item.getKey())) {
+                    if (!outOfBoundsIndicators.containsKey(user.getId())) {
                         TextView indicator = OutOfBoundsHelper.generatePositionIdicator(nickname, View.generateViewId(), getBaseContext());
-                        outOfBoundsIndicators.put(item.getKey(), indicator);
+                        outOfBoundsIndicators.put(user.getId(), indicator);
                         outOfBoundsViewGroup.addView(indicator);
                     }
 
                     // reposition and update indicator
-                    TextView indicator = outOfBoundsIndicators.get(item.getKey());
+                    TextView indicator = outOfBoundsIndicators.get(user.getId());
                     indicator.setText(nickname);
                     OutOfBoundsHelper.setIndicatorPosition(bounds, marker, indicator, camera);
                     indicator.setVisibility(View.VISIBLE);
