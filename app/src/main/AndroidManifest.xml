@@ -21,9 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
 
-        <!-- android:theme="@style/AppTheme"> -->
-
-
         <!-- ACTIVITIES -->
         <activity
             android:name=".Activity.WelcomeActivity"
@@ -50,7 +47,8 @@
             android:label="@string/title_activity_not_confirmed" />
         <activity
             android:name=".Activity.ApplinkActivity"
-            android:label="@string/title_joinup">
+            android:label="@string/title_joinup"
+            android:launchMode="singleTask">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
