@@ -4,17 +4,14 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.Layout;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Marker;
 
 import io.github.core55.joinup.R;
 
@@ -31,7 +28,7 @@ public class OutOfBoundsHelper {
      * @param marker
      * @return
      */
-    public static double calculatePolarCoordinateTheta(LatLngBounds bounds, MarkerOptions marker) {
+    public static double calculatePolarCoordinateTheta(LatLngBounds bounds, Marker marker) {
         LatLng center = bounds.getCenter();
         LatLng location = marker.getPosition();
         return Math.atan2(location.latitude - center.latitude, location.longitude - center.longitude);
@@ -77,7 +74,7 @@ public class OutOfBoundsHelper {
      * @param indicator
      * @param camera
      */
-    public static void setIndicatorPosition(LatLngBounds bounds, MarkerOptions marker, TextView indicator, CameraPosition camera) {
+    public static void setIndicatorPosition(LatLngBounds bounds, Marker marker, TextView indicator, CameraPosition camera) {
         double theta = calculatePolarCoordinateTheta(bounds, marker);
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
 
@@ -109,19 +106,19 @@ public class OutOfBoundsHelper {
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             offsetLeft = linearMapping(theta, fourthPi, threeFourthPi, width - indicator.getWidth(), 0);
 
-        }else if (theta > -1 * fourthPi && theta < fourthPi) {
+        } else if (theta > -1 * fourthPi && theta < fourthPi) {
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             offsetTop = linearMapping(theta, -1 * fourthPi, fourthPi, height - indicator.getHeight(), 0);
 
-        }else if (theta >= -1 * threeFourthPi && theta <= -1 * fourthPi) {
+        } else if (theta >= -1 * threeFourthPi && theta <= -1 * fourthPi) {
             params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             offsetLeft = linearMapping(theta, -1 * threeFourthPi, -1 * fourthPi, 0, width - indicator.getWidth());
 
-        }else if ((theta <= Math.PI && theta >= threeFourthPi) || (theta <= -1 * threeFourthPi && theta >= -1 * Math.PI)) {
+        } else if ((theta <= Math.PI && theta >= threeFourthPi) || (theta <= -1 * threeFourthPi && theta >= -1 * Math.PI)) {
             params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             if (theta <= Math.PI && theta >= threeFourthPi) {
                 offsetTop = linearMapping(theta, threeFourthPi, Math.PI, 0, height / 2);
-            }else {
+            } else {
                 offsetTop = linearMapping(theta, -1 * Math.PI, -1 * threeFourthPi, height / 2, height - indicator.getHeight());
             }
         }
