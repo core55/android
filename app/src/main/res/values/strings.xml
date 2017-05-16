@@ -1,7 +1,7 @@
 <resources>
     <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://culater.herokuapp.com\",\n  }\n}]</string>
 
-    <string name="app_name">JoinUp</string>
+    <string name="app_name">Joinup</string>
     <string name="title_activity_map">MapActivity</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_welcome">WelcomeActivity</string>

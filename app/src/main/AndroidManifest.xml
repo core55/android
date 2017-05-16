@@ -32,10 +32,12 @@
         </activity>
         <activity
             android:name=".Activity.LoginActivity"
-            android:label="@string/title_activity_login" />
+            android:label="@string/title_activity_login"
+            android:noHistory="true" />
         <activity
             android:name=".Activity.RegisterActivity"
-            android:label="@string/title_activity_register" />
+            android:label="@string/title_activity_register"
+            android:noHistory="true" />
         <activity
             android:name=".Activity.CreateActivity"
             android:label="@string/title_activity_create" />
@@ -44,11 +46,13 @@
             android:label="@string/title_activity_map" />
         <activity
             android:name=".Activity.EmailNotConfirmedActivity"
-            android:label="@string/title_activity_not_confirmed" />
+            android:label="@string/title_activity_not_confirmed"
+            android:noHistory="true" />
         <activity
             android:name=".Activity.ApplinkActivity"
             android:label="@string/title_joinup"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:noHistory="true" >
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 

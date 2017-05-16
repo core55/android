@@ -26,14 +26,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import io.github.core55.joinup.Model.AccountCredentials;
-import io.github.core55.joinup.Model.AuthenticationResponse;
-import io.github.core55.joinup.Model.GoogleToken;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
-import io.github.core55.joinup.R;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
+import io.github.core55.joinup.Model.AccountCredentials;
+import io.github.core55.joinup.Model.AuthenticationResponse;
+import io.github.core55.joinup.Model.GoogleToken;
+import io.github.core55.joinup.R;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -68,6 +68,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Register Login and Google SignIn buttons listeners
         registerOnClickListeners();
         registerOnTouchListener();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this, WelcomeActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
     }
 
     private void registerOnClickListeners() {
