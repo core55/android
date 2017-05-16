@@ -57,6 +57,7 @@
     <string name="title_activity_not_confirmed">EmailNotConfirmedActivity</string>
     <string name="title_activity_applink">ApplinkActivity</string>
     <string name="title_joinup">Joinup</string>
+    <string name="type_status">Update status</string>
 
 
 </resources>
