@@ -35,6 +35,13 @@ public class RegisterActivity extends AppCompatActivity {
         registerOnTouchListener();
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this, WelcomeActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+    }
+
     private void registerOnClickListener() {
 
         // Register button
