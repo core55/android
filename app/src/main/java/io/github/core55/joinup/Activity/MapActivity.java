@@ -57,21 +57,26 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.CircleTransform;
+import io.github.core55.joinup.Helper.DrawerFragment;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
-import io.github.core55.joinup.Helper.NavigationDrawer;
 import io.github.core55.joinup.Helper.OutOfBoundsHelper;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
@@ -110,9 +115,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.authenticationLogger(this);
 
         // Inject the navigation drawer
-        NavigationDrawer.buildDrawer(this, true);
+        /*NavigationDrawer.buildDrawer(this, true);*/ //We use DrawerFragment now
         LocationHelper.askLocationPermission(this);
 
+        //instantiates drawer, puts it in the dataholder and creates fragment with it
+        DrawerFragment drawer = DrawerFragment.Companion.newInstance("DrawerFragment", DataHolder.getInstance(), this);
+        DataHolder.getInstance().setDrawer(drawer);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_drawer_container, DataHolder.getInstance().getDrawer())
+                .commit();
+        DataHolder.getInstance().setActivity(this);
         // get the view wrapper
         this.outOfBoundsViewGroup = (RelativeLayout) findViewById(R.id.outOfBoundsIndicators);
 
@@ -354,8 +366,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 }
 
-                NavigationDrawer.buildDrawer(MapActivity.this, true);
+
             }
+
         }
     };
 
@@ -692,4 +705,69 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 });
         queue.add(request);
     }
+
+    public void centerMapOnMarker(Long id) {
+        if (markersHashMap.containsKey(id)) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markersHashMap.get(id).getPosition(), 14));
+        }
+
+    }
+
+    public void populateUserList() {
+        HashMap<Long, PrimaryDrawerItem> hashMap = DataHolder.getInstance().getDrawer().getHashMap();
+        List<User> users = DataHolder.getInstance().getUserList();
+        Drawer drawer = DataHolder.getInstance().getDrawer().result;
+
+        ArrayList<Long> idsToBeRemoved = new ArrayList<Long>();
+        //adds all the identifiers to arraylist
+        List<IDrawerItem> subItems = drawer.getDrawerItem(1000).getSubItems();
+        if (subItems != null) {
+            for (IDrawerItem item : subItems) {
+                Log.d("drawerItem", Objects.toString(item.getIdentifier()));
+                idsToBeRemoved.add(item.getIdentifier());
+            }
+        }
+        Log.d("ids_beggining", idsToBeRemoved.toString());
+
+        for (User user : users) {
+            Log.d("user", user.getNickname());
+            Log.d("hashmap", hashMap.toString());
+            PrimaryDrawerItem item;
+            if (hashMap.containsKey(user.getId())) {
+                item = hashMap.get(user.getId());
+                idsToBeRemoved.remove(user.getId());
+            } else {
+                item = new PrimaryDrawerItem();
+                hashMap.put(user.getId(), item);
+            }
+            if (user.getStatus() != null) {
+                item.withDescription(user.getStatus());
+            }
+            item.withName(user.getNickname());
+            item.withIdentifier(user.getId());
+            item.withIcon(R.drawable.emoji_3);
+            item.withLevel(2);
+            item.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                @Override
+                public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                    centerMapOnMarker(drawerItem.getIdentifier());
+                    return false;
+                }
+            });
+            if (hashMap.containsKey(user.getId())) {
+                drawer.updateItem(item);
+            } else {
+                hashMap.put(user.getId(), item);
+                drawer.addItem(item);
+                drawer.updateItem(item);//AtPosition(item,user.getId().intValue());
+            }
+        }
+        //delete users that are not there anymore.
+        Log.d("ids_end", idsToBeRemoved.toString());
+        for (Long id : idsToBeRemoved) {
+            drawer.removeItem(id.longValue());
+        }
+    }
+
+
 }

@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
 
 android {
     compileSdkVersion 25
@@ -44,7 +46,11 @@ dependencies {
     compile 'com.lucasurbas:listitemview:1.0.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.mikepenz:google-material-typeface:3.0.1.0.original@aar'
+    compile 'co.zsmb:materialdrawer-kt:1.0.1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile 'junit:junit:4.12'
 }
 
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'kotlin-android-extensions'
+

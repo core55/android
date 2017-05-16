@@ -6,19 +6,30 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
+import io.github.core55.joinup.Activity.MapActivity;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Model.DataHolder;
 
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Model.UserList;
+import io.github.core55.joinup.R;
 
 public class NetworkService extends Service {
 
@@ -153,6 +164,7 @@ public class NetworkService extends Service {
                     public void onResponse(UserList response) {
                         DataHolder.getInstance().setUserList(response.getUsers());
                         Intent i = new Intent(ACTION);
+                        DataHolder.getInstance().getActivity().populateUserList();
                         mLocalBroadcastManager.sendBroadcast(i);
                     }
                 }, new Response.ErrorListener() {
@@ -163,4 +175,6 @@ public class NetworkService extends Service {
         });
         queue.add(request);
     }
+
+
 }
