@@ -14,14 +14,19 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -39,6 +44,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -225,11 +231,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
 
                 if (markersHashMap.containsKey(u.getId())) {
-                    Log.d(TAG, "pin update");
-                    Marker marker = markersHashMap.get(u.getId());
-                    marker.setPosition(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
-                    marker.setTitle(u.getNickname());
 
+                    Marker marker = markersHashMap.get(u.getId());
+                    marker.setTitle(u.getNickname());
+                    LatLng lastLatLng = new LatLng(u.getLastLatitude(), u.getLastLongitude());
+
+                    //smooth-marker movement
+                    animateMarker(marker, lastLatLng, false);
+
+                    // update pin color
                     long epoch = System.currentTimeMillis() / 1000; // in seconds
 
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -257,6 +267,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         Log.d(TAG, "red");
                     }
 
+
                 } else {
                     Log.d(TAG, "pin create");
                     MarkerOptions newMarker = new MarkerOptions();
@@ -275,6 +286,50 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             NavigationDrawer.buildDrawer(MapActivity.this, true);
         }
     };
+
+    /**
+     * This method is in charge of animating the marker movement, when we move on the map,
+     * the marker will update position and will move towards desired destination when we update the view.
+     * @param marker the marker we are animating
+     * @param toPosition the position to move to
+     * @param hideMarker marker visibility
+     */
+    public void animateMarker(final Marker marker, final LatLng toPosition,
+                              final boolean hideMarker) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = mMap.getProjection();
+        Point startPoint = proj.toScreenLocation(marker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 500;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t)
+                        * startLatLng.latitude;
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarker) {
+                        marker.setVisible(false);
+                    } else {
+                        marker.setVisible(true);
+                    }
+                }
+            }
+        });
+    }
 
     /**
      * Manipulates the map once available.
