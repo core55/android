@@ -25,6 +25,8 @@ import co.zsmb.materialdrawerkt.draweritems.profile.profile
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.materialdrawer.AccountHeader
 import com.mikepenz.materialdrawer.Drawer
+import com.mikepenz.materialdrawer.model.ExpandableBadgeDrawerItem
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.squareup.picasso.Picasso
 import io.github.core55.joinup.Activity.LoginActivity
 import io.github.core55.joinup.Activity.MapActivity
@@ -36,9 +38,11 @@ import kotlinx.android.synthetic.main.fragment_navdrawer.view.*
 
 class DrawerFragment : Fragment() {
 
-    private lateinit var result: Drawer
+    public lateinit var result: Drawer
     private lateinit var headerResult: AccountHeader
     lateinit var store: DataHolder
+    lateinit var people: ExpandableBadgeDrawerItem
+    var hashMap: HashMap<Long, PrimaryDrawerItem> = HashMap()
     // Retrieve current user from shared preferences with default
 
 
@@ -48,7 +52,7 @@ class DrawerFragment : Fragment() {
 
 
         result = drawer {
-
+            Log.d("drawer","Again")
             savedInstance = savedInstanceState
             displayBelowStatusBar = true
 
@@ -59,15 +63,15 @@ class DrawerFragment : Fragment() {
                     compactStyle = false
                     savedInstance = savedInstanceState
                     profile(store.user.nickname) {
-                        if(store.user.status != null)
-                            email= store.user.status
+                        if (store.user.status != null)
+                            email = store.user.status
                         //iconBitmap = profilePicture(store.user)
                         icon = R.drawable.emoji_4
                     }
                 }
             }
-
-            expandableBadgeItem("People") {
+            divider { }
+            people = expandableBadgeItem("People") {
                 iicon = GoogleMaterial.Icon.gmd_people
                 identifier = 1000
                 selectable = true
@@ -77,25 +81,25 @@ class DrawerFragment : Fragment() {
                     badge(store.userList.size.toString()) {
                         textColor = Color.WHITE.toLong()
                         colorRes = R.color.md_red_700
+
                     }
 
                     for (user in store.userList) {
                         try {
-                            primaryItem(user.nickname, user.status) {
+                            hashMap.put(user.id, primaryItem(user.nickname, user.status) {
                                 level = 2
                                 selectable = true
                                 icon = R.drawable.emoji_3 //Icon.createWithResource(context,R.drawable.emoji_3)//GoogleMaterial.Icon.gmd_people
-                                identifier = user.id + 10
+                                identifier = user.id
                                 onClick { view, position, drawerItem ->
                                     var act: MapActivity = getActivity() as MapActivity
                                     act.centerMapOnMarker(user.id)
                                     false
                                 }
-                            }
+                            })
 
-                        }
-                        catch (e : IllegalStateException ){
-                            Log.e("pew","User nickname &/or status = null")
+                        } catch (e: IllegalStateException) {
+                            Log.e("pew", "User nickname &/or status = null")
                         }
 
 
@@ -103,19 +107,25 @@ class DrawerFragment : Fragment() {
                 }
 
             }
+            divider { }
             primaryItem("Directions") {
+                identifier = 8000
                 iicon = GoogleMaterial.Icon.gmd_directions
             }
             primaryItem("Settings & Privacy") {
+                identifier = 8001
                 iicon = GoogleMaterial.Icon.gmd_settings
             }
-            divider { }
+
             primaryItem("Leave Meetup") {
+                identifier = 8002
                 iicon = GoogleMaterial.Icon.gmd_time_to_leave
             }
             footer {
+
                 if (store.isAuthenticated) {
                     secondaryItem("Log out") {
+                        identifier = 8003
                         iicon = GoogleMaterial.Icon.gmd_exit_to_app
                         onClick { _ ->
                             startActivity(Intent(context, LoginActivity::class.java))
@@ -124,6 +134,7 @@ class DrawerFragment : Fragment() {
                     }
                 } else {
                     secondaryItem("Log in") {
+                        identifier = 8004
                         iicon = GoogleMaterial.Icon.gmd_radio
                         onClick { _ ->
                             startActivity(Intent(context, LoginActivity::class.java))
@@ -131,6 +142,7 @@ class DrawerFragment : Fragment() {
                         }
                     }
                     secondaryItem("Register") {
+                        identifier = 8005
                         iicon = GoogleMaterial.Icon.gmd_favorite
                         onClick { _ ->
                             startActivity(Intent(context, RegisterActivity::class.java))
@@ -166,6 +178,7 @@ class DrawerFragment : Fragment() {
         }
         return IconTargetHelper.iconProfile
     }
+
 
 
     companion object {
