@@ -48,6 +48,8 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -169,7 +171,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             if (lat != -1 && lon != -1 && (DataHolder.getInstance().getUser() != null)) {
 
                 RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-                final String url = API_URL +  "users/" + DataHolder.getInstance().getUser().getId();
+                final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
                 User user = new User(lon, lat);
                 user.setNickname(DataHolder.getInstance().getUser().getNickname());
@@ -219,13 +221,45 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             List<User> users = DataHolder.getInstance().getUserList();
 
             for (User u : users) {
-                if (u == null) { return; }
+                if (u == null) {
+                    return;
+                }
 
                 if (markersOnMap.containsKey(u.getId())) {
+                    Log.d(TAG, "pin update");
                     MarkerOptions marker = markersOnMap.get(u.getId());
                     marker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     marker.title(u.getNickname());
+
+                    long epoch = System.currentTimeMillis() / 1000;
+
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                    long updatedAt = 0;
+                    try {
+                        updatedAt = df.parse(u.getUpdatedAt()).getTime();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.d(TAG, "epoch = " + epoch);
+                    Log.d(TAG, "updatedAt = " + updatedAt);
+
+                    if (epoch - updatedAt < 5 * 60) {
+                        // green pin if active in the last 5 min
+                        marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_green));
+                        Log.d(TAG, "green");
+                    } else if (epoch - updatedAt < 20 * 60) {
+                        // yellow pin if active in the last 20 min
+                        marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_yellow));
+                        Log.d(TAG, "yellow");
+                    } else {
+                        // red pin otherwise
+                        marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_red));
+                        Log.d(TAG, "red");
+                    }
+
                 } else {
+                    Log.d(TAG, "pin create");
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     newMarker.title(u.getNickname());
@@ -238,6 +272,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     mMap.addMarker(newMarker);
                 }
             }
+
             NavigationDrawer.buildDrawer(MapActivity.this, true);
         }
     };
@@ -504,7 +539,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Link is copied!", Toast.LENGTH_SHORT).show();
     }
-
 
 
     private void updateMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
