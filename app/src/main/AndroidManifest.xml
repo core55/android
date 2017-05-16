@@ -24,7 +24,8 @@
         <!-- ACTIVITIES -->
         <activity
             android:name=".Activity.WelcomeActivity"
-            android:label="@string/title_joinup">
+            android:label="@string/title_joinup"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,26 +34,32 @@
         <activity
             android:name=".Activity.LoginActivity"
             android:label="@string/title_activity_login"
-            android:noHistory="true" />
+            android:noHistory="true"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.RegisterActivity"
             android:label="@string/title_activity_register"
-            android:noHistory="true" />
+            android:noHistory="true"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.CreateActivity"
-            android:label="@string/title_activity_create" />
+            android:label="@string/title_activity_create"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.MapActivity"
-            android:label="@string/title_activity_map" />
+            android:label="@string/title_activity_map"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.EmailNotConfirmedActivity"
             android:label="@string/title_activity_not_confirmed"
-            android:noHistory="true" />
+            android:noHistory="true"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.ApplinkActivity"
             android:label="@string/title_joinup"
             android:launchMode="singleTask"
-            android:noHistory="true" >
+            android:noHistory="true"
+            android:screenOrientation="portrait">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
