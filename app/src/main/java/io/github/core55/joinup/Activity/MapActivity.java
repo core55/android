@@ -20,12 +20,8 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-
 import android.os.Handler;
 import android.os.SystemClock;
-
-import android.provider.ContactsContract;
-
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -49,7 +45,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.data.DataBuffer;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -62,40 +57,22 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-
-import io.github.core55.joinup.Entity.Meetup;
-import io.github.core55.joinup.Entity.User;
-
-import io.github.core55.joinup.Helper.DrawerFragment;
-import io.github.core55.joinup.Helper.OutOfBoundsHelper;
-import io.github.core55.joinup.Model.DataHolder;
-import io.github.core55.joinup.Helper.AuthenticationHelper;
-import io.github.core55.joinup.Helper.CircleTransform;
-import io.github.core55.joinup.Helper.GsonRequest;
-import io.github.core55.joinup.Helper.HttpRequestHelper;
-import io.github.core55.joinup.Helper.LocationHelper;
-import io.github.core55.joinup.Helper.NavigationDrawer;
-
 import java.util.Objects;
 
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
+import io.github.core55.joinup.Helper.CircleTransform;
 import io.github.core55.joinup.Helper.DrawerFragment;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
@@ -729,9 +706,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         queue.add(request);
     }
 
-    public void centerMapOnMarker(Long id){
-        if (markersHashMap.containsKey(id)){
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markersHashMap.get(id).getPosition(),14));
+    public void centerMapOnMarker(Long id) {
+        if (markersHashMap.containsKey(id)) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markersHashMap.get(id).getPosition(), 14));
         }
 
     }
@@ -744,31 +721,28 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         ArrayList<Long> idsToBeRemoved = new ArrayList<Long>();
         //adds all the identifiers to arraylist
         List<IDrawerItem> subItems = drawer.getDrawerItem(1000).getSubItems();
-        for (IDrawerItem item : subItems){
-            Log.d("drawerItem", Objects.toString(item.getIdentifier()));
-            idsToBeRemoved.add(item.getIdentifier());
+        if (subItems != null) {
+            for (IDrawerItem item : subItems) {
+                Log.d("drawerItem", Objects.toString(item.getIdentifier()));
+                idsToBeRemoved.add(item.getIdentifier());
+            }
         }
-        Log.d("ids_beggining",idsToBeRemoved.toString());
-       /* idsToBeRemoved.remove(Long.getLong("1000")); //takes away identifier of ExpandableBadge
-        idsToBeRemoved.remove(Long.getLong("8001"));
-        idsToBeRemoved.remove(Long.getLong("8002"));
-        idsToBeRemoved.remove(Long.getLong("8003"));
-        idsToBeRemoved.remove(Long.getLong("8004"));
-        idsToBeRemoved.remove(Long.getLong("8005"));*/
+        Log.d("ids_beggining", idsToBeRemoved.toString());
 
         for (User user : users) {
-            Log.d("user",user.getNickname());
-            Log.d("hashmap",hashMap.toString());
+            Log.d("user", user.getNickname());
+            Log.d("hashmap", hashMap.toString());
             PrimaryDrawerItem item;
             if (hashMap.containsKey(user.getId())) {
                 item = hashMap.get(user.getId());
                 idsToBeRemoved.remove(user.getId());
             } else {
                 item = new PrimaryDrawerItem();
-                hashMap.put(user.getId(),item);
+                hashMap.put(user.getId(), item);
             }
-            if(user.getStatus()!=null){
-                item.withDescription(user.getStatus());}
+            if (user.getStatus() != null) {
+                item.withDescription(user.getStatus());
+            }
             item.withName(user.getNickname());
             item.withIdentifier(user.getId());
             item.withIcon(R.drawable.emoji_3);
@@ -782,15 +756,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             });
             if (hashMap.containsKey(user.getId())) {
                 drawer.updateItem(item);
-            }else{
-                hashMap.put(user.getId(),item);
+            } else {
+                hashMap.put(user.getId(), item);
                 drawer.addItem(item);
                 drawer.updateItem(item);//AtPosition(item,user.getId().intValue());
             }
         }
         //delete users that are not there anymore.
-        Log.d("ids_end",idsToBeRemoved.toString());
-        for (Long id : idsToBeRemoved){
+        Log.d("ids_end", idsToBeRemoved.toString());
+        for (Long id : idsToBeRemoved) {
             drawer.removeItem(id.longValue());
         }
     }
