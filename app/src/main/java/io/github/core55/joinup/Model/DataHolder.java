@@ -25,24 +25,6 @@ public class DataHolder {
     private Meetup meetup;
     private List<User> userList;
     private DrawerFragment drawer;
-    private HashMap<Long, MarkerOptions> markersOnMap;
-    private GoogleMap mMap;
-
-    public GoogleMap getmMap() {
-        return mMap;
-    }
-
-    public void setmMap(GoogleMap mMap) {
-        this.mMap = mMap;
-    }
-
-    public HashMap<Long, MarkerOptions> getMarkersOnMap() {
-        return markersOnMap;
-    }
-
-    public void setMarkersOnMap(HashMap<Long, MarkerOptions> markersOnMap) {
-        this.markersOnMap = markersOnMap;
-    }
 
     public DrawerFragment getDrawer() {return drawer; }
 

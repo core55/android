@@ -4,7 +4,6 @@ package io.github.core55.joinup.Helper
  * Created by juanl on 15/05/2017.
  */
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -23,10 +22,6 @@ import co.zsmb.materialdrawerkt.draweritems.badgeable.secondaryItem
 import co.zsmb.materialdrawerkt.draweritems.divider
 import co.zsmb.materialdrawerkt.draweritems.expandable.expandableBadgeItem
 import co.zsmb.materialdrawerkt.draweritems.profile.profile
-import co.zsmb.materialdrawerkt.draweritems.profile.profileSetting
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.MarkerOptions
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.materialdrawer.AccountHeader
 import com.mikepenz.materialdrawer.Drawer
@@ -48,8 +43,6 @@ class DrawerFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.e("store", store.toString())
-        Log.e("store_user", store.user.nickname)
 
         val view = inflater.inflate(R.layout.fragment_navdrawer, container, false)
 
@@ -59,19 +52,19 @@ class DrawerFragment : Fragment() {
             savedInstance = savedInstanceState
             displayBelowStatusBar = true
 
-            if (store.isAuthenticated) {
+            if (store.isAnonymous || store.isAuthenticated) {
                 headerResult = accountHeader {
                     background = R.drawable.material_drawer_shadow_top
                     translucentStatusBar = true
                     compactStyle = false
                     savedInstance = savedInstanceState
-                    profile(store.user.nickname, store.user.status) {
+                    profile(store.user.nickname) {
+                        if(store.user.status != null)
+                            email= store.user.status
                         //iconBitmap = profilePicture(store.user)
                         icon = R.drawable.emoji_4
                     }
-
                 }
-
             }
 
             expandableBadgeItem("People") {
@@ -79,7 +72,7 @@ class DrawerFragment : Fragment() {
                 identifier = 1000
                 selectable = true
 
-              
+
                 if (store.userList != null) {
                     badge(store.userList.size.toString()) {
                         textColor = Color.WHITE.toLong()
@@ -87,16 +80,22 @@ class DrawerFragment : Fragment() {
                     }
 
                     for (user in store.userList) {
-                        primaryItem(user.nickname, user.status) {
-                            level = 2
-                            selectable = true
-                            icon = R.drawable.emoji_3 //Icon.createWithResource(context,R.drawable.emoji_3)//GoogleMaterial.Icon.gmd_people
-                            identifier = user.id + 10
-                            onClick { view, position, drawerItem ->
-                                var act: MapActivity = getActivity() as MapActivity
-                                act.centerMapOnMarker(user.id)
-                                false}
+                        try {
+                            primaryItem(user.nickname, user.status) {
+                                level = 2
+                                selectable = true
+                                icon = R.drawable.emoji_3 //Icon.createWithResource(context,R.drawable.emoji_3)//GoogleMaterial.Icon.gmd_people
+                                identifier = user.id + 10
+                                onClick { view, position, drawerItem ->
+                                    var act: MapActivity = getActivity() as MapActivity
+                                    act.centerMapOnMarker(user.id)
+                                    false
+                                }
+                            }
 
+                        }
+                        catch (e : IllegalStateException ){
+                            Log.e("pew","User nickname &/or status = null")
                         }
 
 
@@ -118,6 +117,10 @@ class DrawerFragment : Fragment() {
                 if (store.isAuthenticated) {
                     secondaryItem("Log out") {
                         iicon = GoogleMaterial.Icon.gmd_exit_to_app
+                        onClick { _ ->
+                            startActivity(Intent(context, LoginActivity::class.java))
+                            false
+                        }
                     }
                 } else {
                     secondaryItem("Log in") {
@@ -163,7 +166,6 @@ class DrawerFragment : Fragment() {
         }
         return IconTargetHelper.iconProfile
     }
-
 
 
     companion object {
