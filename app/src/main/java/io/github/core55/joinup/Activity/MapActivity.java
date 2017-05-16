@@ -89,12 +89,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     private LocationManager locationManager;
-    //private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
     private HashMap<Long, Marker> markersHashMap = new HashMap<>();
-
     private HashMap<Long, Bitmap> bmpPictureHashMap = new HashMap<>();
-
-    private Bitmap bmpPicture;
 
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
@@ -321,7 +317,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                         queue.add(imageRequest);
 
-
                         if (bmpPictureHashMap.get(u.getId()) == null) {
                             return;
                         }
@@ -329,7 +324,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         Bitmap bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_default);
                         Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
                         Canvas canvas1 = new Canvas(bmpCanvas);
-
                         canvas1.drawBitmap(bmpPin, 0, 0, null);
                         Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPictureHashMap.get(u.getId()), bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
                         canvas1.drawBitmap(scaledPicture, 5, 5, null);
