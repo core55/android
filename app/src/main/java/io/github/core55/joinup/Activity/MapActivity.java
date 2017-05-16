@@ -13,6 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
@@ -40,6 +43,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -63,6 +67,7 @@ import java.util.List;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
+import io.github.core55.joinup.Helper.CircleTransform;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
@@ -84,8 +89,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     private LocationManager locationManager;
-    //private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
     private HashMap<Long, Marker> markersHashMap = new HashMap<>();
+    private HashMap<Long, Bitmap> bmpPictureHashMap = new HashMap<>();
 
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
@@ -225,7 +230,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             List<User> users = DataHolder.getInstance().getUserList();
 
-            for (User u : users) {
+            for (final User u : users) {
                 if (u == null) {
                     return;
                 }
@@ -239,7 +244,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     //smooth-marker movement
                     animateMarker(marker, lastLatLng, false);
 
-                    // update pin color
+                    /*********** Update pin color ***********/
                     long epoch = System.currentTimeMillis() / 1000; // in seconds
 
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -253,18 +258,36 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     Log.d(TAG, "epoch = " + epoch);
                     Log.d(TAG, "updatedAt = " + updatedAt);
 
+                    Bitmap bmpPin;
+
                     if (epoch - updatedAt < 5 * 60) {
                         // green pin if active in the last 5 min
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_green));
+                        bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_green);
                         Log.d(TAG, "green");
                     } else if (epoch - updatedAt < 20 * 60) {
                         // yellow pin if active in the last 20 min
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_yellow));
+                        bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_yellow);
                         Log.d(TAG, "yellow");
                     } else {
                         // red pin otherwise
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_red));
+                        bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_red);
                         Log.d(TAG, "red");
+                    }
+
+                    if (bmpPictureHashMap.get(u.getId()) == null) {
+                        // no picture
+                        Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas1 = new Canvas(bmpCanvas);
+                        canvas1.drawBitmap(bmpPin, 0, 0, null);
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
+                    } else {
+                        // picture is available
+                        Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas1 = new Canvas(bmpCanvas);
+                        canvas1.drawBitmap(bmpPin, 0, 0, null);
+                        Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPictureHashMap.get(u.getId()), bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
+                        canvas1.drawBitmap(scaledPicture, 5, 5, null);
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
                     }
 
 
@@ -273,24 +296,74 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     newMarker.title(u.getNickname());
-                    if (newMarker.getTitle() == null) {
-                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                    } else {
-                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
-                    }
-                    Marker marker = mMap.addMarker(newMarker);
-                    markersHashMap.put(u.getId(), marker);
-                }
-            }
 
-            NavigationDrawer.buildDrawer(MapActivity.this, true);
+                    if (u.getNickname() == null) {
+                        newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_anon));
+                        Marker marker = mMap.addMarker(newMarker);
+                        markersHashMap.put(u.getId(), marker);
+                    } else {
+
+                        String pictureURL;
+
+                        if (u.getGooglePictureURI() != null) {
+                            pictureURL = u.getGooglePictureURI();
+                        } else if (u.getGravatarURI() != null) {
+                            pictureURL = u.getGravatarURI();
+                        } else {
+                            // no google or gravatar picture, so display the default marker and return
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
+                            Marker marker = mMap.addMarker(newMarker);
+                            markersHashMap.put(u.getId(), marker);
+                            return;
+                        }
+
+                        ImageRequest imageRequest = new ImageRequest(pictureURL,
+                                new Response.Listener<Bitmap>() {
+                                    @Override
+                                    public void onResponse(Bitmap response) {
+                                        Log.d(TAG, "imageRequest:onResponse");
+                                        CircleTransform circleTransform = new CircleTransform();
+                                        bmpPictureHashMap.put(u.getId(), circleTransform.transform(response));
+                                    }
+                                }, 0, 0, null, null,
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        error.printStackTrace();
+                                    }
+                                });
+
+                        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+                        queue.add(imageRequest);
+
+                        if (bmpPictureHashMap.get(u.getId()) == null) {
+                            return;
+                        }
+
+                        Bitmap bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_default);
+                        Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas1 = new Canvas(bmpCanvas);
+                        canvas1.drawBitmap(bmpPin, 0, 0, null);
+                        Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPictureHashMap.get(u.getId()), bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
+                        canvas1.drawBitmap(scaledPicture, 5, 5, null);
+                        newMarker.icon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
+
+                        Marker marker = mMap.addMarker(newMarker);
+                        markersHashMap.put(u.getId(), marker);
+
+                    }
+                }
+
+                NavigationDrawer.buildDrawer(MapActivity.this, true);
+            }
         }
     };
 
     /**
      * This method is in charge of animating the marker movement, when we move on the map,
      * the marker will update position and will move towards desired destination when we update the view.
-     * @param marker the marker we are animating
+     *
+     * @param marker     the marker we are animating
      * @param toPosition the position to move to
      * @param hideMarker marker visibility
      */
