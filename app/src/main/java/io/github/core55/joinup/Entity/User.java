@@ -18,6 +18,8 @@ public class User extends BaseEntity implements Parcelable {
     private String username;
     private String status;
     private String profilePicture;
+    private String gravatarURI;
+    private String googlePictureURI;
 
 
     //private List<String> meetupsList = new ArrayList<>();
@@ -122,6 +124,14 @@ public class User extends BaseEntity implements Parcelable {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public String getGravatarURI() {
+        return gravatarURI;
+    }
+
+    public String getGooglePictureURI() {
+        return googlePictureURI;
     }
 
     public User(String nickname, String status, String profilePicture) {

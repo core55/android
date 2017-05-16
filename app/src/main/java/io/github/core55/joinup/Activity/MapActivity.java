@@ -92,7 +92,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     //private HashMap<Long, MarkerOptions> markersOnMap = new HashMap<>();
     private HashMap<Long, Marker> markersHashMap = new HashMap<>();
 
-    private Bitmap bmpPicture;
+    private HashMap<Long, Bitmap> bmpPictureHashMap = new HashMap<>();
 
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
@@ -232,7 +232,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             List<User> users = DataHolder.getInstance().getUserList();
 
-            for (User u : users) {
+            for (final User u : users) {
                 if (u == null) {
                     return;
                 }
@@ -279,19 +279,34 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     newMarker.title(u.getNickname());
-                    if (newMarker.getTitle() == null) {
+
+                    if (u.getNickname() == null) {
                         newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_anon));
                         Marker marker = mMap.addMarker(newMarker);
                         markersHashMap.put(u.getId(), marker);
                     } else {
 
-                        ImageRequest imageRequest = new ImageRequest("https://www.gravatar.com/avatar/576e391f3f68e7597fa7be5435ca5e73",
+                        String pictureURL;
+
+                        if (u.getGooglePictureURI() != null) {
+                            pictureURL = u.getGooglePictureURI();
+                        } else if (u.getGravatarURI() != null) {
+                            pictureURL = u.getGravatarURI();
+                        } else {
+                            // no google or gravatar picture, so display the default marker and return
+                            newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_default));
+                            markersOnMap.put(u.getId(), newMarker);
+                            mMap.addMarker(newMarker);
+                            return;
+                        }
+
+                        ImageRequest imageRequest = new ImageRequest(pictureURL,
                                 new Response.Listener<Bitmap>() {
                                     @Override
                                     public void onResponse(Bitmap response) {
-                                        Log.d(TAG, "ImageRequest:onResponse");
+                                        Log.d(TAG, "imageRequest:onResponse");
                                         CircleTransform circleTransform = new CircleTransform();
-                                        bmpPicture = circleTransform.transform(response);
+                                        bmpPictureHashMap.put(u.getId(), circleTransform.transform(response));
                                     }
                                 }, 0, 0, null, null,
                                 new Response.ErrorListener() {
@@ -304,7 +319,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                         queue.add(imageRequest);
 
-                        if (bmpPicture == null) {
+                        if (bmpPictureHashMap.get(u.getId()) == null) {
                             return;
                         }
 
@@ -314,7 +329,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                         canvas1.drawBitmap(bmpPin, 0, 0, null);
 
-                        Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPicture, bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
+                        Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPictureHashMap.get(u.getId()), bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
                         canvas1.drawBitmap(scaledPicture, 5, 5, null);
 
                         newMarker.icon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
