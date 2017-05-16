@@ -258,19 +258,38 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     Log.d(TAG, "epoch = " + epoch);
                     Log.d(TAG, "updatedAt = " + updatedAt);
 
+                    Bitmap bmpPin;
+
                     if (epoch - updatedAt < 5 * 60) {
                         // green pin if active in the last 5 min
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_green));
+                        bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_green);
                         Log.d(TAG, "green");
                     } else if (epoch - updatedAt < 20 * 60) {
                         // yellow pin if active in the last 20 min
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_yellow));
+                        bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_yellow);
                         Log.d(TAG, "yellow");
                     } else {
                         // red pin otherwise
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.pin_red));
+                        bmpPin = BitmapFactory.decodeResource(context.getResources(), R.drawable.pin_red);
                         Log.d(TAG, "red");
                     }
+
+                    if (bmpPictureHashMap.get(u.getId()) == null) {
+                        // no picture
+                        Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas1 = new Canvas(bmpCanvas);
+                        canvas1.drawBitmap(bmpPin, 0, 0, null);
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
+                    } else {
+                        // picture is available
+                        Bitmap bmpCanvas = Bitmap.createBitmap(bmpPin.getWidth(), bmpPin.getHeight(), Bitmap.Config.ARGB_8888);
+                        Canvas canvas1 = new Canvas(bmpCanvas);
+                        canvas1.drawBitmap(bmpPin, 0, 0, null);
+                        Bitmap scaledPicture = Bitmap.createScaledBitmap(bmpPictureHashMap.get(u.getId()), bmpPin.getWidth() - 10, bmpPin.getWidth() - 10, false);
+                        canvas1.drawBitmap(scaledPicture, 5, 5, null);
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(bmpCanvas));
+                    }
+
 
                 } else {
                     Log.d(TAG, "pin create");
