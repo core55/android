@@ -23,6 +23,7 @@ import co.zsmb.materialdrawerkt.draweritems.badgeable.secondaryItem
 import co.zsmb.materialdrawerkt.draweritems.divider
 import co.zsmb.materialdrawerkt.draweritems.expandable.expandableBadgeItem
 import co.zsmb.materialdrawerkt.draweritems.profile.profile
+import co.zsmb.materialdrawerkt.draweritems.switchable.switchItem
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.materialdrawer.AccountHeader
 import com.mikepenz.materialdrawer.Drawer
@@ -121,9 +122,18 @@ class DrawerFragment : Fragment() {
                 identifier = 8000
                 iicon = GoogleMaterial.Icon.gmd_directions
             }
-            primaryItem("Settings & Privacy") {
+            switchItem("Location updates") {
                 identifier = 8001
                 iicon = GoogleMaterial.Icon.gmd_settings
+                checked = true
+                onSwitchChanged { drawerItem, button, isEnabled ->
+                    if(isEnabled){
+                        store.activity.locationManager.restart()
+                    }
+                    else{
+                        store.activity.locationManager.stop()
+                    }
+                }
             }
             primaryItem("Set status") {
                 identifier = 8006
