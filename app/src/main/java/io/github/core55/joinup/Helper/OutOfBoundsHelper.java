@@ -60,7 +60,7 @@ public class OutOfBoundsHelper {
         TextView indicator = new TextView(context);
         indicator.setBackgroundResource(R.drawable.out_of_bounds_indicator);
         indicator.setText(label);
-        indicator.setTextColor(Color.WHITE);
+        indicator.setTextColor(Color.BLACK);
         indicator.setTypeface(null, Typeface.BOLD);
         return indicator;
     }
