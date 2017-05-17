@@ -834,5 +834,32 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+    public void leaveMeetup(){
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash()  + "/users/remove";
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.POST, url, DataHolder.getInstance().getUser(), User.class,
+
+                new Response.Listener<User>() {
+
+                    @Override
+                    public void onResponse(User user) {
+                        DataHolder.getInstance().setMeetup(null);
+                        Intent intent = new Intent(getApplicationContext(),CreateActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                    }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
+
 
 }

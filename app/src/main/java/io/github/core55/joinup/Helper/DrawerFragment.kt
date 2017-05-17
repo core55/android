@@ -147,6 +147,11 @@ class DrawerFragment : Fragment() {
             primaryItem("Leave Meetup") {
                 identifier = 8002
                 iicon = GoogleMaterial.Icon.gmd_time_to_leave
+                onClick { _ ->
+                    var act: MapActivity = getActivity() as MapActivity
+                    act.leaveMeetup()
+                    false
+                }
             }
             footer {
 

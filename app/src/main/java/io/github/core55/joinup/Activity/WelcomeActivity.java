@@ -39,6 +39,12 @@ public class WelcomeActivity extends Activity {
         mCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*if (DataHolder.getInstance().getMeetup()!=null){
+                    Intent intent = new Intent(getApplicationContext(),MapActivity.class);
+                    startActivity(intent);
+                }
+                else {createMeetup();}
+                */
                 createMeetup();
             }
         });
