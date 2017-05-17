@@ -24,16 +24,20 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -140,7 +144,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         locationManager.start();
 
         createShareButtonListener();
-
+        openDrawer();
         if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
@@ -728,6 +732,23 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
 
+    /**
+     * when clicking on the drawerBtn, the drawer opens up.
+     */
+    public void openDrawer(){
+
+        ImageButton DrawerBtn = (ImageButton) findViewById(R.id.drawerButton);
+        DrawerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                DataHolder.getInstance().getDrawer().result.openDrawer();
+
+            }
+        });
+    }
+
+   
     /**
      * The method is used to copy the provided link to the clipboard when clicking on the copy button
      *
