@@ -147,6 +147,9 @@ public class CreateActivity extends AppCompatActivity implements
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
+    /**
+     * Listens to clicks for the searched location
+     */
     private void registerOnClickListeners() {
 
         // Register search button listener
@@ -248,12 +251,18 @@ public class CreateActivity extends AppCompatActivity implements
         startLocationUpdates();
     }
 
+    /**
+     * asks for location updates
+     */
     private void startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
 
+    /**
+     * asks for location updates to stop
+     */
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
@@ -306,6 +315,9 @@ public class CreateActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * searches for location and direct the user into it
+     */
     public void searchLocation() {
 
         // Get location from user input
@@ -341,6 +353,9 @@ public class CreateActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * creates a meetup map with a unique hash
+     */
     private void createMeetup() {
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "meetups";
@@ -388,6 +403,11 @@ public class CreateActivity extends AppCompatActivity implements
         queue.add(request);
     }
 
+    /**
+     * links a meetup to a user
+     *
+     * @param user is current user
+     */
     private void linkUserToMeetup(User user) {
         RequestQueue queue = Volley.newRequestQueue(this);
         String hash = DataHolder.getInstance().getMeetup().getHash();
@@ -422,6 +442,7 @@ public class CreateActivity extends AppCompatActivity implements
         queue.add(request);
     }
 
+    //checks if the network is available
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();

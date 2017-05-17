@@ -32,6 +32,9 @@ public class WelcomeActivity extends Activity {
         registerOnClickListeners();
     }
 
+    /**
+     * creates button-listeners to the buttons on the view for creating a meet up, logging in and registration
+     */
     private void registerOnClickListeners() {
 
         // Create meetup button
