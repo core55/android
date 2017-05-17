@@ -34,18 +34,6 @@
         tools:layout_editor_absoluteX="286dp"
         tools:layout_editor_absoluteY="490dp" />
 
-    <Switch
-        android:id="@+id/toggleSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/imageButton"
-        android:layout_alignStart="@+id/imageButton"
-        android:layout_marginBottom="18dp"
-        android:layout_marginStart="5dp"
-        android:background="@android:color/transparent"
-        android:checked="true"
-        android:theme="@style/SwitchTheme" />
-
     <FrameLayout
         android:id="@+id/fragment_drawer_container"
         android:layout_width="match_parent"

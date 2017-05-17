@@ -96,7 +96,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;
 
-    private LocationManager locationManager;
+    public LocationManager locationManager;
     private HashMap<Long, Marker> markersHashMap = new HashMap<>();
     private HashMap<Long, Bitmap> bmpPictureHashMap = new HashMap<>();
 
@@ -141,7 +141,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         locationManager.start();
 
         createShareButtonListener();
-        createSwitchListener();
+
         if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
@@ -721,25 +721,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
-    /**
-     * The switch is responsible for controlling the location update
-     * The switch is colored-green by default which indicates that the updates are on.
-     */
-    private void createSwitchListener() {
-        Switch toggle = (Switch) findViewById(R.id.toggleSwitch);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    //enable location for users
-                    locationManager.restart();
-                } else {
-                    //disable location for users
-                    locationManager.stop();
-                }
-            }
-        });
-    }
-
+   
     /**
      * The method is used to copy the provided link to the clipboard when clicking on the copy button
      *
