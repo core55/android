@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -87,7 +88,6 @@ public class ApplinkActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
-                        //TODO the backend does not check if there are duplicate users in a meetup
                         linkUserToMeetup(prepareUserForMeetup(meetup), meetup.getHash());
                     }
                 },
@@ -95,6 +95,9 @@ public class ApplinkActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, ApplinkActivity.this);
+                        Toast.makeText(getApplicationContext(),"Meetup not found", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(ApplinkActivity.this, CreateActivity.class);
+                        startActivity(intent);
                     }
                 });
         queue.add(request);

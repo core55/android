@@ -67,8 +67,11 @@ class DrawerFragment : Fragment() {
                             name = store.user.nickname
                         if (store.user.status != null)
                             email = store.user.status
-                        //iconBitmap = profilePicture(store.user)
-                        icon = R.drawable.emoji_4
+
+                        if (store.isAuthenticated && store.activity.bmpPictureHashMap.containsKey(store.user.id)){
+                            iconDrawable = BitmapDrawable(getResources(), store.activity.bmpPictureHashMap.get(store.user.id));
+                        }
+                        else{ iicon = GoogleMaterial.Icon.gmd_account_circle}
                     }
                 }
             }
@@ -94,7 +97,7 @@ class DrawerFragment : Fragment() {
                                 if (store.activity.bmpPictureHashMap.containsKey(user.id)){
                                     iconDrawable = BitmapDrawable(resources,store.activity.bmpPictureHashMap.get(user.id))}
                                 else{
-                                    icon = R.drawable.emoji_2
+                                    iicon = GoogleMaterial.Icon.gmd_account_circle
                                 }
                                 identifier = user.id
                                 onClick { view, position, drawerItem ->
