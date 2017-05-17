@@ -660,12 +660,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    private void createStatusListener() {
+    public void createStatusListener() {
+
 
 
         Button mButton = (Button) findViewById(R.id.edit_status_btn);
-
-
         mButton.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
@@ -698,6 +697,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                     }
                                 });
                         queue.add(request);
+
+                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
 
                     }
                 });

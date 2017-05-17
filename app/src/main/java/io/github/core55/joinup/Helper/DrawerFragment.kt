@@ -125,7 +125,15 @@ class DrawerFragment : Fragment() {
                 identifier = 8001
                 iicon = GoogleMaterial.Icon.gmd_settings
             }
-
+            primaryItem("Set status") {
+                identifier = 8006
+                iicon = GoogleMaterial.Icon.gmd_edit
+                onClick { _ ->
+                    var act: MapActivity = getActivity() as MapActivity
+                    act.createStatusListener()
+                    false
+                }
+            }
             primaryItem("Leave Meetup") {
                 identifier = 8002
                 iicon = GoogleMaterial.Icon.gmd_time_to_leave
@@ -161,6 +169,8 @@ class DrawerFragment : Fragment() {
                 }
 
             }
+
+
 
         }
 

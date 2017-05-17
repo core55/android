@@ -20,42 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"></RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/circle_center"
-        android:layout_marginRight="5dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="11dp"
-        android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/edit_status"
-            android:layout_width="290dp"
-            android:layout_height="40dp"
-            android:background="@drawable/custom_text"
-            android:hint="@string/type_status"
-            android:inputType="text"
-            android:maxLines="1"
-            android:paddingBottom="8dp"
-            android:paddingLeft="10dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            />
-
-        <Button
-            android:id="@+id/edit_status_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/custom_button"
-            android:text="edit"
-            android:layout_alignBottom="@+id/edit_status"
-            android:layout_alignEnd="@+id/edit_status"
-            android:layout_alignParentTop="true" />
-
-
-    </RelativeLayout>
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="wrap_content"
