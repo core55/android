@@ -18,6 +18,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,6 +61,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -97,6 +99,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private HashMap<Long, Marker> markersHashMap = new HashMap<>();
     private HashMap<Long, Bitmap> bmpPictureHashMap = new HashMap<>();
 
+    public HashMap<Long, Bitmap> getBmpPictureHashMap() {
+        return bmpPictureHashMap;
+    }
+
     private MarkerOptions meetupMarker;
     private Marker meetupMarkerView;
 
@@ -114,8 +120,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.syncDataHolder(this);
         AuthenticationHelper.authenticationLogger(this);
 
-        // Inject the navigation drawer
-        /*NavigationDrawer.buildDrawer(this, true);*/ //We use DrawerFragment now
         LocationHelper.askLocationPermission(this);
 
         //instantiates drawer, puts it in the dataholder and creates fragment with it
@@ -572,7 +576,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     String nickname = name.getText().toString();
                     Log.d(TAG, nickname);
 
-                    updateNickname(nickname);
+                    IProfile profile = DataHolder.getInstance().getDrawer().getHeaderResult().getActiveProfile();
+                    profile.withName(nickname);
+                    DataHolder.getInstance().getDrawer().headerResult.updateProfile(profile);
+                    updateNickname(nickname); //updates nickname on database
                     dialog.dismiss();
                 }
 
@@ -730,8 +737,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Log.d("ids_beggining", idsToBeRemoved.toString());
 
         for (User user : users) {
-            Log.d("user", user.getNickname());
-            Log.d("hashmap", hashMap.toString());
+           /* Log.d("user", user.getNickname());
+            Log.d("hashmap", hashMap.toString());*/
             PrimaryDrawerItem item;
             if (hashMap.containsKey(user.getId())) {
                 item = hashMap.get(user.getId());
@@ -745,7 +752,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
             item.withName(user.getNickname());
             item.withIdentifier(user.getId());
-            item.withIcon(R.drawable.emoji_3);
+            //item.withIcon(R.drawable.emoji_3);
+            item.withIcon(new BitmapDrawable(getResources(), bmpPictureHashMap.get(user.getId())));
             item.withLevel(2);
             item.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                 @Override
@@ -759,7 +767,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             } else {
                 hashMap.put(user.getId(), item);
                 drawer.addItem(item);
-                drawer.updateItem(item);//AtPosition(item,user.getId().intValue());
+                //drawer.updateItem(item);//AtPosition(item,user.getId().intValue());
             }
         }
         //delete users that are not there anymore.
