@@ -142,7 +142,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         createShareButtonListener();
         createSwitchListener();
-        //  createStatusListener();
         if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
