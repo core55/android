@@ -142,7 +142,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         createShareButtonListener();
         createSwitchListener();
-
         if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
@@ -256,6 +255,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     Marker marker = markersHashMap.get(u.getId());
                     marker.setTitle(u.getNickname());
+                    marker.setSnippet(u.getStatus());
                     LatLng lastLatLng = new LatLng(u.getLastLatitude(), u.getLastLongitude());
 
                     //smooth-marker movement
@@ -313,6 +313,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     newMarker.title(u.getNickname());
+                    newMarker.snippet(u.getStatus());
 
                     if (u.getNickname() == null) {
                         newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_anon));
@@ -654,6 +655,70 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             }
         });
+    }
+
+    /**
+     *Creates a dialog for status input
+     */
+    public void createStatusDialog() {
+
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.dialog_status, null);
+        mBuilder.setView(mView);
+
+        final AlertDialog dialog = mBuilder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+
+        Button statusBtn = (Button) dialog.findViewById(R.id.edit_status_btn);
+        statusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setStatus(v, dialog);
+            }
+        });
+
+    }
+
+    /**
+     * Updates the status in the database 
+     * @param view is the current view
+     * @param dialog for referencing
+     */
+    public void setStatus(View view, AlertDialog dialog) {
+        final EditText status = (EditText) dialog.findViewById(R.id.edit_status);
+        final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
+
+        DataHolder.getInstance().getUser().setStatus(status.getText().toString());
+
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        User user = new User();
+        user.setStatus(status.getText().toString());
+
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.PATCH, url, user, User.class,
+
+                new Response.Listener<User>() {
+
+                    @Override
+                    public void onResponse(User user) {
+                        DataHolder.getInstance().setUser(user);
+
+                    }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+        dialog.dismiss();
+
+
     }
 
     /**
