@@ -658,6 +658,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
+    /**
+     *Creates a dialog for status input
+     */
     public void createStatusDialog() {
 
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
@@ -669,13 +672,27 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
 
+        Button statusBtn = (Button) dialog.findViewById(R.id.edit_status_btn);
+        statusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setStatus(v, dialog);
+            }
+        });
+
     }
 
-    public void setStatus(View view) {
-        final EditText status = (EditText) findViewById(R.id.edit_status);
+    /**
+     * Updates the status in the database 
+     * @param view is the current view
+     * @param dialog for referencing
+     */
+    public void setStatus(View view, AlertDialog dialog) {
+        final EditText status = (EditText) dialog.findViewById(R.id.edit_status);
         final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
         DataHolder.getInstance().getUser().setStatus(status.getText().toString());
+
         RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         User user = new User();
         user.setStatus(status.getText().toString());
@@ -700,8 +717,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 });
         queue.add(request);
-
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        dialog.dismiss();
 
 
     }
