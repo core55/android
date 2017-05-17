@@ -88,7 +88,6 @@ public class ApplinkActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Meetup meetup) {
                         DataHolder.getInstance().setMeetup(meetup);
-                        //TODO the backend does not check if there are duplicate users in a meetup
                         linkUserToMeetup(prepareUserForMeetup(meetup), meetup.getHash());
                     }
                 },

@@ -58,6 +58,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
@@ -307,7 +308,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
 
 
-                } else {
+                } else if (u.getLastLatitude()!=null && u.getLastLongitude()!=null){
                     Log.d(TAG, "pin create");
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
@@ -737,8 +738,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Log.d("ids_beggining", idsToBeRemoved.toString());
 
         for (User user : users) {
-           /* Log.d("user", user.getNickname());
-            Log.d("hashmap", hashMap.toString());*/
             PrimaryDrawerItem item;
             if (hashMap.containsKey(user.getId())) {
                 item = hashMap.get(user.getId());
@@ -753,7 +752,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             item.withName(user.getNickname());
             item.withIdentifier(user.getId());
             //item.withIcon(R.drawable.emoji_3);
-            item.withIcon(new BitmapDrawable(getResources(), bmpPictureHashMap.get(user.getId())));
+            if (bmpPictureHashMap.containsKey(user.getId())){
+                BitmapDrawable icon = new BitmapDrawable(getResources(), bmpPictureHashMap.get(user.getId()));
+                item.withIcon(icon);
+                if (user.getId().equals(DataHolder.getInstance().getUser().getId())){
+                    IProfile p = DataHolder.getInstance().getDrawer().getHeaderResult().getActiveProfile();
+                    p.withIcon(icon);
+                    DataHolder.getInstance().getDrawer().getHeaderResult().updateProfile(p);
+                }
+            }
+            else{
+                item.withIcon(GoogleMaterial.Icon.gmd_account_circle);
+            }
             item.withLevel(2);
             item.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                 @Override
