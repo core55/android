@@ -8,7 +8,6 @@ import com.android.volley.toolbox.Volley;
 
 public class VolleyController {
 
-    // TODO: This cause memory leaks!!!
     private static VolleyController mInstance;
     private RequestQueue mRequestQueue;
     private static Context mCtx;
@@ -19,7 +18,6 @@ public class VolleyController {
     }
 
     public static synchronized VolleyController getInstance(Context context) {
-        // If instance is not available, create it. If available, reuse and return the object.
         if (mInstance == null) {
             mInstance = new VolleyController(context);
         }
@@ -28,14 +26,14 @@ public class VolleyController {
 
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
-            // getApplicationContext() is key. It should not be activity context,
-            // or else RequestQueue won't last for the lifetime of your app
+            // getApplicationContext() is key, it keeps you from leaking the
+            // Activity or BroadcastReceiver if someone passes one in.
             mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
         }
         return mRequestQueue;
     }
 
-    public void addToRequestQueue(Request req) {
+    public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
     }
 
