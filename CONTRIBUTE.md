@@ -2,53 +2,53 @@
 
 ## Folder structure
 
-* `Activity` : all the activities of the app
+* `Activity` : all the activities/views of the app
 * `Entity` : entities that reflex what the API returns
-* `Helper` : helper classes
-* `Model` : models that are used in the Android app
+* `Helper` : helper classes for different functions
+* `Model` : models to store information that are used in the Android app
 * `Service` : all services that run in background
 
 ```
 │
 └───Activity
-│   │   ApplinkActivity
-│   │   CreateActivity
-│   │   EmailNotConfirmedActivity
-│   │   LoginActivity
-│   │   MapActivity
-│   │   RegisterActivity
-│   │   WelcomeActivity
+│   │   ApplinkActivity: entry point when clicking app link
+│   │   CreateActivity: view to create a meetup
+│   │   EmailNotConfirmedActivity: view when email is not confirmed
+│   │   LoginActivity: login view
+│   │   MapActivity: main activity where the map is displayed with the drawer
+│   │   RegisterActivity: register view
+│   │   WelcomeActivity: entry point when first starting the app
 │
 └───Entity
-│   │   BaseEntity
-│   │   Meetup
-│   │   User    
+│   │   BaseEntity: common fields for Meetup and User
+│   │   Meetup: meetup entity reflex from API
+│   │   User: user entity reflex from API
 │  
 └───Helper
 │   │   AuthenticationHelper
 │   |   CircleTransform
-│   |   DrawerFragment.kt
-│   |   GsonRequest
-│   |   HeaderRequest
-│   |   HttpRequestHelper
-│   |   LocationHelper
-│   |   NavigationDrawer
+│   |   DrawerFragment.kt: drawer implement in Kotlin
+│   |   GsonRequest: custom request which reflex object from the API
+│   |   HeaderRequest: request with custom HTTP header
+│   |   HttpRequestHelper: offers method for HTTP handling
+│   |   LocationHelper: offers method for location handling
+│   |   NavigationDrawer (not used)
 │   |   OutOfBoundsHelper
-│   |   UserAdapter
-│   |   VolleyController
+│   |   UserAdapter (not used)
+│   |   VolleyController (not used)
 │
 └───Model
 │   │   AccountCredentials
 │   |   AuthenticationResponse
-│   |   DataHolder
+│   |   DataHolder: contains the current Meetup and User as a singleton
 │   |   GoogleToken
 │   |   StringResponse
 │   |   UserList
 │ 
 └───Service
-    │   LocationManager
-    |   LocationService
-    |   NetworkService
+    │   LocationManager: manage LocationService 
+    |   LocationService: request location updates in background
+    |   NetworkService: periodic request with the API in background
 ```
 
 ## Guidelines
