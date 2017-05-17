@@ -6,16 +6,14 @@ package io.github.core55.joinup.Activity;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +23,7 @@ import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
+import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Model.UserList;
 import io.github.core55.joinup.R;
@@ -80,7 +79,6 @@ public class ApplinkActivity extends AppCompatActivity {
      * @param hash is the string that identifies the meetup
      */
     private void fetchMeetup(String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_URL + "meetups/" + hash;
 
         GsonRequest<Meetup> request = new GsonRequest<>(Request.Method.GET, url, Meetup.class,
@@ -95,12 +93,12 @@ public class ApplinkActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, ApplinkActivity.this);
-                        Toast.makeText(getApplicationContext(),"Meetup not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Meetup not found", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(ApplinkActivity.this, CreateActivity.class);
                         startActivity(intent);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**
@@ -110,7 +108,6 @@ public class ApplinkActivity extends AppCompatActivity {
      * @param hash is the string that identifies the meetup
      */
     private void linkUserToMeetup(User user, final String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_URL + "meetups/" + hash + "/users/save";
 
         GsonRequest<User> request = new GsonRequest<>(Request.Method.POST, url, user, User.class,
@@ -129,7 +126,7 @@ public class ApplinkActivity extends AppCompatActivity {
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, ApplinkActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**
@@ -138,7 +135,6 @@ public class ApplinkActivity extends AppCompatActivity {
      * @param hash is the string that identifies the meetup
      */
     private void fetchUserList(String hash) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_URL + "meetups/" + hash + "/users";
 
         GsonRequest<UserList> request = new GsonRequest<>(Request.Method.GET, url, UserList.class,
@@ -157,7 +153,7 @@ public class ApplinkActivity extends AppCompatActivity {
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, ApplinkActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**

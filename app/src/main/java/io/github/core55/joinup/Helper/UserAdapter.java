@@ -18,8 +18,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.core55.joinup.R;
 import io.github.core55.joinup.Entity.User;
+import io.github.core55.joinup.R;
 
 /**
  * Created by juanl on 04/05/2017.

@@ -6,30 +6,17 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.View;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-
-import io.github.core55.joinup.Activity.MapActivity;
 import io.github.core55.joinup.Entity.Meetup;
 import io.github.core55.joinup.Entity.User;
-import io.github.core55.joinup.Model.DataHolder;
-
 import io.github.core55.joinup.Helper.GsonRequest;
+import io.github.core55.joinup.Helper.VolleyController;
+import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.Model.UserList;
-import io.github.core55.joinup.R;
 
 public class NetworkService extends Service {
 
@@ -73,7 +60,9 @@ public class NetworkService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (DataHolder.getInstance().getMeetup() == null || DataHolder.getInstance().getUser() == null) { return; }
+            if (DataHolder.getInstance().getMeetup() == null || DataHolder.getInstance().getUser() == null) {
+                return;
+            }
             requestMeetup("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash());
             sendLocation("https://dry-cherry.herokuapp.com/api/users/" + DataHolder.getInstance().getUser().getId());
             requestUserList("https://dry-cherry.herokuapp.com/api/meetups/" + DataHolder.getInstance().getMeetup().getHash() + "/users");
@@ -94,8 +83,6 @@ public class NetworkService extends Service {
     }
 
     public void requestMeetup(String url) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
         GsonRequest<Meetup> request = new GsonRequest<>(Request.Method.GET, url, Meetup.class,
                 new Response.Listener<Meetup>() {
                     @Override
@@ -109,32 +96,10 @@ public class NetworkService extends Service {
                         Log.d("error", "Meetup could not be retrieved");
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
-//    public void requestUser(String url) {
-//
-//        int method = Request.Method.GET;
-//        GsonRequest<User> request = new GsonRequest<User>
-//                (method, url, User.class, new Response.Listener<User>() {
-//                    @Override
-//                    public void onResponse(User response) {
-//
-//                        DataHolder.getInstance().setUser(response);
-//                    }
-//                }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                    }
-//                });
-//
-//        // Add a request to your RequestQueue.
-//        VolleyController.getInstance(this).addToRequestQueue(request);
-//
-//    }
-
     public void sendLocation(String url) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         User locationPatch = new User();
 
         locationPatch.setLastLongitude(DataHolder.getInstance().getUser().getLastLongitude());
@@ -152,12 +117,10 @@ public class NetworkService extends Service {
 
             }
         });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     public void requestUserList(String url) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
         GsonRequest<UserList> request = new GsonRequest<>(Request.Method.GET, url, UserList.class,
                 new Response.Listener<UserList>() {
                     @Override
@@ -173,7 +136,7 @@ public class NetworkService extends Service {
 
             }
         });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
 

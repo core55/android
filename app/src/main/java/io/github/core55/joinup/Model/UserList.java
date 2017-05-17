@@ -1,6 +1,5 @@
 package io.github.core55.joinup.Model;
 
-import java.util.Collection;
 import java.util.List;
 
 import io.github.core55.joinup.Entity.User;

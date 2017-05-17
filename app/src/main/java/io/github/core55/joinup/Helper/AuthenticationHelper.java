@@ -11,9 +11,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.Entity.User;
 
 public class AuthenticationHelper {
 
@@ -35,7 +35,7 @@ public class AuthenticationHelper {
             DataHolder.getInstance().setJwt(jwt);
             DataHolder.getInstance().setAnonymous(false);
             DataHolder.getInstance().setAuthenticated(true);
-        } else if (!anonymousUser.equals(UNKNOWN_USER)){
+        } else if (!anonymousUser.equals(UNKNOWN_USER)) {
             User user = new Gson().fromJson(anonymousUser, User.class);
             DataHolder.getInstance().setUser(user);
             DataHolder.getInstance().setJwt(null);

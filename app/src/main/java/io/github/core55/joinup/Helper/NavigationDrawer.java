@@ -22,11 +22,11 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import java.util.List;
 
+import io.github.core55.joinup.Activity.LoginActivity;
+import io.github.core55.joinup.Activity.WelcomeActivity;
 import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
-import io.github.core55.joinup.Activity.LoginActivity;
-import io.github.core55.joinup.Activity.WelcomeActivity;
 
 public class NavigationDrawer {
 
@@ -36,7 +36,6 @@ public class NavigationDrawer {
 
         // Retrieve current user from shared preferences with default
         DataHolder store = DataHolder.getInstance();
-
 
 
         // Create profile header

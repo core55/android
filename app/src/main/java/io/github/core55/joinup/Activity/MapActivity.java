@@ -11,7 +11,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -24,31 +23,25 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -84,6 +77,7 @@ import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.OutOfBoundsHelper;
+import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.Service.LocationManager;
@@ -201,7 +195,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             if (lat != -1 && lon != -1 && (DataHolder.getInstance().getUser() != null)) {
 
-                RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                 final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
                 User user = new User(lon, lat);
@@ -225,7 +218,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                             }
                         });
-                queue.add(request);
+                VolleyController.getInstance(MapActivity.this).addToRequestQueue(request);
             }
 
         }
@@ -359,9 +352,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                         error.printStackTrace();
                                     }
                                 });
-
-                        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-                        queue.add(imageRequest);
+                        VolleyController.getInstance(MapActivity.this).addToRequestQueue(imageRequest);
 
                         if (bmpPictureHashMap.get(u.getId()) == null) {
                             return;
@@ -614,7 +605,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
      * @param nickname is the input nickname
      */
     public void updateNickname(String nickname) {
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
         User user = new User();
@@ -639,7 +629,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**
@@ -702,7 +692,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         DataHolder.getInstance().getUser().setStatus(status.getText().toString());
 
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         User user = new User();
         user.setStatus(status.getText().toString());
 
@@ -725,7 +714,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
         dialog.dismiss();
 
 
@@ -735,7 +724,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     /**
      * when clicking on the drawerBtn, the drawer opens up.
      */
-    public void openDrawer(){
+    public void openDrawer() {
 
         ImageButton DrawerBtn = (ImageButton) findViewById(R.id.drawerButton);
         DrawerBtn.setOnClickListener(new View.OnClickListener() {
@@ -748,7 +737,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-   
+
     /**
      * The method is used to copy the provided link to the clipboard when clicking on the copy button
      *
@@ -764,7 +753,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
     private void updateMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
         Meetup meetup = new Meetup();
@@ -785,7 +773,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     public void centerMapOnMarker(Long id) {
@@ -863,9 +851,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    public void leaveMeetup(){
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-        String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash()  + "/users/remove";
+    public void leaveMeetup() {
+        String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash() + "/users/remove";
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, DataHolder.getInstance().getUser(), User.class,
 
@@ -874,8 +861,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(User user) {
                         DataHolder.getInstance().setMeetup(null);
-                        AuthenticationHelper.syncSharedPreferences( DataHolder.getInstance().getActivity());
-                        Intent intent = new Intent(getApplicationContext(),CreateActivity.class);
+                        AuthenticationHelper.syncSharedPreferences(DataHolder.getInstance().getActivity());
+                        Intent intent = new Intent(getApplicationContext(), CreateActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
                         finish();
@@ -889,10 +876,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
-    public void logout(){
+    public void logout() {
         DataHolder.getInstance().setUser(null);
         DataHolder.getInstance().setAuthenticated(false);
         DataHolder.getInstance().setAnonymous(false);
@@ -901,8 +888,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         startActivity(new Intent(getApplicationContext(), LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         finish();
     }
-
-
 
 
 }
