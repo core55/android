@@ -151,6 +151,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
+    /**
+     * Is responsible for the logging in with the username and password
+     * @param username  username input
+     * @param password  password input
+     */
     private void loginBackend(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "login";
@@ -186,6 +191,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         queue.add(request);
     }
 
+    /**
+     * Is responsible for logging in with Google account
+     * @param idToken given token
+     */
     private void loginGoogleBackend(String idToken) {
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "login/token";

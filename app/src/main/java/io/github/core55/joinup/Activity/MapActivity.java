@@ -32,11 +32,9 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -186,7 +184,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         AuthenticationHelper.syncSharedPreferences(this);
     }
 
-    // TODO: fix
+    /**
+     * get user coordinates and save information to the dataholder
+     */
     private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -226,7 +226,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     };
 
-    // Define the callback for what to do when message is received
+    /**
+     * add markers to the map and display them smoothly when the location is updated
+     * shows the colored pins and the picture
+     * shows user status and nickname above the pin
+     */
     private BroadcastReceiver networkServiceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -308,7 +312,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
 
 
-                } else if (u.getLastLatitude()!=null && u.getLastLongitude()!=null){
+                } else if (u.getLastLatitude() != null && u.getLastLongitude() != null) {
                     Log.d(TAG, "pin create");
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
@@ -658,7 +662,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     /**
-     *Creates a dialog for status input
+     * Creates a dialog for status input
      */
     public void createStatusDialog() {
 
@@ -682,8 +686,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     /**
-     * Updates the status in the database 
-     * @param view is the current view
+     * Updates the status in the database
+     *
+     * @param view   is the current view
      * @param dialog for referencing
      */
     public void setStatus(View view, AlertDialog dialog) {
@@ -721,7 +726,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
-   
+
     /**
      * The method is used to copy the provided link to the clipboard when clicking on the copy button
      *
@@ -768,6 +773,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
+    /**
+     * is responsible for the userList in the drawer
+     */
     public void populateUserList() {
         HashMap<Long, PrimaryDrawerItem> hashMap = DataHolder.getInstance().getDrawer().getHashMap();
         List<User> users = DataHolder.getInstance().getUserList();
@@ -799,16 +807,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             item.withName(user.getNickname());
             item.withIdentifier(user.getId());
             //item.withIcon(R.drawable.emoji_3);
-            if (bmpPictureHashMap.containsKey(user.getId())){
+            if (bmpPictureHashMap.containsKey(user.getId())) {
                 BitmapDrawable icon = new BitmapDrawable(getResources(), bmpPictureHashMap.get(user.getId()));
                 item.withIcon(icon);
-                if (user.getId().equals(DataHolder.getInstance().getUser().getId())){
+                if (user.getId().equals(DataHolder.getInstance().getUser().getId())) {
                     IProfile p = DataHolder.getInstance().getDrawer().getHeaderResult().getActiveProfile();
                     p.withIcon(icon);
                     DataHolder.getInstance().getDrawer().getHeaderResult().updateProfile(p);
                 }
-            }
-            else{
+            } else {
                 item.withIcon(GoogleMaterial.Icon.gmd_account_circle);
             }
             item.withLevel(2);

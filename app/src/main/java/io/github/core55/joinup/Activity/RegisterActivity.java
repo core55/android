@@ -1,3 +1,7 @@
+/*
+  Authors: Simone Stefani
+ */
+
 package io.github.core55.joinup.Activity;
 
 import android.content.Intent;
@@ -68,6 +72,9 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * adds registration fields and creates an account
+     */
     private void registerUser() {
 
         // Get register name
@@ -92,6 +99,10 @@ public class RegisterActivity extends AppCompatActivity {
         sendRegistrationRequest(credentials);
     }
 
+    /**
+     * sends a Gson request to the backend
+     * @param credentials is account credentials
+     */
     private void sendRegistrationRequest(AccountCredentials credentials) {
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "register/send";

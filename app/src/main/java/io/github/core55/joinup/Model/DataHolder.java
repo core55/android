@@ -4,10 +4,6 @@
 
 package io.github.core55.joinup.Model;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.HashMap;
 import java.util.List;
 
 import io.github.core55.joinup.Activity.MapActivity;
@@ -38,9 +34,13 @@ public class DataHolder {
     private MapActivity activity;
 
 
-    public DrawerFragment getDrawer() {return drawer; }
+    public DrawerFragment getDrawer() {
+        return drawer;
+    }
 
-    public void setDrawer(DrawerFragment drawer) {this.drawer = drawer;}
+    public void setDrawer(DrawerFragment drawer) {
+        this.drawer = drawer;
+    }
 
     public static DataHolder getInstance() {
         return holder;

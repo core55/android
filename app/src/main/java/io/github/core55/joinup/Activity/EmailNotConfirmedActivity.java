@@ -1,3 +1,6 @@
+/*
+  Authors: Simone Stefani
+ */
 package io.github.core55.joinup.Activity;
 
 import android.content.Intent;

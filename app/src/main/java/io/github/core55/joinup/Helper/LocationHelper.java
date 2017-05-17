@@ -1,3 +1,7 @@
+/*
+  Authors: Simone Stefani
+ */
+
 package io.github.core55.joinup.Helper;
 
 import android.Manifest;
