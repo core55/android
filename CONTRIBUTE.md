@@ -8,6 +8,49 @@
 * `Model` : models that are used in the Android app
 * `Service` : all services that run in background
 
+```
+│
+└───Activity
+│   │   ApplinkActivity
+│   │   CreateActivity
+│   │   EmailNotConfirmedActivity
+│   │   LoginActivity
+│   │   MapActivity
+│   │   RegisterActivity
+│   │   WelcomeActivity
+│
+└───Entity
+│   │   BaseEntity
+│   │   Meetup
+│   │   User    
+│  
+└───Helper
+│   │   AuthenticationHelper
+│   |   CircleTransform
+│   |   DrawerFragment.kt
+│   |   GsonRequest
+│   |   HeaderRequest
+│   |   HttpRequestHelper
+│   |   LocationHelper
+│   |   NavigationDrawer
+│   |   OutOfBoundsHelper
+│   |   UserAdapter
+│   |   VolleyController
+│
+└───Model
+│   │   AccountCredentials
+│   |   AuthenticationResponse
+│   |   DataHolder
+│   |   GoogleToken
+│   |   StringResponse
+│   |   UserList
+│ 
+└───Service
+    │   LocationManager
+    |   LocationService
+    |   NetworkService
+```
+
 ## Guidelines
 
 * Append your name to the end of the authors header in every modified file like this:
