@@ -7,6 +7,7 @@ package io.github.core55.joinup.Helper
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -38,8 +39,8 @@ import kotlinx.android.synthetic.main.fragment_navdrawer.view.*
 
 class DrawerFragment : Fragment() {
 
-    public lateinit var result: Drawer
-    private lateinit var headerResult: AccountHeader
+    lateinit var result: Drawer
+    lateinit var headerResult: AccountHeader
     lateinit var store: DataHolder
     lateinit var people: ExpandableBadgeDrawerItem
     var hashMap: HashMap<Long, PrimaryDrawerItem> = HashMap()
@@ -52,7 +53,6 @@ class DrawerFragment : Fragment() {
 
 
         result = drawer {
-            Log.d("drawer","Again")
             savedInstance = savedInstanceState
             displayBelowStatusBar = true
 
@@ -62,7 +62,9 @@ class DrawerFragment : Fragment() {
                     translucentStatusBar = true
                     compactStyle = false
                     savedInstance = savedInstanceState
-                    profile(store.user.nickname) {
+                    profile {
+                        if (store.user.nickname != null)
+                            name = store.user.nickname
                         if (store.user.status != null)
                             email = store.user.status
                         //iconBitmap = profilePicture(store.user)
@@ -89,7 +91,11 @@ class DrawerFragment : Fragment() {
                             hashMap.put(user.id, primaryItem(user.nickname, user.status) {
                                 level = 2
                                 selectable = true
-                                icon = R.drawable.emoji_3 //Icon.createWithResource(context,R.drawable.emoji_3)//GoogleMaterial.Icon.gmd_people
+                                if (store.activity.bmpPictureHashMap.containsKey(user.id)){
+                                    iconDrawable = BitmapDrawable(resources,store.activity.bmpPictureHashMap.get(user.id))}
+                                else{
+                                    icon = R.drawable.emoji_2
+                                }
                                 identifier = user.id
                                 onClick { view, position, drawerItem ->
                                     var act: MapActivity = getActivity() as MapActivity
@@ -172,11 +178,11 @@ class DrawerFragment : Fragment() {
 
     fun profilePicture(user: User): Bitmap {
         if (user.profilePicture == null) {
-            Picasso.with(context).load(R.drawable.emoji_2).transform(CircleTransform()).into(IconTargetHelper.getTarget())
-        } else {
-            Picasso.with(context).load(user.profilePicture).transform(CircleTransform()).into(IconTargetHelper.getTarget())
+            return Picasso.with(context).load(R.drawable.emoji_2).transform(CircleTransform()).get()
         }
-        return IconTargetHelper.iconProfile
+        else {
+            return store.activity.bmpPictureHashMap[user.id] as Bitmap
+        }
     }
 
 
