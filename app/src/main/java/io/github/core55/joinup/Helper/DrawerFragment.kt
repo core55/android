@@ -130,7 +130,7 @@ class DrawerFragment : Fragment() {
                 iicon = GoogleMaterial.Icon.gmd_edit
                 onClick { _ ->
                     var act: MapActivity = getActivity() as MapActivity
-                    act.createStatusListener()
+                    act.createStatusDialog()
                     false
                 }
             }

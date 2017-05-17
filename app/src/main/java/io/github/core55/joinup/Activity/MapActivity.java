@@ -109,7 +109,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private Double lat;
     private Double lon;
-    private String userStatus;
 
     private HashMap<Long, TextView> outOfBoundsIndicators = new HashMap<>();
     private RelativeLayout outOfBoundsViewGroup;
@@ -143,8 +142,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         createShareButtonListener();
         createSwitchListener();
-        createStatusListener();
-
+        //  createStatusListener();
         if (DataHolder.getInstance().getUser() != null && DataHolder.getInstance().getUser().getNickname() == null) {
             namePrompt();
         }
@@ -258,7 +256,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     Marker marker = markersHashMap.get(u.getId());
                     marker.setTitle(u.getNickname());
-                    marker.setSnippet(userStatus);
+                    marker.setSnippet(u.getStatus());
                     LatLng lastLatLng = new LatLng(u.getLastLatitude(), u.getLastLongitude());
 
                     //smooth-marker movement
@@ -316,7 +314,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     MarkerOptions newMarker = new MarkerOptions();
                     newMarker.position(new LatLng(u.getLastLatitude(), u.getLastLongitude()));
                     newMarker.title(u.getNickname());
-                    newMarker.snippet(userStatus);
+                    newMarker.snippet(u.getStatus());
 
                     if (u.getNickname() == null) {
                         newMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_anon));
@@ -660,50 +658,52 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    public void createStatusListener() {
+    public void createStatusDialog() {
+
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.dialog_status, null);
+        mBuilder.setView(mView);
+
+        final AlertDialog dialog = mBuilder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
 
+    }
 
-        Button mButton = (Button) findViewById(R.id.edit_status_btn);
-        mButton.setOnClickListener(
-                new View.OnClickListener() {
-                    public void onClick(View view) {
-                        final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
-                        final EditText status = (EditText) findViewById(R.id.edit_status);
+    public void setStatus(View view) {
+        final EditText status = (EditText) findViewById(R.id.edit_status);
+        final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
-                        userStatus = status.getText().toString();
+        DataHolder.getInstance().getUser().setStatus(status.getText().toString());
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        User user = new User();
+        user.setStatus(status.getText().toString());
 
-                        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-                        User user = new User();
-                        user.setStatus(status.getText().toString());
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.PATCH, url, user, User.class,
 
-                        GsonRequest<User> request = new GsonRequest<>(
-                                Request.Method.PATCH, url, user, User.class,
+                new Response.Listener<User>() {
 
-                                new Response.Listener<User>() {
-
-                                    @Override
-                                    public void onResponse(User user) {
-                                        DataHolder.getInstance().setUser(user);
-
-                                    }
-                                },
-
-                                new Response.ErrorListener() {
-
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
-                                    }
-                                });
-                        queue.add(request);
-
-                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
+                    @Override
+                    public void onResponse(User user) {
+                        DataHolder.getInstance().setUser(user);
 
                     }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
                 });
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        queue.add(request);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+
     }
 
     /**

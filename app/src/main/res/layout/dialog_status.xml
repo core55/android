@@ -20,6 +20,7 @@
         android:id="@+id/edit_status_btn"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
+        android:onClick="setStatus"
         android:background="@drawable/custom_button"
         android:text="@string/edit_status"
         android:layout_alignBottom="@+id/edit_status"
