@@ -69,10 +69,11 @@ class DrawerFragment : Fragment() {
                         if (store.user.status != null)
                             email = store.user.status
 
-                        if (store.isAuthenticated && store.activity.bmpPictureHashMap.containsKey(store.user.id)){
+                        if (store.isAuthenticated && store.activity.bmpPictureHashMap.containsKey(store.user.id)) {
                             iconDrawable = BitmapDrawable(getResources(), store.activity.bmpPictureHashMap.get(store.user.id));
+                        } else {
+                            iicon = GoogleMaterial.Icon.gmd_account_circle
                         }
-                        else{ iicon = GoogleMaterial.Icon.gmd_account_circle}
                     }
                 }
             }
@@ -95,9 +96,9 @@ class DrawerFragment : Fragment() {
                             hashMap.put(user.id, primaryItem(user.nickname, user.status) {
                                 level = 2
                                 selectable = true
-                                if (store.activity.bmpPictureHashMap.containsKey(user.id)){
-                                    iconDrawable = BitmapDrawable(resources,store.activity.bmpPictureHashMap.get(user.id))}
-                                else{
+                                if (store.activity.bmpPictureHashMap.containsKey(user.id)) {
+                                    iconDrawable = BitmapDrawable(resources, store.activity.bmpPictureHashMap.get(user.id))
+                                } else {
                                     iicon = GoogleMaterial.Icon.gmd_account_circle
                                 }
                                 identifier = user.id
@@ -127,10 +128,9 @@ class DrawerFragment : Fragment() {
                 iicon = GoogleMaterial.Icon.gmd_settings
                 checked = true
                 onSwitchChanged { drawerItem, button, isEnabled ->
-                    if(isEnabled){
+                    if (isEnabled) {
                         store.activity.locationManager.restart()
-                    }
-                    else{
+                    } else {
                         store.activity.locationManager.stop()
                     }
                 }
@@ -187,7 +187,6 @@ class DrawerFragment : Fragment() {
             }
 
 
-
         }
 
 
@@ -208,12 +207,10 @@ class DrawerFragment : Fragment() {
     fun profilePicture(user: User): Bitmap {
         if (user.profilePicture == null) {
             return Picasso.with(context).load(R.drawable.emoji_2).transform(CircleTransform()).get()
-        }
-        else {
+        } else {
             return store.activity.bmpPictureHashMap[user.id] as Bitmap
         }
     }
-
 
 
     companion object {

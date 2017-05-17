@@ -10,9 +10,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import io.github.core55.joinup.R;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Model.DataHolder;
+import io.github.core55.joinup.R;
 
 public class WelcomeActivity extends Activity {
 
@@ -32,10 +32,9 @@ public class WelcomeActivity extends Activity {
         // If user is authenticated move to create meetup activity/mapActivity
         if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
             Intent intent;
-            if (DataHolder.getInstance().getMeetup()!=null){ //if there is a meetup already, go to that meetup
-                intent = new Intent(getApplicationContext(),MapActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            }
-            else{
+            if (DataHolder.getInstance().getMeetup() != null) { //if there is a meetup already, go to that meetup
+                intent = new Intent(getApplicationContext(), MapActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            } else {
                 intent = new Intent(this, CreateActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             }
 

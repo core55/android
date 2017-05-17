@@ -30,7 +30,6 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -56,7 +55,6 @@ import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
-import io.github.core55.joinup.Helper.NavigationDrawer;
 import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
@@ -446,6 +444,7 @@ public class CreateActivity extends AppCompatActivity implements
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
     @Override
     public void onBackPressed() {
     }

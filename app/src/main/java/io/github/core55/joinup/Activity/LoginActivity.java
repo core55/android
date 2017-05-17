@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -154,8 +153,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     /**
      * Is responsible for the logging in with the username and password
-     * @param username  username input
-     * @param password  password input
+     *
+     * @param username username input
+     * @param password password input
      */
     private void loginBackend(String username, String password) {
         final String url = API_BASE_URL + "login";
@@ -193,6 +193,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     /**
      * Is responsible for logging in with Google account
+     *
      * @param idToken given token
      */
     private void loginGoogleBackend(String idToken) {

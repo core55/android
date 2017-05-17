@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
@@ -102,6 +101,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * sends a Gson request to the backend
+     *
      * @param credentials is account credentials
      */
     private void sendRegistrationRequest(AccountCredentials credentials) {

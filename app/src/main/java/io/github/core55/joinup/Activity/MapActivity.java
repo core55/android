@@ -11,7 +11,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -24,20 +23,16 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -47,7 +42,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -730,7 +724,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     /**
      * when clicking on the drawerBtn, the drawer opens up.
      */
-    public void openDrawer(){
+    public void openDrawer() {
 
         ImageButton DrawerBtn = (ImageButton) findViewById(R.id.drawerButton);
         DrawerBtn.setOnClickListener(new View.OnClickListener() {
@@ -743,7 +737,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-   
+
     /**
      * The method is used to copy the provided link to the clipboard when clicking on the copy button
      *
@@ -857,8 +851,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    public void leaveMeetup(){
-        String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash()  + "/users/remove";
+    public void leaveMeetup() {
+        String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash() + "/users/remove";
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, DataHolder.getInstance().getUser(), User.class,
 
@@ -867,8 +861,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(User user) {
                         DataHolder.getInstance().setMeetup(null);
-                        AuthenticationHelper.syncSharedPreferences( DataHolder.getInstance().getActivity());
-                        Intent intent = new Intent(getApplicationContext(),CreateActivity.class);
+                        AuthenticationHelper.syncSharedPreferences(DataHolder.getInstance().getActivity());
+                        Intent intent = new Intent(getApplicationContext(), CreateActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
                         finish();
@@ -885,7 +879,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
-    public void logout(){
+    public void logout() {
         DataHolder.getInstance().setUser(null);
         DataHolder.getInstance().setAuthenticated(false);
         DataHolder.getInstance().setAnonymous(false);
@@ -894,8 +888,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         startActivity(new Intent(getApplicationContext(), LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         finish();
     }
-
-
 
 
 }

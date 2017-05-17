@@ -33,9 +33,9 @@ public class GsonRequest<T> extends Request<T> {
      * Make a Http request and return a parsed object from JSON.
      *
      * @param method Http method of the request
-     * @param url URL of the request to make
-     * @param body Is the body in case of a POST, PUT or PATCH request
-     * @param clazz Relevant class object, for Gson's reflection
+     * @param url    URL of the request to make
+     * @param body   Is the body in case of a POST, PUT or PATCH request
+     * @param clazz  Relevant class object, for Gson's reflection
      */
     public GsonRequest(int method, String url, Object body, Class<T> clazz,
                        Response.Listener<T> listener, Response.ErrorListener errorListener) {
@@ -53,8 +53,8 @@ public class GsonRequest<T> extends Request<T> {
      * Make a Http request and return a parsed object from JSON.
      *
      * @param method Http method of the request
-     * @param url URL of the request to make
-     * @param clazz Relevant class object, for Gson's reflection
+     * @param url    URL of the request to make
+     * @param clazz  Relevant class object, for Gson's reflection
      */
     public GsonRequest(int method, String url, Class<T> clazz, Response.Listener<T> listener,
                        Response.ErrorListener errorListener) {
