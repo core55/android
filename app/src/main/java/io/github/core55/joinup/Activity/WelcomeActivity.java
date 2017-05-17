@@ -23,13 +23,25 @@ public class WelcomeActivity extends Activity {
         AuthenticationHelper.syncDataHolder(this);
         AuthenticationHelper.authenticationLogger(this);
 
-        // If user is authenticated move to create meetup activity
+        registerOnClickListeners();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // If user is authenticated move to create meetup activity/mapActivity
         if (DataHolder.getInstance().isAuthenticated() || DataHolder.getInstance().isAnonymous()) {
-            Intent i = new Intent(this, CreateActivity.class);
-            startActivity(i);
+            Intent intent;
+            if (DataHolder.getInstance().getMeetup()!=null){ //if there is a meetup already, go to that meetup
+                intent = new Intent(getApplicationContext(),MapActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+            else{
+                intent = new Intent(this, CreateActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+
+            startActivity(intent);
         }
 
-        registerOnClickListeners();
     }
 
     private void registerOnClickListeners() {
@@ -39,12 +51,6 @@ public class WelcomeActivity extends Activity {
         mCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*if (DataHolder.getInstance().getMeetup()!=null){
-                    Intent intent = new Intent(getApplicationContext(),MapActivity.class);
-                    startActivity(intent);
-                }
-                else {createMeetup();}
-                */
                 createMeetup();
             }
         });

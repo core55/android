@@ -73,6 +73,10 @@ public class AuthenticationHelper {
         } else if (DataHolder.getInstance().isAnonymous()) {
             User user = DataHolder.getInstance().getUser();
             editor.putString(context.getString(R.string.anonymous_user), new Gson().toJson(user));
+        } else {
+            sharedPref.edit().remove(context.getString(R.string.auth_user)).commit();
+            sharedPref.edit().remove(context.getString(R.string.anonymous_user)).commit();
+            sharedPref.edit().remove(context.getString(R.string.jwt_string)).commit();
         }
 
         editor.commit();

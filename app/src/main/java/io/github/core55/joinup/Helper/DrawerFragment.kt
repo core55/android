@@ -160,7 +160,8 @@ class DrawerFragment : Fragment() {
                         identifier = 8003
                         iicon = GoogleMaterial.Icon.gmd_exit_to_app
                         onClick { _ ->
-                            startActivity(Intent(context, LoginActivity::class.java))
+                            var act: MapActivity = getActivity() as MapActivity
+                            act.logout()
                             false
                         }
                     }
