@@ -1,21 +1,27 @@
 # Contribute
 
-* Clone repository
-* Copy `res/values/google_maps_api.example.xml` to `res/values/google_maps_api.xml` and add your own Google Maps for Android API key
-* Copy `res/values/google_signin_api.example.xml` to `res/values/google_signin_api.xml` and request the key from the android team, we're using a shared one right now
-* Request the `google-services.json` from the team and copy to `app/google-services.json`
+## Folder structure
+
+* `Activity` : all the activities of the app
+* `Entity` : entities that reflex what the API returns
+* `Helper` : helper classes
+* `Model` : models that are used in the Android app
+* `Service` : all services that run in background
 
 ## Guidelines
 
-* Always header with authors like this:
+* Append your name to the end of the authors header in every modified file like this:
 ```java
 /*
-  Authors: S. Stefani
+  Authors: 
+  Marcel Eschmann
+  Hussam Hassanein
+  Patrick Richer St-Onge
+  Juan Luiz Ruiz-Tagle Oriol
+  Simone Stefani
+  < new name >
  */
 ```
 * `CTRL + ALT + L` or `CMD + ALT (option) + L` before committing to auto-format the file
-* Write nice Javadoc comments on top of classes and methods. Intellij automatically generates if you start typing `/**`
-* Try to keep files short
-* Be DRY -> dont repeat yourself
-* Don't hardcode strings unless necessary (try not do it anyway)
-* Learn what is the `Context` and the current activity
+* Write Javadoc on top of classes and methods
+* Place strings in `res/values/strings.xml`
