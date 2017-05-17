@@ -28,7 +28,6 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
@@ -58,6 +57,7 @@ import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.NavigationDrawer;
+import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
 
@@ -357,7 +357,6 @@ public class CreateActivity extends AppCompatActivity implements
      * creates a meetup map with a unique hash
      */
     private void createMeetup() {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "meetups";
 
         // Infer meetup coordinates and zoom from camera
@@ -400,7 +399,7 @@ public class CreateActivity extends AppCompatActivity implements
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, CreateActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**
@@ -409,7 +408,6 @@ public class CreateActivity extends AppCompatActivity implements
      * @param user is current user
      */
     private void linkUserToMeetup(User user) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         String hash = DataHolder.getInstance().getMeetup().getHash();
         final String url = API_BASE_URL + "meetups/" + hash + "/users/save";
 
@@ -439,7 +437,7 @@ public class CreateActivity extends AppCompatActivity implements
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, CreateActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     //checks if the network is available

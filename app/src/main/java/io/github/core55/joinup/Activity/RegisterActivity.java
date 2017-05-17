@@ -14,13 +14,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
+import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.AccountCredentials;
 import io.github.core55.joinup.Model.AuthenticationResponse;
 import io.github.core55.joinup.Model.DataHolder;
@@ -105,7 +105,6 @@ public class RegisterActivity extends AppCompatActivity {
      * @param credentials is account credentials
      */
     private void sendRegistrationRequest(AccountCredentials credentials) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "register/send";
 
         GsonRequest<AuthenticationResponse> request = new GsonRequest<>(
@@ -127,6 +126,6 @@ public class RegisterActivity extends AppCompatActivity {
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, RegisterActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 }

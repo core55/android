@@ -44,7 +44,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
@@ -84,6 +83,7 @@ import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
 import io.github.core55.joinup.Helper.LocationHelper;
 import io.github.core55.joinup.Helper.OutOfBoundsHelper;
+import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.DataHolder;
 import io.github.core55.joinup.R;
 import io.github.core55.joinup.Service.LocationManager;
@@ -201,7 +201,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             if (lat != -1 && lon != -1 && (DataHolder.getInstance().getUser() != null)) {
 
-                RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
                 final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
                 User user = new User(lon, lat);
@@ -225,7 +224,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                             }
                         });
-                queue.add(request);
+                VolleyController.getInstance(MapActivity.this).addToRequestQueue(request);
             }
 
         }
@@ -359,9 +358,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                         error.printStackTrace();
                                     }
                                 });
-
-                        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
-                        queue.add(imageRequest);
+                        VolleyController.getInstance(MapActivity.this).addToRequestQueue(imageRequest);
 
                         if (bmpPictureHashMap.get(u.getId()) == null) {
                             return;
@@ -614,7 +611,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
      * @param nickname is the input nickname
      */
     public void updateNickname(String nickname) {
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "users/" + DataHolder.getInstance().getUser().getId();
 
         User user = new User();
@@ -639,7 +635,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**
@@ -702,7 +698,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         DataHolder.getInstance().getUser().setStatus(status.getText().toString());
 
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         User user = new User();
         user.setStatus(status.getText().toString());
 
@@ -725,7 +720,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
         dialog.dismiss();
 
 
@@ -764,7 +759,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
     private void updateMeetupPinLocation(Double pinLongitude, Double pinLatitude) {
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         final String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash();
 
         Meetup meetup = new Meetup();
@@ -785,7 +779,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     public void centerMapOnMarker(Long id) {
@@ -864,7 +858,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     public void leaveMeetup(){
-        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
         String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash()  + "/users/remove";
         GsonRequest<User> request = new GsonRequest<>(
                 Request.Method.POST, url, DataHolder.getInstance().getUser(), User.class,
@@ -889,7 +882,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     public void logout(){

@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
@@ -30,6 +29,7 @@ import io.github.core55.joinup.Entity.User;
 import io.github.core55.joinup.Helper.AuthenticationHelper;
 import io.github.core55.joinup.Helper.GsonRequest;
 import io.github.core55.joinup.Helper.HttpRequestHelper;
+import io.github.core55.joinup.Helper.VolleyController;
 import io.github.core55.joinup.Model.AccountCredentials;
 import io.github.core55.joinup.Model.AuthenticationResponse;
 import io.github.core55.joinup.Model.GoogleToken;
@@ -158,7 +158,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
      * @param password  password input
      */
     private void loginBackend(String username, String password) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "login";
 
         AccountCredentials credentials = new AccountCredentials(username, password);
@@ -189,7 +188,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, LoginActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     /**
@@ -197,7 +196,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
      * @param idToken given token
      */
     private void loginGoogleBackend(String idToken) {
-        RequestQueue queue = Volley.newRequestQueue(this);
         final String url = API_BASE_URL + "login/token";
 
         GoogleToken googleToken = new GoogleToken(idToken);
@@ -227,7 +225,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         HttpRequestHelper.handleErrorResponse(error.networkResponse, LoginActivity.this);
                     }
                 });
-        queue.add(request);
+        VolleyController.getInstance(this).addToRequestQueue(request);
     }
 
     @Override
