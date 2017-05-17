@@ -11,6 +11,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -840,6 +841,47 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             drawer.removeItem(id.longValue());
         }
     }
+
+    public void leaveMeetup(){
+        RequestQueue queue = Volley.newRequestQueue(MapActivity.this);
+        String url = API_URL + "meetups/" + DataHolder.getInstance().getMeetup().getHash()  + "/users/remove";
+        GsonRequest<User> request = new GsonRequest<>(
+                Request.Method.POST, url, DataHolder.getInstance().getUser(), User.class,
+
+                new Response.Listener<User>() {
+
+                    @Override
+                    public void onResponse(User user) {
+                        DataHolder.getInstance().setMeetup(null);
+                        AuthenticationHelper.syncSharedPreferences( DataHolder.getInstance().getActivity());
+                        Intent intent = new Intent(getApplicationContext(),CreateActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                        finish();
+                    }
+                },
+
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        HttpRequestHelper.handleErrorResponse(error.networkResponse, MapActivity.this);
+                    }
+                });
+        queue.add(request);
+    }
+
+    public void logout(){
+        DataHolder.getInstance().setUser(null);
+        DataHolder.getInstance().setAuthenticated(false);
+        DataHolder.getInstance().setAnonymous(false);
+        AuthenticationHelper.syncSharedPreferences(this);
+        AuthenticationHelper.authenticationLogger(this);
+        startActivity(new Intent(getApplicationContext(), LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+        finish();
+    }
+
+
 
 
 }

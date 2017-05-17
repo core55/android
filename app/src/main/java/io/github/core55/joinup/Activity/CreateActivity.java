@@ -448,4 +448,7 @@ public class CreateActivity extends AppCompatActivity implements
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+    @Override
+    public void onBackPressed() {
+    }
 }

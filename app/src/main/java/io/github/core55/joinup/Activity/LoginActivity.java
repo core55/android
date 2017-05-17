@@ -106,6 +106,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 return true;
             }
