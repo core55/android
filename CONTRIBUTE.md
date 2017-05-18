@@ -35,7 +35,7 @@
 │   |   NavigationDrawer (not used)
 │   |   OutOfBoundsHelper
 │   |   UserAdapter (not used)
-│   |   VolleyController (not used)
+│   |   VolleyController: handle the volley requests
 │
 └───Model
 │   │   AccountCredentials
