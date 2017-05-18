@@ -21,9 +21,9 @@ To switch to the beta channel, go to `Help > Check for Updates...`, click on "Up
 3. Copy `res/values/google_signin_api.example.xml` to `res/values/google_signin_api.xml` and request the key from the android team
 4. Request the `google-services.json` from the android team and copy to `app/google-services.json`
 
-## Contribute
+## Contributing
 
-Please read [CONTRIBUTE.md](CONTRIBUTE.md) for folder structure and guidelines.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for folder structure and guidelines.
 
 ## Authors
 
