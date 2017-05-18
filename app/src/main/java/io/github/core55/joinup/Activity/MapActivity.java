@@ -88,7 +88,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     public static final String TAG = "MapActivity";
     public static final String API_URL = "https://dry-cherry.herokuapp.com/api/";
-    public static final String WEBAPP_URL = "https://culater.herokuapp.com/#/";
+    public static final String WEBAPP_URL = "https://www.joinup.nu/#/";
     private static final String WEBAPP_URL_PREFIX = "m/";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private GoogleMap mMap;

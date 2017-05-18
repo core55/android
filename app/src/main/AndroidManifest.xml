@@ -66,9 +66,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="culater.herokuapp.com" />
-                <data android:scheme="https" />
-                <data android:scheme="http" />
+                <data
+                    android:scheme="https"
+                    android:host="www.joinup.nu" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="www.joinup.nu" />
             </intent-filter>
         </activity>
 

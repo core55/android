@@ -1,5 +1,5 @@
 <resources>
-    <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://culater.herokuapp.com\",\n  }\n}]</string>
+    <string name="asset_statements" translatable="false">[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"web\",\n    \"site\": \"https://www.joinup.nu\",\n  }\n}]</string>
 
     <string name="app_name">Joinup</string>
     <string name="title_activity_map">MapActivity</string>
@@ -59,6 +59,5 @@
     <string name="title_joinup">Joinup</string>
     <string name="type_status">Update status</string>
     <string name="edit_status">edit</string>
-
 
 </resources>
