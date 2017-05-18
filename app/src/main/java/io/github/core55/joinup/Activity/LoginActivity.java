@@ -88,14 +88,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
 
         // Google SignIn button
-        SignInButton signInButton = (SignInButton) findViewById(R.id.google_sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-        findViewById(R.id.google_sign_in_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                googleLogin();
-            }
-        });
+//        SignInButton signInButton = (SignInButton) findViewById(R.id.google_sign_in_button);
+//        signInButton.setSize(SignInButton.SIZE_STANDARD);
+//        findViewById(R.id.google_sign_in_button).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                googleLogin();
+//            }
+//        });
     }
 
     private void registerOnTouchListener() {

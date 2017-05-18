@@ -10,8 +10,8 @@ android {
         applicationId "io.github.core55.joinup"
         minSdkVersion 23
         targetSdkVersion 25
-        versionCode 7
-        versionName "0.1.5"
+        versionCode 8
+        versionName "0.2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
