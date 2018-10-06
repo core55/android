@@ -4,9 +4,7 @@ The official JoinUp app for Android. JoinUp allows people to spontaneously meet 
 
 ## Beta
 
-[Google Play](https://play.google.com/store/apps/details?id=io.github.core55.joinup)
-
-[Beta Community](https://plus.google.com/communities/102146297063147505085)
+**The app has been removed from Google Play Store and relative beta program.**
 
 ## Getting started
 
@@ -34,7 +32,3 @@ Made by [Core 55](https://core55.github.io/)
 * Patrick Richer St-Onge
 * Juan Luiz Ruiz-Tagle Oriol
 * Simone Stefani
-
-## License
-
-TBA
